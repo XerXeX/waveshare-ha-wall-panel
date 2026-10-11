@@ -8,6 +8,18 @@
 #
 # Entity changes are passed directly to the wall_panel component. The component
 # subscribes to the new Home Assistant entity at runtime, so no reboot is needed.
+# Light entity IDs are persisted by the wall_panel component so an intentionally
+# cleared entity remains cleared across reboots.
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - lambda: |-
+            id(light_slot1_entity).publish_state(id(wall_panel_controller).get_light_slot(1).entity_id);
+            id(light_slot2_entity).publish_state(id(wall_panel_controller).get_light_slot(2).entity_id);
+            id(light_slot3_entity).publish_state(id(wall_panel_controller).get_light_slot(3).entity_id);
+            id(light_slot4_entity).publish_state(id(wall_panel_controller).get_light_slot(4).entity_id);
 
 globals:
   - id: active_light_slot
@@ -54,7 +66,7 @@ text:
     name: "Lys · Slot 1 · Entity"
     entity_category: config
     optimistic: true
-    restore_value: true
+    restore_value: false
     initial_value: ""
     min_length: 0
     max_length: 64
@@ -87,7 +99,7 @@ text:
     name: "Lys · Slot 2 · Entity"
     entity_category: config
     optimistic: true
-    restore_value: true
+    restore_value: false
     initial_value: ""
     min_length: 0
     max_length: 64
@@ -120,7 +132,7 @@ text:
     name: "Lys · Slot 3 · Entity"
     entity_category: config
     optimistic: true
-    restore_value: true
+    restore_value: false
     initial_value: ""
     min_length: 0
     max_length: 64
@@ -153,7 +165,7 @@ text:
     name: "Lys · Slot 4 · Entity"
     entity_category: config
     optimistic: true
-    restore_value: true
+    restore_value: false
     initial_value: ""
     min_length: 0
     max_length: 64
