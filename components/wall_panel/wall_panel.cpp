@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 
 namespace esphome {
 namespace wall_panel {
@@ -12,6 +13,24 @@ static const char *const TAG = "wall_panel";
 
 void WallPanel::setup() {
   ESP_LOGCONFIG(TAG, "Setting up Wall Panel component...");
+
+  this->light_entity_pref_ = global_preferences->make_preference<LightEntityPreferences>(LIGHT_ENTITY_PREF_KEY, true);
+  this->light_entity_pref_ready_ = true;
+
+  LightEntityPreferences prefs{};
+  if (this->light_entity_pref_.load(&prefs) && prefs.version == 1) {
+    for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
+      prefs.entity_ids[i][64] = '\0';
+      auto &slot = this->light_slots_[i];
+      slot.entity_id = prefs.entity_ids[i];
+      slot.configured = !slot.entity_id.empty();
+      if (slot.configured)
+        this->subscribe_light_slot_(i + 1);
+    }
+    ESP_LOGI(TAG, "Loaded persisted light entity configuration");
+  } else {
+    ESP_LOGI(TAG, "No persisted light entity configuration found");
+  }
 }
 
 void WallPanel::dump_config() {
@@ -55,6 +74,23 @@ void WallPanel::set_ignore_all_off(uint8_t slot, bool ignore) {
   this->light_slots_[slot - 1].ignore_all_off = ignore;
 }
 
+void WallPanel::save_light_entities_() {
+  if (!this->light_entity_pref_ready_)
+    return;
+
+  LightEntityPreferences prefs{};
+  prefs.version = 1;
+
+  for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
+    const auto &entity_id = this->light_slots_[i].entity_id;
+    std::strncpy(prefs.entity_ids[i], entity_id.c_str(), 64);
+    prefs.entity_ids[i][64] = '\0';
+  }
+
+  if (!this->light_entity_pref_.save(&prefs))
+    ESP_LOGW(TAG, "Failed to persist light entity configuration");
+}
+
 void WallPanel::set_light_entity(uint8_t slot, const std::string &entity_id) {
   if (!this->valid_slot_(slot))
     return;
@@ -71,8 +107,10 @@ void WallPanel::set_light_entity(uint8_t slot, const std::string &entity_id) {
   state.has_brightness = false;
   state.brightness_pct = 0;
 
+  this->save_light_entities_();
+
   if (entity_id.empty()) {
-    ESP_LOGI(TAG, "Light slot %u cleared", slot);
+    ESP_LOGI(TAG, "Light slot %u cleared and persisted", slot);
     return;
   }
 
