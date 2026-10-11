@@ -16,6 +16,10 @@ static const char *const ACTION_PERMISSION_TIMEOUT = "ha_action_permission_probe
 void WallPanel::setup() {
   ESP_LOGCONFIG(TAG, "Setting up Wall Panel component...");
 
+  this->language_pref_ = global_preferences->make_preference<LanguagePreferences>(LANGUAGE_PREF_KEY, true);
+  this->language_pref_ready_ = true;
+  this->load_language_();
+
   this->set_light_defaults_();
   this->light_slot_pref_ = global_preferences->make_preference<LightSlotPreferences>(LIGHT_SLOT_PREF_KEY, true);
   this->light_slot_pref_ready_ = true;
@@ -24,6 +28,87 @@ void WallPanel::setup() {
   for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
     if (this->light_slots_[i].configured)
       this->subscribe_light_slot_(i + 1);
+  }
+}
+
+void WallPanel::load_language_() {
+  LanguagePreferences prefs{};
+  if (this->language_pref_.load(&prefs) && prefs.version == 1 &&
+      prefs.language <= static_cast<uint8_t>(Language::DANISH)) {
+    this->language_ = static_cast<Language>(prefs.language);
+    ESP_LOGI(TAG, "Loaded language: %s", this->get_language_option());
+    return;
+  }
+
+  this->language_ = Language::ENGLISH;
+  this->save_language_();
+  ESP_LOGI(TAG, "No persisted language found; using English");
+}
+
+void WallPanel::save_language_() {
+  if (!this->language_pref_ready_)
+    return;
+
+  LanguagePreferences prefs{};
+  prefs.version = 1;
+  prefs.language = static_cast<uint8_t>(this->language_);
+  if (!this->language_pref_.save(&prefs))
+    ESP_LOGW(TAG, "Failed to persist language configuration");
+}
+
+void WallPanel::set_language(const std::string &language) {
+  Language next;
+  if (language == "English") {
+    next = Language::ENGLISH;
+  } else if (language == "Danish") {
+    next = Language::DANISH;
+  } else {
+    ESP_LOGW(TAG, "Ignoring unsupported language: %s", language.c_str());
+    return;
+  }
+
+  if (this->language_ == next)
+    return;
+
+  this->language_ = next;
+  this->save_language_();
+  ESP_LOGI(TAG, "Language changed to %s", this->get_language_option());
+}
+
+const char *WallPanel::get_language_option() const {
+  return this->language_ == Language::DANISH ? "Danish" : "English";
+}
+
+const char *WallPanel::tr(TranslationKey key) const {
+  const bool da = this->language_ == Language::DANISH;
+
+  switch (key) {
+    case TranslationKey::LIGHTS:
+      return da ? "Lys" : "Lights";
+    case TranslationKey::LIGHT:
+      return da ? "Lys" : "Light";
+    case TranslationKey::BLINDS:
+      return da ? "Persienner" : "Blinds";
+    case TranslationKey::AUDIO:
+      return da ? "Lyd" : "Audio";
+    case TranslationKey::SCENES:
+      return da ? "Scener" : "Scenes";
+    case TranslationKey::ALL_OFF:
+      return da ? "Sluk alt" : "All off";
+    case TranslationKey::ALL_LIGHTS:
+      return da ? "Alle lys" : "All lights";
+    case TranslationKey::UNAVAILABLE:
+      return da ? "Ikke tilgængelig" : "Unavailable";
+    case TranslationKey::ON:
+      return da ? "Tændt" : "On";
+    case TranslationKey::OFF:
+      return da ? "Slukket" : "Off";
+    case TranslationKey::ACTION_PERMISSION_MESSAGE:
+      return da
+                 ? "Panelet kan ikke udføre handlinger i Home Assistant.\n\nAktivér \"Allow device to perform Home Assistant actions\" i ESPHome-enhedens indstillinger."
+                 : "This panel cannot perform actions in Home Assistant.\n\nEnable \"Allow device to perform Home Assistant actions\" in the ESPHome device settings.";
+    default:
+      return "";
   }
 }
 
@@ -41,13 +126,15 @@ void WallPanel::set_light_defaults_() {
     slot.ignore_all_off = false;
   }
 
-  this->light_slots_[3].name = "Sluk alt";
-  this->light_slots_[3].function = "Sluk alt";
+  this->light_slots_[3].name = "All off";
+  this->light_slots_[3].function = "All off";
 }
 
 void WallPanel::load_light_configuration_() {
   LightSlotPreferences prefs{};
   if (this->light_slot_pref_.load(&prefs) && prefs.version == 2) {
+    bool migrated = false;
+
     for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
       prefs.entity_ids[i][64] = '\0';
       prefs.names[i][32] = '\0';
@@ -60,11 +147,30 @@ void WallPanel::load_light_configuration_() {
       slot.ignore_all_off = prefs.ignore_all_off[i] != 0;
       slot.configured = !slot.entity_id.empty();
 
+      if (slot.function == "Sluk alt") {
+        slot.function = "All off";
+        migrated = true;
+      } else if (slot.function == "Skjult") {
+        slot.function = "Hidden";
+        migrated = true;
+      }
+
+      if (i == 3 && slot.name == "Sluk alt") {
+        slot.name = "All off";
+        migrated = true;
+      }
+
       if (slot.name.empty())
-        slot.name = (i == 3) ? "Sluk alt" : "Light " + std::to_string(i + 1);
-      if (slot.function != "Auto" && slot.function != "Sluk alt" && slot.function != "Skjult")
-        slot.function = (i == 3) ? "Sluk alt" : "Auto";
+        slot.name = (i == 3) ? "All off" : "Light " + std::to_string(i + 1);
+      if (slot.function != "Auto" && slot.function != "All off" && slot.function != "Hidden") {
+        slot.function = (i == 3) ? "All off" : "Auto";
+        migrated = true;
+      }
     }
+
+    if (migrated)
+      this->save_light_configuration_();
+
     ESP_LOGI(TAG, "Loaded persisted light slot configuration");
     return;
   }
@@ -113,6 +219,7 @@ void WallPanel::save_light_configuration_() {
 
 void WallPanel::dump_config() {
   ESP_LOGCONFIG(TAG, "Wall Panel:");
+  ESP_LOGCONFIG(TAG, "  Language: %s", this->get_language_option());
   ESP_LOGCONFIG(TAG, "  Light slots: %u", LIGHT_SLOT_COUNT);
 
   for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
@@ -148,16 +255,22 @@ void WallPanel::set_light_function(uint8_t slot, const std::string &function) {
   if (!this->valid_slot_(slot))
     return;
 
-  if (function != "Auto" && function != "Sluk alt" && function != "Skjult") {
+  std::string normalized = function;
+  if (normalized == "Sluk alt")
+    normalized = "All off";
+  else if (normalized == "Skjult")
+    normalized = "Hidden";
+
+  if (normalized != "Auto" && normalized != "All off" && normalized != "Hidden") {
     ESP_LOGW(TAG, "Ignoring invalid function for light slot %u: %s", slot, function.c_str());
     return;
   }
 
   auto &state = this->light_slots_[slot - 1];
-  if (state.function == function)
+  if (state.function == normalized)
     return;
 
-  state.function = function;
+  state.function = normalized;
   this->save_light_configuration_();
 }
 
@@ -275,7 +388,7 @@ void WallPanel::activate_light_slot(uint8_t slot) {
   ESP_LOGD(TAG, "Light slot %u pressed: %s (%s)", slot,
            state.entity_id.empty() ? "<no entity>" : state.entity_id.c_str(), state.function.c_str());
 
-  if (state.function == "Sluk alt") {
+  if (state.function == "All off") {
     this->all_lights_off();
     return;
   }
