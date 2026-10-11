@@ -1,6 +1,7 @@
 #pragma once
 
 #include "esphome/core/component.h"
+#include "esphome/core/preferences.h"
 #include "esphome/components/api/custom_api_device.h"
 
 #include <array>
@@ -24,6 +25,11 @@ struct LightSlotState {
   bool ignore_all_off{false};
 };
 
+struct LightEntityPreferences {
+  uint8_t version{1};
+  char entity_ids[4][65]{};
+};
+
 class WallPanel : public Component, public api::CustomAPIDevice {
  public:
   void setup() override;
@@ -42,12 +48,16 @@ class WallPanel : public Component, public api::CustomAPIDevice {
 
  protected:
   static constexpr uint8_t LIGHT_SLOT_COUNT = 4;
+  static constexpr uint32_t LIGHT_ENTITY_PREF_KEY = 0x57504C45U;
 
   std::array<LightSlotState, LIGHT_SLOT_COUNT> light_slots_{};
+  ESPPreferenceObject light_entity_pref_;
+  bool light_entity_pref_ready_{false};
 
   bool valid_slot_(uint8_t slot) const;
   void subscribe_light_slot_(uint8_t slot);
   void turn_entity_off_(const std::string &entity_id);
+  void save_light_entities_();
 
   void on_entity_state_(const std::string &entity_id, StringRef value);
   void on_brightness_state_(const std::string &entity_id, StringRef value);
