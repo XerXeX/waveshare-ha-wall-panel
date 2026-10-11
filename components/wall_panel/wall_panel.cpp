@@ -1,5 +1,6 @@
 #include "wall_panel.h"
 
+#include "esphome/components/api/homeassistant_service.h"
 #include "esphome/core/log.h"
 
 #include <cmath>
@@ -10,6 +11,7 @@ namespace esphome {
 namespace wall_panel {
 
 static const char *const TAG = "wall_panel";
+static const char *const ACTION_PERMISSION_TIMEOUT = "ha_action_permission_probe";
 
 void WallPanel::setup() {
   ESP_LOGCONFIG(TAG, "Setting up Wall Panel component...");
@@ -197,6 +199,74 @@ void WallPanel::set_light_entity(uint8_t slot, const std::string &entity_id) {
   this->subscribe_light_slot_(slot);
 }
 
+void WallPanel::dismiss_action_permission_warning() {
+  this->action_permission_warning_ = false;
+  this->action_permission_confirmed_ = false;
+  this->action_permission_probe_pending_ = false;
+  this->cancel_timeout(ACTION_PERMISSION_TIMEOUT);
+}
+
+void WallPanel::call_homeassistant_service_checked_(const std::string &service_name,
+                                                    const std::map<std::string, std::string> &data) {
+  if (api::global_api_server == nullptr || !api::global_api_server->is_connected_with_state_subscription()) {
+    ESP_LOGW(TAG, "Cannot call %s because Home Assistant is not connected", service_name.c_str());
+    return;
+  }
+
+  // Once Home Assistant has acknowledged one action, ordinary fire-and-forget
+  // calls are sufficient for the rest of this boot.
+  if (this->action_permission_confirmed_ || this->action_permission_probe_pending_) {
+    this->call_homeassistant_service(service_name, data);
+    return;
+  }
+
+  api::HomeassistantActionRequest request;
+  request.service = StringRef(service_name);
+  request.data.init(data.size());
+  for (const auto &it : data) {
+    auto &kv = request.data.emplace_back();
+    kv.key = StringRef(it.first);
+    kv.value = StringRef(it.second);
+  }
+
+  const uint32_t call_id = this->next_action_call_id_++;
+  request.call_id = call_id;
+  this->action_permission_probe_call_id_ = call_id;
+  this->action_permission_probe_pending_ = true;
+
+  api::global_api_server->register_action_response_callback(
+      call_id, [this, call_id](const api::ActionResponse &response) {
+        if (!this->action_permission_probe_pending_ || this->action_permission_probe_call_id_ != call_id)
+          return;
+
+        this->action_permission_probe_pending_ = false;
+        this->cancel_timeout(ACTION_PERMISSION_TIMEOUT);
+
+        if (response.is_success()) {
+          this->action_permission_confirmed_ = true;
+          this->action_permission_warning_ = false;
+          ESP_LOGI(TAG, "Home Assistant action permission confirmed");
+        } else {
+          this->action_permission_warning_ = true;
+          ESP_LOGW(TAG, "Home Assistant action failed: %s", response.get_error_message().c_str());
+        }
+      });
+
+  api::global_api_server->send_homeassistant_action(request);
+
+  // Home Assistant currently rejects disallowed ESPHome actions without sending
+  // an action response. A timeout therefore indicates that the device permission
+  // is very likely disabled. The UI shows a helpful message and lets the user retry.
+  this->set_timeout(ACTION_PERMISSION_TIMEOUT, 2500, [this, call_id]() {
+    if (!this->action_permission_probe_pending_ || this->action_permission_probe_call_id_ != call_id)
+      return;
+
+    this->action_permission_probe_pending_ = false;
+    this->action_permission_warning_ = true;
+    ESP_LOGW(TAG, "No Home Assistant action response received; action permission may be disabled");
+  });
+}
+
 void WallPanel::activate_light_slot(uint8_t slot) {
   if (!this->valid_slot_(slot))
     return;
@@ -213,7 +283,7 @@ void WallPanel::activate_light_slot(uint8_t slot) {
   if (state.function != "Auto" || !state.configured || state.entity_id.empty())
     return;
 
-  this->call_homeassistant_service("homeassistant.toggle", {{"entity_id", state.entity_id}});
+  this->call_homeassistant_service_checked_("homeassistant.toggle", {{"entity_id", state.entity_id}});
 }
 
 void WallPanel::set_light_brightness(uint8_t slot, int brightness_pct) {
@@ -230,7 +300,7 @@ void WallPanel::set_light_brightness(uint8_t slot, int brightness_pct) {
     brightness_pct = 100;
 
   ESP_LOGD(TAG, "Light slot %u brightness -> %d%%", slot, brightness_pct);
-  this->call_homeassistant_service(
+  this->call_homeassistant_service_checked_(
       "light.turn_on",
       {{"entity_id", state.entity_id},
        {"brightness_pct", std::to_string(brightness_pct)},
@@ -241,7 +311,7 @@ void WallPanel::turn_entity_off_(const std::string &entity_id) {
   if (entity_id.empty())
     return;
 
-  this->call_homeassistant_service("homeassistant.turn_off", {{"entity_id", entity_id}});
+  this->call_homeassistant_service_checked_("homeassistant.turn_off", {{"entity_id", entity_id}});
 }
 
 void WallPanel::all_lights_off() {
