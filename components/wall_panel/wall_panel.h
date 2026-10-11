@@ -25,9 +25,18 @@ struct LightSlotState {
   bool ignore_all_off{false};
 };
 
-struct LightEntityPreferences {
+// Legacy v1 storage. Kept only so existing entity selections can be migrated.
+struct LightEntityPreferencesV1 {
   uint8_t version{1};
   char entity_ids[4][65]{};
+};
+
+struct LightSlotPreferences {
+  uint8_t version{2};
+  char entity_ids[4][65]{};
+  char names[4][33]{};
+  char functions[4][16]{};
+  uint8_t ignore_all_off[4]{};
 };
 
 class WallPanel : public Component, public api::CustomAPIDevice {
@@ -48,16 +57,19 @@ class WallPanel : public Component, public api::CustomAPIDevice {
 
  protected:
   static constexpr uint8_t LIGHT_SLOT_COUNT = 4;
-  static constexpr uint32_t LIGHT_ENTITY_PREF_KEY = 0x57504C45U;
+  static constexpr uint32_t LEGACY_LIGHT_ENTITY_PREF_KEY = 0x57504C45U;
+  static constexpr uint32_t LIGHT_SLOT_PREF_KEY = 0x57504C32U;
 
   std::array<LightSlotState, LIGHT_SLOT_COUNT> light_slots_{};
-  ESPPreferenceObject light_entity_pref_;
-  bool light_entity_pref_ready_{false};
+  ESPPreferenceObject light_slot_pref_;
+  bool light_slot_pref_ready_{false};
 
   bool valid_slot_(uint8_t slot) const;
+  void set_light_defaults_();
+  void load_light_configuration_();
+  void save_light_configuration_();
   void subscribe_light_slot_(uint8_t slot);
   void turn_entity_off_(const std::string &entity_id);
-  void save_light_entities_();
 
   void on_entity_state_(const std::string &entity_id, StringRef value);
   void on_brightness_state_(const std::string &entity_id, StringRef value);
