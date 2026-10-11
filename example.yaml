@@ -34,14 +34,20 @@ wifi:
   password: !secret wifi_password
 
 external_components:
-  - source:
-      type: local
-      path: components
+  - source: github://XerXeX/waveshare-ha-wall-panel@main
+    components:
+      - wall_panel
+    refresh: 5min
 
 packages:
-  hardware: !include packages/hardware.yaml
-  ui: !include packages/ui.yaml
-  lights: !include packages/lights.yaml
-  blinds: !include packages/blinds.yaml
-  audio: !include packages/audio.yaml
-  scenes: !include packages/scenes.yaml
+  wall_panel:
+    url: https://github.com/XerXeX/waveshare-ha-wall-panel
+    ref: main
+    refresh: 5min
+    files:
+      - packages/hardware.yaml
+      - packages/ui.yaml
+      - packages/lights.yaml
+      - packages/blinds.yaml
+      - packages/audio.yaml
+      - packages/scenes.yaml
