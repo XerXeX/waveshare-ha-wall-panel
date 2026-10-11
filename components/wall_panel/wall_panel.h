@@ -11,6 +11,25 @@
 namespace esphome {
 namespace wall_panel {
 
+enum class Language : uint8_t {
+  ENGLISH = 0,
+  DANISH = 1,
+};
+
+enum class TranslationKey : uint8_t {
+  LIGHTS,
+  LIGHT,
+  BLINDS,
+  AUDIO,
+  SCENES,
+  ALL_OFF,
+  ALL_LIGHTS,
+  UNAVAILABLE,
+  ON,
+  OFF,
+  ACTION_PERMISSION_MESSAGE,
+};
+
 struct LightSlotState {
   std::string entity_id;
   std::string name;
@@ -40,10 +59,19 @@ struct LightSlotPreferences {
   uint8_t ignore_all_off[4]{};
 };
 
+struct LanguagePreferences {
+  uint8_t version{1};
+  uint8_t language{static_cast<uint8_t>(Language::ENGLISH)};
+};
+
 class WallPanel : public Component, public api::CustomAPIDevice {
  public:
   void setup() override;
   void dump_config() override;
+
+  void set_language(const std::string &language);
+  const char *get_language_option() const;
+  const char *tr(TranslationKey key) const;
 
   void set_light_entity(uint8_t slot, const std::string &entity_id);
   void set_light_name(uint8_t slot, const std::string &name);
@@ -63,10 +91,15 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   static constexpr uint8_t LIGHT_SLOT_COUNT = 4;
   static constexpr uint32_t LEGACY_LIGHT_ENTITY_PREF_KEY = 0x57504C45U;
   static constexpr uint32_t LIGHT_SLOT_PREF_KEY = 0x57504C32U;
+  static constexpr uint32_t LANGUAGE_PREF_KEY = 0x57504C4CU;
 
   std::array<LightSlotState, LIGHT_SLOT_COUNT> light_slots_{};
   ESPPreferenceObject light_slot_pref_;
   bool light_slot_pref_ready_{false};
+
+  Language language_{Language::ENGLISH};
+  ESPPreferenceObject language_pref_;
+  bool language_pref_ready_{false};
 
   bool action_permission_confirmed_{false};
   bool action_permission_probe_pending_{false};
@@ -75,6 +108,8 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   uint32_t next_action_call_id_{1};
 
   bool valid_slot_(uint8_t slot) const;
+  void load_language_();
+  void save_language_();
   void set_light_defaults_();
   void load_light_configuration_();
   void save_light_configuration_();
