@@ -9,6 +9,27 @@
 # Entity changes are passed directly to the wall_panel component. The component
 # subscribes to the new Home Assistant entity at runtime, so no reboot is needed.
 
+globals:
+  - id: active_light_slot
+    type: int
+    restore_value: false
+    initial_value: '0'
+
+  - id: pending_light_brightness
+    type: int
+    restore_value: false
+    initial_value: '0'
+
+  - id: light_brightness_dirty
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+
+  - id: light_slider_syncing
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+
 text:
   # ---------------------------------------------------------
   # Slot 1
@@ -241,7 +262,7 @@ switch:
       - lambda: id(wall_panel_controller).set_ignore_all_off(4, false);
 
 # -----------------------------------------------------------
-# Light page
+# Light pages
 # -----------------------------------------------------------
 
 lvgl:
@@ -271,9 +292,29 @@ lvgl:
             bg_color: 0x181B20
             radius: 18
             border_width: 0
-            on_click:
+            on_short_click:
               - script.execute: ui_click
               - lambda: id(wall_panel_controller).activate_light_slot(1);
+            on_long_press:
+              - if:
+                  condition:
+                    lambda: |-
+                      const auto &slot = id(wall_panel_controller).get_light_slot(1);
+                      return slot.function == "Auto" && slot.configured && slot.available && slot.has_brightness;
+                  then:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_light_slot(1);
+                        id(active_light_slot) = 1;
+                        id(light_brightness_dirty) = false;
+                        lv_label_set_text(id(light_detail_name), slot.name.empty() ? "Lys" : slot.name.c_str());
+                        char text[16];
+                        snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
+                        lv_label_set_text(id(light_detail_percent), text);
+                        id(light_slider_syncing) = true;
+                        lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
+                        id(light_slider_syncing) = false;
+                    - lvgl.page.show: light_detail_page
             widgets:
               - image:
                   id: light_slot1_icon
@@ -304,9 +345,29 @@ lvgl:
             bg_color: 0x181B20
             radius: 18
             border_width: 0
-            on_click:
+            on_short_click:
               - script.execute: ui_click
               - lambda: id(wall_panel_controller).activate_light_slot(2);
+            on_long_press:
+              - if:
+                  condition:
+                    lambda: |-
+                      const auto &slot = id(wall_panel_controller).get_light_slot(2);
+                      return slot.function == "Auto" && slot.configured && slot.available && slot.has_brightness;
+                  then:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_light_slot(2);
+                        id(active_light_slot) = 2;
+                        id(light_brightness_dirty) = false;
+                        lv_label_set_text(id(light_detail_name), slot.name.empty() ? "Lys" : slot.name.c_str());
+                        char text[16];
+                        snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
+                        lv_label_set_text(id(light_detail_percent), text);
+                        id(light_slider_syncing) = true;
+                        lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
+                        id(light_slider_syncing) = false;
+                    - lvgl.page.show: light_detail_page
             widgets:
               - image:
                   id: light_slot2_icon
@@ -337,9 +398,29 @@ lvgl:
             bg_color: 0x181B20
             radius: 18
             border_width: 0
-            on_click:
+            on_short_click:
               - script.execute: ui_click
               - lambda: id(wall_panel_controller).activate_light_slot(3);
+            on_long_press:
+              - if:
+                  condition:
+                    lambda: |-
+                      const auto &slot = id(wall_panel_controller).get_light_slot(3);
+                      return slot.function == "Auto" && slot.configured && slot.available && slot.has_brightness;
+                  then:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_light_slot(3);
+                        id(active_light_slot) = 3;
+                        id(light_brightness_dirty) = false;
+                        lv_label_set_text(id(light_detail_name), slot.name.empty() ? "Lys" : slot.name.c_str());
+                        char text[16];
+                        snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
+                        lv_label_set_text(id(light_detail_percent), text);
+                        id(light_slider_syncing) = true;
+                        lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
+                        id(light_slider_syncing) = false;
+                    - lvgl.page.show: light_detail_page
             widgets:
               - image:
                   id: light_slot3_icon
@@ -370,9 +451,29 @@ lvgl:
             bg_color: 0x181B20
             radius: 18
             border_width: 0
-            on_click:
+            on_short_click:
               - script.execute: ui_click
               - lambda: id(wall_panel_controller).activate_light_slot(4);
+            on_long_press:
+              - if:
+                  condition:
+                    lambda: |-
+                      const auto &slot = id(wall_panel_controller).get_light_slot(4);
+                      return slot.function == "Auto" && slot.configured && slot.available && slot.has_brightness;
+                  then:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_light_slot(4);
+                        id(active_light_slot) = 4;
+                        id(light_brightness_dirty) = false;
+                        lv_label_set_text(id(light_detail_name), slot.name.empty() ? "Lys" : slot.name.c_str());
+                        char text[16];
+                        snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
+                        lv_label_set_text(id(light_detail_percent), text);
+                        id(light_slider_syncing) = true;
+                        lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
+                        id(light_slider_syncing) = false;
+                    - lvgl.page.show: light_detail_page
             widgets:
               - image:
                   id: light_slot4_icon
@@ -394,6 +495,81 @@ lvgl:
                   text_font: ui_font_18
                   text_color: 0x858B94
 
+    - id: light_detail_page
+      bg_color: 0x101216
+      widgets:
+        - button:
+            id: light_detail_back
+            x: 20
+            y: 18
+            width: 64
+            height: 52
+            bg_color: 0x181B20
+            radius: 16
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: |-
+                  id(active_light_slot) = 0;
+                  id(light_brightness_dirty) = false;
+              - lvgl.page.show: lights_page
+            widgets:
+              - label:
+                  align: CENTER
+                  text: "‹"
+                  text_font: ui_font_34
+                  text_color: 0xFFFFFF
+
+        - label:
+            id: light_detail_name
+            x: 104
+            y: 26
+            text: "Lys"
+            text_font: ui_font_28
+            text_color: 0xFFFFFF
+
+        - image:
+            id: light_detail_icon
+            src: icon_lightbulb
+            align: CENTER
+            y: -95
+            image_recolor: 0xFFB300
+            image_recolor_opa: 100%
+
+        - label:
+            id: light_detail_percent
+            align: CENTER
+            y: -35
+            text: "--%"
+            text_font: ui_font_34
+            text_color: 0xFFFFFF
+
+        - slider:
+            id: light_detail_slider
+            x: 40
+            y: 270
+            width: 400
+            height: 42
+            min_value: 0
+            max_value: 100
+            value: 50
+            bg_color: 0x343A44
+            indicator:
+              bg_color: 0xFFB300
+            knob:
+              bg_color: 0xFFFFFF
+            on_value:
+              - lambda: |-
+                  char text[16];
+                  snprintf(text, sizeof(text), "%d%%", (int) x);
+                  lv_label_set_text(id(light_detail_percent), text);
+            on_change:
+              - lambda: |-
+                  if (id(light_slider_syncing))
+                    return;
+                  id(pending_light_brightness) = (int) x;
+                  id(light_brightness_dirty) = true;
+
 # Keep the LVGL cards synchronized with the C++ runtime state. This is kept
 # deliberately small for now; later the component can publish UI-change events
 # so the display does not need periodic polling.
@@ -401,7 +577,7 @@ interval:
   - interval: 250ms
     then:
       - lambda: |-
-          auto update_card = [](lv_obj_t *card, lv_obj_t *name_label, lv_obj_t *state_label,
+          auto update_card = [](lv_obj_t *card, lv_obj_t *icon, lv_obj_t *name_label, lv_obj_t *state_label,
                                 const esphome::wall_panel::LightSlotState &slot) {
             const bool all_off = slot.function == "Sluk alt";
             const bool hidden = slot.function == "Skjult" || (slot.function == "Auto" && !slot.configured);
@@ -413,9 +589,11 @@ interval:
             lv_obj_clear_flag(card, LV_OBJ_FLAG_HIDDEN);
 
             lv_label_set_text(name_label, slot.name.empty() ? (all_off ? "Sluk alt" : "Lys") : slot.name.c_str());
+            lv_obj_set_style_image_recolor_opa(icon, LV_OPA_COVER, LV_PART_MAIN);
 
             if (all_off) {
               lv_obj_set_style_bg_color(card, lv_color_hex(0x181B20), LV_PART_MAIN);
+              lv_obj_set_style_image_recolor(icon, lv_color_hex(0x858B94), LV_PART_MAIN);
               lv_label_set_text(state_label, "Alle lys");
               lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
               return;
@@ -423,6 +601,7 @@ interval:
 
             if (!slot.available) {
               lv_obj_set_style_bg_color(card, lv_color_hex(0x181B20), LV_PART_MAIN);
+              lv_obj_set_style_image_recolor(icon, lv_color_hex(0x555A62), LV_PART_MAIN);
               lv_label_set_text(state_label, "Ikke tilgængelig");
               lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
               return;
@@ -430,6 +609,7 @@ interval:
 
             if (slot.is_on) {
               lv_obj_set_style_bg_color(card, lv_color_hex(0x343A44), LV_PART_MAIN);
+              lv_obj_set_style_image_recolor(icon, lv_color_hex(0xFFB300), LV_PART_MAIN);
               if (slot.has_brightness) {
                 char text[16];
                 snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
@@ -440,16 +620,42 @@ interval:
               lv_obj_set_style_text_color(state_label, lv_color_hex(0xFFB300), LV_PART_MAIN);
             } else {
               lv_obj_set_style_bg_color(card, lv_color_hex(0x181B20), LV_PART_MAIN);
+              lv_obj_set_style_image_recolor(icon, lv_color_hex(0x858B94), LV_PART_MAIN);
               lv_label_set_text(state_label, "Slukket");
               lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
             }
           };
 
-          update_card(id(light_slot1_card), id(light_slot1_name_label), id(light_slot1_state_label),
+          update_card(id(light_slot1_card), id(light_slot1_icon), id(light_slot1_name_label), id(light_slot1_state_label),
                       id(wall_panel_controller).get_light_slot(1));
-          update_card(id(light_slot2_card), id(light_slot2_name_label), id(light_slot2_state_label),
+          update_card(id(light_slot2_card), id(light_slot2_icon), id(light_slot2_name_label), id(light_slot2_state_label),
                       id(wall_panel_controller).get_light_slot(2));
-          update_card(id(light_slot3_card), id(light_slot3_name_label), id(light_slot3_state_label),
+          update_card(id(light_slot3_card), id(light_slot3_icon), id(light_slot3_name_label), id(light_slot3_state_label),
                       id(wall_panel_controller).get_light_slot(3));
-          update_card(id(light_slot4_card), id(light_slot4_name_label), id(light_slot4_state_label),
+          update_card(id(light_slot4_card), id(light_slot4_icon), id(light_slot4_name_label), id(light_slot4_state_label),
                       id(wall_panel_controller).get_light_slot(4));
+
+          if (id(active_light_slot) >= 1 && id(active_light_slot) <= 4 && !id(light_brightness_dirty)) {
+            const auto &slot = id(wall_panel_controller).get_light_slot(id(active_light_slot));
+            if (slot.has_brightness) {
+              id(light_slider_syncing) = true;
+              lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
+              id(light_slider_syncing) = false;
+              char text[16];
+              snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
+              lv_label_set_text(id(light_detail_percent), text);
+              lv_obj_set_style_image_recolor(id(light_detail_icon),
+                                             lv_color_hex(slot.is_on ? 0xFFB300 : 0x858B94), LV_PART_MAIN);
+              lv_obj_set_style_image_recolor_opa(id(light_detail_icon), LV_OPA_COVER, LV_PART_MAIN);
+            }
+          }
+
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            lambda: return id(light_brightness_dirty) && id(active_light_slot) >= 1 && id(active_light_slot) <= 4;
+          then:
+            - lambda: |-
+                id(wall_panel_controller).set_light_brightness(id(active_light_slot), id(pending_light_brightness));
+                id(light_brightness_dirty) = false;
