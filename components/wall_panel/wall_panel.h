@@ -12,11 +12,14 @@ namespace wall_panel {
 struct LightSlotState {
   std::string entity_id;
   std::string name;
+
   bool configured{false};
   bool available{false};
   bool is_on{false};
+
   bool has_brightness{false};
   int brightness_pct{0};
+
   bool ignore_all_off{false};
 };
 
@@ -33,10 +36,14 @@ class WallPanel : public Component, public api::CustomAPIDevice {
 
  protected:
   static constexpr uint8_t LIGHT_SLOT_COUNT = 4;
+
   std::array<LightSlotState, LIGHT_SLOT_COUNT> light_slots_{};
 
   bool valid_slot_(uint8_t slot) const;
   void subscribe_light_slot_(uint8_t slot);
+
+  void on_entity_state_(const std::string &entity_id, StringRef value);
+  void on_brightness_state_(const std::string &entity_id, StringRef value);
 };
 
 }  // namespace wall_panel
