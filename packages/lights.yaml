@@ -8,7 +8,7 @@
 #
 # The wall_panel component is the source of truth for the full slot configuration.
 # All four settings are persisted independently of their Home Assistant display names,
-# so renaming/reordering config entities does not reset the panel configuration.
+# so renaming or reordering config entities does not reset the panel configuration.
 
 esphome:
   on_boot:
@@ -67,7 +67,7 @@ text:
   # ---------------------------------------------------------
   - platform: template
     id: light_slot1_name
-    name: "Lys · Slot 1 · 1 Navn"
+    name: "Lights · Slot 1 · 1 Name"
     entity_category: config
     optimistic: true
     restore_value: false
@@ -81,7 +81,7 @@ text:
 
   - platform: template
     id: light_slot1_entity
-    name: "Lys · Slot 1 · 2 Entity"
+    name: "Lights · Slot 1 · 2 Entity"
     entity_category: config
     optimistic: true
     restore_value: false
@@ -98,7 +98,7 @@ text:
   # ---------------------------------------------------------
   - platform: template
     id: light_slot2_name
-    name: "Lys · Slot 2 · 1 Navn"
+    name: "Lights · Slot 2 · 1 Name"
     entity_category: config
     optimistic: true
     restore_value: false
@@ -112,7 +112,7 @@ text:
 
   - platform: template
     id: light_slot2_entity
-    name: "Lys · Slot 2 · 2 Entity"
+    name: "Lights · Slot 2 · 2 Entity"
     entity_category: config
     optimistic: true
     restore_value: false
@@ -129,7 +129,7 @@ text:
   # ---------------------------------------------------------
   - platform: template
     id: light_slot3_name
-    name: "Lys · Slot 3 · 1 Navn"
+    name: "Lights · Slot 3 · 1 Name"
     entity_category: config
     optimistic: true
     restore_value: false
@@ -143,7 +143,7 @@ text:
 
   - platform: template
     id: light_slot3_entity
-    name: "Lys · Slot 3 · 2 Entity"
+    name: "Lights · Slot 3 · 2 Entity"
     entity_category: config
     optimistic: true
     restore_value: false
@@ -160,11 +160,11 @@ text:
   # ---------------------------------------------------------
   - platform: template
     id: light_slot4_name
-    name: "Lys · Slot 4 · 1 Navn"
+    name: "Lights · Slot 4 · 1 Name"
     entity_category: config
     optimistic: true
     restore_value: false
-    initial_value: "Sluk alt"
+    initial_value: "All off"
     min_length: 0
     max_length: 32
     mode: text
@@ -174,7 +174,7 @@ text:
 
   - platform: template
     id: light_slot4_entity
-    name: "Lys · Slot 4 · 2 Entity"
+    name: "Lights · Slot 4 · 2 Entity"
     entity_category: config
     optimistic: true
     restore_value: false
@@ -189,48 +189,48 @@ text:
 select:
   - platform: template
     id: light_slot1_function
-    name: "Lys · Slot 1 · 3 Funktion"
+    name: "Lights · Slot 1 · 3 Function"
     entity_category: config
     optimistic: true
     restore_value: false
     initial_option: "Auto"
-    options: ["Auto", "Sluk alt", "Skjult"]
+    options: ["Auto", "All off", "Hidden"]
     set_action:
       - lambda: |-
           id(wall_panel_controller).set_light_function(1, x);
 
   - platform: template
     id: light_slot2_function
-    name: "Lys · Slot 2 · 3 Funktion"
+    name: "Lights · Slot 2 · 3 Function"
     entity_category: config
     optimistic: true
     restore_value: false
     initial_option: "Auto"
-    options: ["Auto", "Sluk alt", "Skjult"]
+    options: ["Auto", "All off", "Hidden"]
     set_action:
       - lambda: |-
           id(wall_panel_controller).set_light_function(2, x);
 
   - platform: template
     id: light_slot3_function
-    name: "Lys · Slot 3 · 3 Funktion"
+    name: "Lights · Slot 3 · 3 Function"
     entity_category: config
     optimistic: true
     restore_value: false
     initial_option: "Auto"
-    options: ["Auto", "Sluk alt", "Skjult"]
+    options: ["Auto", "All off", "Hidden"]
     set_action:
       - lambda: |-
           id(wall_panel_controller).set_light_function(3, x);
 
   - platform: template
     id: light_slot4_function
-    name: "Lys · Slot 4 · 3 Funktion"
+    name: "Lights · Slot 4 · 3 Function"
     entity_category: config
     optimistic: true
     restore_value: false
-    initial_option: "Sluk alt"
-    options: ["Auto", "Sluk alt", "Skjult"]
+    initial_option: "All off"
+    options: ["Auto", "All off", "Hidden"]
     set_action:
       - lambda: |-
           id(wall_panel_controller).set_light_function(4, x);
@@ -238,7 +238,7 @@ select:
 switch:
   - platform: template
     id: light_slot1_ignore_all_off
-    name: "Lys · Slot 1 · 4 Ignorer Sluk alt"
+    name: "Lights · Slot 1 · 4 Ignore All Off"
     entity_category: config
     optimistic: true
     turn_on_action:
@@ -248,7 +248,7 @@ switch:
 
   - platform: template
     id: light_slot2_ignore_all_off
-    name: "Lys · Slot 2 · 4 Ignorer Sluk alt"
+    name: "Lights · Slot 2 · 4 Ignore All Off"
     entity_category: config
     optimistic: true
     turn_on_action:
@@ -258,7 +258,7 @@ switch:
 
   - platform: template
     id: light_slot3_ignore_all_off
-    name: "Lys · Slot 3 · 4 Ignorer Sluk alt"
+    name: "Lights · Slot 3 · 4 Ignore All Off"
     entity_category: config
     optimistic: true
     turn_on_action:
@@ -268,7 +268,7 @@ switch:
 
   - platform: template
     id: light_slot4_ignore_all_off
-    name: "Lys · Slot 4 · 4 Ignorer Sluk alt"
+    name: "Lights · Slot 4 · 4 Ignore All Off"
     entity_category: config
     optimistic: true
     turn_on_action:
@@ -294,7 +294,7 @@ lvgl:
             id: lights_page_title
             x: 20
             y: 18
-            text: "Lys"
+            text: "Lights"
             text_font: ui_font_34
             text_color: 0xFFFFFF
 
@@ -322,7 +322,9 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_light_slot(1);
                         id(active_light_slot) = 1;
                         id(light_brightness_dirty) = false;
-                        lv_label_set_text(id(light_detail_name), slot.name.empty() ? "Lys" : slot.name.c_str());
+                        lv_label_set_text(id(light_detail_name), slot.name.empty()
+                          ? id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::LIGHT)
+                          : slot.name.c_str());
                         char text[16];
                         snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
                         lv_label_set_text(id(light_detail_percent), text);
@@ -375,7 +377,9 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_light_slot(2);
                         id(active_light_slot) = 2;
                         id(light_brightness_dirty) = false;
-                        lv_label_set_text(id(light_detail_name), slot.name.empty() ? "Lys" : slot.name.c_str());
+                        lv_label_set_text(id(light_detail_name), slot.name.empty()
+                          ? id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::LIGHT)
+                          : slot.name.c_str());
                         char text[16];
                         snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
                         lv_label_set_text(id(light_detail_percent), text);
@@ -428,7 +432,9 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_light_slot(3);
                         id(active_light_slot) = 3;
                         id(light_brightness_dirty) = false;
-                        lv_label_set_text(id(light_detail_name), slot.name.empty() ? "Lys" : slot.name.c_str());
+                        lv_label_set_text(id(light_detail_name), slot.name.empty()
+                          ? id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::LIGHT)
+                          : slot.name.c_str());
                         char text[16];
                         snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
                         lv_label_set_text(id(light_detail_percent), text);
@@ -481,7 +487,9 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_light_slot(4);
                         id(active_light_slot) = 4;
                         id(light_brightness_dirty) = false;
-                        lv_label_set_text(id(light_detail_name), slot.name.empty() ? "Lys" : slot.name.c_str());
+                        lv_label_set_text(id(light_detail_name), slot.name.empty()
+                          ? id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::LIGHT)
+                          : slot.name.c_str());
                         char text[16];
                         snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
                         lv_label_set_text(id(light_detail_percent), text);
@@ -499,14 +507,14 @@ lvgl:
                   id: light_slot4_name_label
                   x: 16
                   y: 65
-                  text: "Sluk alt"
+                  text: "All off"
                   text_font: ui_font_22
                   text_color: 0xFFFFFF
               - label:
                   id: light_slot4_state_label
                   x: 16
                   y: 98
-                  text: "Alle lys"
+                  text: "All lights"
                   text_font: ui_font_18
                   text_color: 0x858B94
 
@@ -539,7 +547,7 @@ lvgl:
             id: light_detail_name
             x: 104
             y: 26
-            text: "Lys"
+            text: "Light"
             text_font: ui_font_28
             text_color: 0xFFFFFF
 
@@ -592,10 +600,13 @@ interval:
   - interval: 250ms
     then:
       - lambda: |-
-          auto update_card = [](lv_obj_t *card, lv_obj_t *icon, lv_obj_t *name_label, lv_obj_t *state_label,
-                                const esphome::wall_panel::LightSlotState &slot) {
-            const bool all_off = slot.function == "Sluk alt";
-            const bool hidden = slot.function == "Skjult" || (slot.function == "Auto" && !slot.configured);
+          auto &panel = id(wall_panel_controller);
+          lv_label_set_text(id(lights_page_title), panel.tr(esphome::wall_panel::TranslationKey::LIGHTS));
+
+          auto update_card = [&panel](lv_obj_t *card, lv_obj_t *icon, lv_obj_t *name_label, lv_obj_t *state_label,
+                                     const esphome::wall_panel::LightSlotState &slot) {
+            const bool all_off = slot.function == "All off";
+            const bool hidden = slot.function == "Hidden" || (slot.function == "Auto" && !slot.configured);
 
             if (hidden) {
               lv_obj_add_flag(card, LV_OBJ_FLAG_HIDDEN);
@@ -603,13 +614,16 @@ interval:
             }
             lv_obj_clear_flag(card, LV_OBJ_FLAG_HIDDEN);
 
-            lv_label_set_text(name_label, slot.name.empty() ? (all_off ? "Sluk alt" : "Lys") : slot.name.c_str());
+            lv_label_set_text(name_label, slot.name.empty()
+              ? (all_off ? panel.tr(esphome::wall_panel::TranslationKey::ALL_OFF)
+                         : panel.tr(esphome::wall_panel::TranslationKey::LIGHT))
+              : slot.name.c_str());
             lv_obj_set_style_image_recolor_opa(icon, LV_OPA_COVER, LV_PART_MAIN);
 
             if (all_off) {
               lv_obj_set_style_bg_color(card, lv_color_hex(0x181B20), LV_PART_MAIN);
               lv_obj_set_style_image_recolor(icon, lv_color_hex(0x858B94), LV_PART_MAIN);
-              lv_label_set_text(state_label, "Alle lys");
+              lv_label_set_text(state_label, panel.tr(esphome::wall_panel::TranslationKey::ALL_LIGHTS));
               lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
               return;
             }
@@ -617,7 +631,7 @@ interval:
             if (!slot.available) {
               lv_obj_set_style_bg_color(card, lv_color_hex(0x181B20), LV_PART_MAIN);
               lv_obj_set_style_image_recolor(icon, lv_color_hex(0x555A62), LV_PART_MAIN);
-              lv_label_set_text(state_label, "Ikke tilgængelig");
+              lv_label_set_text(state_label, panel.tr(esphome::wall_panel::TranslationKey::UNAVAILABLE));
               lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
               return;
             }
@@ -630,28 +644,32 @@ interval:
                 snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
                 lv_label_set_text(state_label, text);
               } else {
-                lv_label_set_text(state_label, "Tændt");
+                lv_label_set_text(state_label, panel.tr(esphome::wall_panel::TranslationKey::ON));
               }
               lv_obj_set_style_text_color(state_label, lv_color_hex(0xFFB300), LV_PART_MAIN);
             } else {
               lv_obj_set_style_bg_color(card, lv_color_hex(0x181B20), LV_PART_MAIN);
               lv_obj_set_style_image_recolor(icon, lv_color_hex(0x858B94), LV_PART_MAIN);
-              lv_label_set_text(state_label, "Slukket");
+              lv_label_set_text(state_label, panel.tr(esphome::wall_panel::TranslationKey::OFF));
               lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
             }
           };
 
           update_card(id(light_slot1_card), id(light_slot1_icon), id(light_slot1_name_label), id(light_slot1_state_label),
-                      id(wall_panel_controller).get_light_slot(1));
+                      panel.get_light_slot(1));
           update_card(id(light_slot2_card), id(light_slot2_icon), id(light_slot2_name_label), id(light_slot2_state_label),
-                      id(wall_panel_controller).get_light_slot(2));
+                      panel.get_light_slot(2));
           update_card(id(light_slot3_card), id(light_slot3_icon), id(light_slot3_name_label), id(light_slot3_state_label),
-                      id(wall_panel_controller).get_light_slot(3));
+                      panel.get_light_slot(3));
           update_card(id(light_slot4_card), id(light_slot4_icon), id(light_slot4_name_label), id(light_slot4_state_label),
-                      id(wall_panel_controller).get_light_slot(4));
+                      panel.get_light_slot(4));
 
           if (id(active_light_slot) >= 1 && id(active_light_slot) <= 4 && !id(light_brightness_dirty)) {
-            const auto &slot = id(wall_panel_controller).get_light_slot(id(active_light_slot));
+            const auto &slot = panel.get_light_slot(id(active_light_slot));
+            lv_label_set_text(id(light_detail_name), slot.name.empty()
+              ? panel.tr(esphome::wall_panel::TranslationKey::LIGHT)
+              : slot.name.c_str());
+
             if (slot.has_brightness) {
               id(light_slider_syncing) = true;
               lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
