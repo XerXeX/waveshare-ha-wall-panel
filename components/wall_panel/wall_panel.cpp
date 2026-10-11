@@ -79,6 +79,59 @@ void WallPanel::set_light_entity(uint8_t slot, const std::string &entity_id) {
   this->subscribe_light_slot_(slot);
 }
 
+void WallPanel::activate_light_slot(uint8_t slot) {
+  if (!this->valid_slot_(slot))
+    return;
+
+  const auto &state = this->light_slots_[slot - 1];
+
+  if (state.function == "Sluk alt") {
+    this->all_lights_off();
+    return;
+  }
+
+  if (state.function != "Auto" || !state.configured || state.entity_id.empty())
+    return;
+
+  this->call_homeassistant_service("homeassistant.toggle", {{"entity_id", state.entity_id}});
+}
+
+void WallPanel::set_light_brightness(uint8_t slot, int brightness_pct) {
+  if (!this->valid_slot_(slot))
+    return;
+
+  const auto &state = this->light_slots_[slot - 1];
+  if (state.function != "Auto" || !state.configured || state.entity_id.empty() || !state.has_brightness)
+    return;
+
+  if (brightness_pct < 0)
+    brightness_pct = 0;
+  if (brightness_pct > 100)
+    brightness_pct = 100;
+
+  this->call_homeassistant_service(
+      "light.turn_on",
+      {{"entity_id", state.entity_id},
+       {"brightness_pct", std::to_string(brightness_pct)},
+       {"transition", "1"}});
+}
+
+void WallPanel::turn_entity_off_(const std::string &entity_id) {
+  if (entity_id.empty())
+    return;
+
+  this->call_homeassistant_service("homeassistant.turn_off", {{"entity_id", entity_id}});
+}
+
+void WallPanel::all_lights_off() {
+  for (const auto &state : this->light_slots_) {
+    if (state.function != "Auto" || !state.configured || state.entity_id.empty() || state.ignore_all_off)
+      continue;
+
+    this->turn_entity_off_(state.entity_id);
+  }
+}
+
 void WallPanel::subscribe_light_slot_(uint8_t slot) {
   if (!this->valid_slot_(slot))
     return;
@@ -116,8 +169,6 @@ void WallPanel::on_brightness_state_(const std::string &entity_id, StringRef val
   char *end = nullptr;
   const float raw = std::strtof(brightness_value.c_str(), &end);
 
-  // A missing/non-numeric brightness attribute means the entity does not
-  // currently expose brightness capability.
   if (end == brightness_value.c_str() || !std::isfinite(raw))
     return;
 
