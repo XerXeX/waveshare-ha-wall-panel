@@ -20,8 +20,9 @@ void WallPanel::dump_config() {
 
   for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
     const auto &slot = this->light_slots_[i];
-    ESP_LOGCONFIG(TAG, "  Slot %u: %s", i + 1,
-                  slot.entity_id.empty() ? "<not configured>" : slot.entity_id.c_str());
+    ESP_LOGCONFIG(TAG, "  Slot %u: %s (%s)", i + 1,
+                  slot.entity_id.empty() ? "<not configured>" : slot.entity_id.c_str(),
+                  slot.function.c_str());
   }
 }
 
@@ -38,6 +39,13 @@ void WallPanel::set_light_name(uint8_t slot, const std::string &name) {
     return;
 
   this->light_slots_[slot - 1].name = name;
+}
+
+void WallPanel::set_light_function(uint8_t slot, const std::string &function) {
+  if (!this->valid_slot_(slot))
+    return;
+
+  this->light_slots_[slot - 1].function = function;
 }
 
 void WallPanel::set_ignore_all_off(uint8_t slot, bool ignore) {
@@ -81,9 +89,9 @@ void WallPanel::subscribe_light_slot_(uint8_t slot) {
 
   ESP_LOGI(TAG, "Light slot %u subscribing to %s", slot, entity_id.c_str());
 
-  // The callback receives the entity ID as well as the state. This lets us
-  // safely leave an old subscription registered after a slot is reconfigured:
-  // callbacks only update slots that still point at that entity.
+  // Old subscriptions can safely remain registered. The callback checks the
+  // current entity ID before applying updates, so changing an entity does not
+  // require a reboot or an unsubscribe operation.
   this->subscribe_homeassistant_state(&WallPanel::on_entity_state_, entity_id);
   this->subscribe_homeassistant_state(&WallPanel::on_brightness_state_, entity_id, "brightness");
 }
