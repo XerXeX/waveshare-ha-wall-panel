@@ -83,3 +83,34 @@ image:
     resize: 42x42
     type: RGB565
     transparency: alpha_channel
+
+# Home Assistant does not send an action response when ESPHome service calls are
+# blocked by the device option. The wall_panel component detects that timeout and
+# raises this modal so the user knows exactly which permission needs enabling.
+lvgl:
+  id: wall_panel_lvgl
+  on_boot:
+    - lvgl.widget.hide: ha_action_permission_message
+  msgboxes:
+    - id: ha_action_permission_message
+      title: "Home Assistant"
+      body:
+        text: |-
+          Panelet kan ikke udføre handlinger i Home Assistant.
+
+          Aktivér "Allow device to perform Home Assistant actions" i ESPHome-enhedens indstillinger.
+      buttons:
+        - id: ha_action_permission_ok
+          text: "OK"
+          on_click:
+            - lambda: id(wall_panel_controller).dismiss_action_permission_warning();
+            - lvgl.widget.hide: ha_action_permission_message
+
+interval:
+  - interval: 500ms
+    then:
+      - if:
+          condition:
+            lambda: return id(wall_panel_controller).has_action_permission_warning();
+          then:
+            - lvgl.widget.show: ha_action_permission_message
