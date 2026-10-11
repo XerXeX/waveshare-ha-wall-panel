@@ -62,9 +62,6 @@ globals:
     initial_value: 'false'
 
 text:
-  # ---------------------------------------------------------
-  # Slot 1
-  # ---------------------------------------------------------
   - platform: template
     id: light_slot1_name
     name: "Lights · Slot 1 · 1 Name"
@@ -76,8 +73,7 @@ text:
     max_length: 32
     mode: text
     set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_light_name(1, x);
+      - lambda: id(wall_panel_controller).set_light_name(1, x);
 
   - platform: template
     id: light_slot1_entity
@@ -90,12 +86,8 @@ text:
     max_length: 64
     mode: text
     set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_light_entity(1, x);
+      - lambda: id(wall_panel_controller).set_light_entity(1, x);
 
-  # ---------------------------------------------------------
-  # Slot 2
-  # ---------------------------------------------------------
   - platform: template
     id: light_slot2_name
     name: "Lights · Slot 2 · 1 Name"
@@ -107,8 +99,7 @@ text:
     max_length: 32
     mode: text
     set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_light_name(2, x);
+      - lambda: id(wall_panel_controller).set_light_name(2, x);
 
   - platform: template
     id: light_slot2_entity
@@ -121,12 +112,8 @@ text:
     max_length: 64
     mode: text
     set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_light_entity(2, x);
+      - lambda: id(wall_panel_controller).set_light_entity(2, x);
 
-  # ---------------------------------------------------------
-  # Slot 3
-  # ---------------------------------------------------------
   - platform: template
     id: light_slot3_name
     name: "Lights · Slot 3 · 1 Name"
@@ -138,8 +125,7 @@ text:
     max_length: 32
     mode: text
     set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_light_name(3, x);
+      - lambda: id(wall_panel_controller).set_light_name(3, x);
 
   - platform: template
     id: light_slot3_entity
@@ -152,12 +138,8 @@ text:
     max_length: 64
     mode: text
     set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_light_entity(3, x);
+      - lambda: id(wall_panel_controller).set_light_entity(3, x);
 
-  # ---------------------------------------------------------
-  # Slot 4
-  # ---------------------------------------------------------
   - platform: template
     id: light_slot4_name
     name: "Lights · Slot 4 · 1 Name"
@@ -169,8 +151,7 @@ text:
     max_length: 32
     mode: text
     set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_light_name(4, x);
+      - lambda: id(wall_panel_controller).set_light_name(4, x);
 
   - platform: template
     id: light_slot4_entity
@@ -183,8 +164,7 @@ text:
     max_length: 64
     mode: text
     set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_light_entity(4, x);
+      - lambda: id(wall_panel_controller).set_light_entity(4, x);
 
 select:
   - platform: template
@@ -196,8 +176,7 @@ select:
     initial_option: "Auto"
     options: ["Auto", "All off", "Hidden"]
     set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_light_function(1, x);
+      - lambda: id(wall_panel_controller).set_light_function(1, x);
 
   - platform: template
     id: light_slot2_function
@@ -208,8 +187,7 @@ select:
     initial_option: "Auto"
     options: ["Auto", "All off", "Hidden"]
     set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_light_function(2, x);
+      - lambda: id(wall_panel_controller).set_light_function(2, x);
 
   - platform: template
     id: light_slot3_function
@@ -220,8 +198,7 @@ select:
     initial_option: "Auto"
     options: ["Auto", "All off", "Hidden"]
     set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_light_function(3, x);
+      - lambda: id(wall_panel_controller).set_light_function(3, x);
 
   - platform: template
     id: light_slot4_function
@@ -232,8 +209,7 @@ select:
     initial_option: "All off"
     options: ["Auto", "All off", "Hidden"]
     set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_light_function(4, x);
+      - lambda: id(wall_panel_controller).set_light_function(4, x);
 
 switch:
   - platform: template
@@ -275,10 +251,6 @@ switch:
       - lambda: id(wall_panel_controller).set_ignore_all_off(4, true);
     turn_off_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(4, false);
-
-# -----------------------------------------------------------
-# Light pages
-# -----------------------------------------------------------
 
 lvgl:
   id: wall_panel_lvgl
@@ -593,14 +565,11 @@ lvgl:
                   id(pending_light_brightness) = (int) x;
                   id(light_brightness_dirty) = true;
 
-# Keep the LVGL cards synchronized with the C++ runtime state. This is kept
-# deliberately small for now; later the component can publish UI-change events
-# so the display does not need periodic polling.
 interval:
   - interval: 250ms
     then:
       - lambda: |-
-          auto &panel = id(wall_panel_controller);
+          auto &panel = *id(wall_panel_controller);
           lv_label_set_text(id(lights_page_title), panel.tr(esphome::wall_panel::TranslationKey::LIGHTS));
 
           auto update_card = [&panel](lv_obj_t *card, lv_obj_t *icon, lv_obj_t *name_label, lv_obj_t *state_label,
