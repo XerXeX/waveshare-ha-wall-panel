@@ -1,7 +1,7 @@
 # Shared UI resources
 
 font:
-  - file: "assets/fonts/Roboto-Regular.ttf"
+  - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
     id: ui_font_18
     size: 18
     bpp: 4
@@ -11,7 +11,7 @@ font:
       - "·"
       - "°"
 
-  - file: "assets/fonts/Roboto-Regular.ttf"
+  - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
     id: ui_font_22
     size: 22
     bpp: 4
@@ -21,7 +21,7 @@ font:
       - "·"
       - "°"
 
-  - file: "assets/fonts/Roboto-Regular.ttf"
+  - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
     id: ui_font_28
     size: 28
     bpp: 4
@@ -31,7 +31,7 @@ font:
       - "·"
       - "°"
 
-  - file: "assets/fonts/Roboto-Regular.ttf"
+  - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
     id: ui_font_34
     size: 34
     bpp: 4
