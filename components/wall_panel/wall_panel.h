@@ -83,7 +83,6 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void all_lights_off();
 
   const LightSlotState &get_light_slot(uint8_t slot) const;
-  std::string get_light_display_name(uint8_t slot) const;
 
   bool has_action_permission_warning() const { return this->action_permission_warning_; }
   void dismiss_action_permission_warning();
