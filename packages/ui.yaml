@@ -30,6 +30,7 @@ font:
     glyphs:
       - "·"
       - "°"
+      - "æøåÆØÅéÉ"
 
   - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
     id: ui_font_22
@@ -40,6 +41,7 @@ font:
     glyphs:
       - "·"
       - "°"
+      - "æøåÆØÅéÉ"
 
   - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
     id: ui_font_28
@@ -50,6 +52,7 @@ font:
     glyphs:
       - "·"
       - "°"
+      - "æøåÆØÅéÉ"
 
   - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
     id: ui_font_34
@@ -60,6 +63,7 @@ font:
     glyphs:
       - "·"
       - "°"
+      - "æøåÆØÅéÉ"
 
 image:
   - platform: file
