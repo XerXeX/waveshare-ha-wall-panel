@@ -151,6 +151,17 @@ void WallPanel::subscribe_light_slot_(uint8_t slot) {
   // require a reboot or an unsubscribe operation.
   this->subscribe_homeassistant_state(&WallPanel::on_entity_state_, entity_id);
   this->subscribe_homeassistant_state(&WallPanel::on_brightness_state_, entity_id, "brightness");
+
+  // Home Assistant receives the state-subscription list over the native API.
+  // If a slot is configured while that connection is already active, refresh
+  // the list immediately so state and attributes begin flowing without a reboot.
+  if (api::global_api_server != nullptr && api::global_api_server->is_connected()) {
+    ESP_LOGD(TAG, "Refreshing Home Assistant state subscriptions");
+    for (const auto &client : api::global_api_server->active_clients()) {
+      if (client != nullptr && client->is_connection_setup())
+        client->on_subscribe_home_assistant_states_request();
+    }
+  }
 }
 
 void WallPanel::on_entity_state_(const std::string &entity_id, StringRef value) {
