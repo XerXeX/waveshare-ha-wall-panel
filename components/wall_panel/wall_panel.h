@@ -12,6 +12,7 @@ namespace wall_panel {
 struct LightSlotState {
   std::string entity_id;
   std::string name;
+  std::string function{"Auto"};
 
   bool configured{false};
   bool available{false};
@@ -30,6 +31,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
 
   void set_light_entity(uint8_t slot, const std::string &entity_id);
   void set_light_name(uint8_t slot, const std::string &name);
+  void set_light_function(uint8_t slot, const std::string &function);
   void set_ignore_all_off(uint8_t slot, bool ignore);
 
   const LightSlotState &get_light_slot(uint8_t slot) const;
