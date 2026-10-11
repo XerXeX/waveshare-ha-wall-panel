@@ -139,7 +139,7 @@ lvgl:
                 y: 78
                 width: 392
                 text: !lambda |-
-                  return id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::ACTION_PERMISSION_MESSAGE);
+                  return std::string(id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::ACTION_PERMISSION_MESSAGE));
                 text_font: ui_font_18
                 text_color: 0xFFFFFF
                 long_mode: wrap
