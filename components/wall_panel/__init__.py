@@ -15,5 +15,9 @@ CONFIG_SCHEMA = cv.Schema(
 
 
 async def to_code(config):
+    # The panel uses Home Assistant action status responses to detect when
+    # action permissions have not been enabled for the ESPHome device.
+    cg.add_define("USE_API_HOMEASSISTANT_ACTION_RESPONSES")
+
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
