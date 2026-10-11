@@ -1,0 +1,85 @@
+# Shared UI resources
+
+font:
+  - file: "assets/fonts/Roboto-Regular.ttf"
+    id: ui_font_18
+    size: 18
+    bpp: 4
+    glyphsets:
+      - GF_Latin_Core
+    glyphs:
+      - "·"
+      - "°"
+
+  - file: "assets/fonts/Roboto-Regular.ttf"
+    id: ui_font_22
+    size: 22
+    bpp: 4
+    glyphsets:
+      - GF_Latin_Core
+    glyphs:
+      - "·"
+      - "°"
+
+  - file: "assets/fonts/Roboto-Regular.ttf"
+    id: ui_font_28
+    size: 28
+    bpp: 4
+    glyphsets:
+      - GF_Latin_Core
+    glyphs:
+      - "·"
+      - "°"
+
+  - file: "assets/fonts/Roboto-Regular.ttf"
+    id: ui_font_34
+    size: 34
+    bpp: 4
+    glyphsets:
+      - GF_Latin_Core
+    glyphs:
+      - "·"
+      - "°"
+
+image:
+  - platform: file
+    file: mdi:lightbulb
+    id: icon_lightbulb
+    resize: 34x34
+    type: RGB565
+    transparency: alpha_channel
+
+  - platform: file
+    file: mdi:wall-sconce-flat
+    id: icon_lamp
+    resize: 34x34
+    type: RGB565
+    transparency: alpha_channel
+
+  - platform: file
+    file: mdi:lightbulb-outline
+    id: nav_light
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+
+  - platform: file
+    file: mdi:window-shutter
+    id: nav_blinds
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+
+  - platform: file
+    file: mdi:speaker
+    id: nav_audio
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+
+  - platform: file
+    file: mdi:palette-outline
+    id: nav_scenes
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel

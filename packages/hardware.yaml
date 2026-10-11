@@ -1,0 +1,104 @@
+# Hardware package
+
+wall_panel:
+  id: wall_panel_controller
+
+external_components:
+  - source: github://pr#17646
+    components:
+      - mipi
+      - mipi_rgb
+    refresh: 1h
+
+i2c:
+  - id: touch_i2c
+    sda: GPIO15
+    scl: GPIO7
+    frequency: 400kHz
+    scan: false
+
+waveshare_io_ch32v003:
+  - id: wave_io
+    address: 0x24
+    i2c_id: touch_i2c
+
+spi:
+  - id: lcd_spi
+    clk_pin: GPIO2
+    mosi_pin: GPIO1
+
+display:
+  - platform: mipi_rgb
+    model: WAVESHARE-4-480X480
+    id: lcd
+    auto_clear_enabled: false
+    update_interval: never
+
+touchscreen:
+  - platform: gt911
+    id: touch
+    display: lcd
+    i2c_id: touch_i2c
+    reset_pin:
+      waveshare_io_ch32v003: wave_io
+      number: 1
+      mode: OUTPUT
+    interrupt_pin:
+      waveshare_io_ch32v003: wave_io
+      number: 2
+
+# --------------------------------------------------
+# Waveshare IO outputs
+# --------------------------------------------------
+
+switch:
+  - platform: gpio
+    id: waveshare_sys_en
+    internal: true
+    restore_mode: ALWAYS_ON
+    pin:
+      waveshare_io_ch32v003: wave_io
+      number: 5
+      mode: OUTPUT
+
+  - platform: gpio
+    id: waveshare_buzzer
+    internal: true
+    restore_mode: ALWAYS_OFF
+    pin:
+      waveshare_io_ch32v003: wave_io
+      number: 6
+      mode: OUTPUT
+
+# --------------------------------------------------
+# Backlight
+# --------------------------------------------------
+
+output:
+  - platform: waveshare_io_ch32v003
+    waveshare_io_ch32v003_id: wave_io
+    id: lcd_backlight_pwm
+    inverted: true
+    zero_means_zero: true
+    min_power: 25%
+    max_power: 97%
+
+light:
+  - platform: monochromatic
+    id: lcd_backlight
+    name: "LCD Backlight"
+    output: lcd_backlight_pwm
+    restore_mode: RESTORE_DEFAULT_ON
+    default_transition_length: 0.3s
+
+# --------------------------------------------------
+# UI click buzzer
+# --------------------------------------------------
+
+script:
+  - id: ui_click
+    mode: restart
+    then:
+      - switch.turn_on: waveshare_buzzer
+      - delay: 25ms
+      - switch.turn_off: waveshare_buzzer
