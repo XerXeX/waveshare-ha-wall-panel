@@ -150,10 +150,7 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Auto"
-    options:
-      - "Auto"
-      - "Sluk alt"
-      - "Skjult"
+    options: ["Auto", "Sluk alt", "Skjult"]
     on_value:
       then:
         - lambda: |-
@@ -166,10 +163,7 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Auto"
-    options:
-      - "Auto"
-      - "Sluk alt"
-      - "Skjult"
+    options: ["Auto", "Sluk alt", "Skjult"]
     on_value:
       then:
         - lambda: |-
@@ -182,10 +176,7 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Auto"
-    options:
-      - "Auto"
-      - "Sluk alt"
-      - "Skjult"
+    options: ["Auto", "Sluk alt", "Skjult"]
     on_value:
       then:
         - lambda: |-
@@ -198,10 +189,7 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Sluk alt"
-    options:
-      - "Auto"
-      - "Sluk alt"
-      - "Skjult"
+    options: ["Auto", "Sluk alt", "Skjult"]
     on_value:
       then:
         - lambda: |-
@@ -215,11 +203,9 @@ switch:
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
-      - lambda: |-
-          id(wall_panel_controller).set_ignore_all_off(1, true);
+      - lambda: id(wall_panel_controller).set_ignore_all_off(1, true);
     on_turn_off:
-      - lambda: |-
-          id(wall_panel_controller).set_ignore_all_off(1, false);
+      - lambda: id(wall_panel_controller).set_ignore_all_off(1, false);
 
   - platform: template
     id: light_slot2_ignore_all_off
@@ -228,11 +214,9 @@ switch:
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
-      - lambda: |-
-          id(wall_panel_controller).set_ignore_all_off(2, true);
+      - lambda: id(wall_panel_controller).set_ignore_all_off(2, true);
     on_turn_off:
-      - lambda: |-
-          id(wall_panel_controller).set_ignore_all_off(2, false);
+      - lambda: id(wall_panel_controller).set_ignore_all_off(2, false);
 
   - platform: template
     id: light_slot3_ignore_all_off
@@ -241,11 +225,9 @@ switch:
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
-      - lambda: |-
-          id(wall_panel_controller).set_ignore_all_off(3, true);
+      - lambda: id(wall_panel_controller).set_ignore_all_off(3, true);
     on_turn_off:
-      - lambda: |-
-          id(wall_panel_controller).set_ignore_all_off(3, false);
+      - lambda: id(wall_panel_controller).set_ignore_all_off(3, false);
 
   - platform: template
     id: light_slot4_ignore_all_off
@@ -254,8 +236,220 @@ switch:
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
-      - lambda: |-
-          id(wall_panel_controller).set_ignore_all_off(4, true);
+      - lambda: id(wall_panel_controller).set_ignore_all_off(4, true);
     on_turn_off:
+      - lambda: id(wall_panel_controller).set_ignore_all_off(4, false);
+
+# -----------------------------------------------------------
+# Light page
+# -----------------------------------------------------------
+
+lvgl:
+  id: wall_panel_lvgl
+  displays: lcd
+  touchscreens:
+    - touchscreen_id: touch
+  bg_color: 0x101216
+  pages:
+    - id: lights_page
+      bg_color: 0x101216
+      widgets:
+        - label:
+            id: lights_page_title
+            x: 20
+            y: 18
+            text: "Lys"
+            text_font: ui_font_34
+            text_color: 0xFFFFFF
+
+        - button:
+            id: light_slot1_card
+            x: 20
+            y: 72
+            width: 210
+            height: 135
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(wall_panel_controller).activate_light_slot(1);
+            widgets:
+              - image:
+                  id: light_slot1_icon
+                  src: icon_lightbulb
+                  x: 16
+                  y: 16
+              - label:
+                  id: light_slot1_name_label
+                  x: 16
+                  y: 65
+                  text: "Light 1"
+                  text_font: ui_font_22
+                  text_color: 0xFFFFFF
+              - label:
+                  id: light_slot1_state_label
+                  x: 16
+                  y: 98
+                  text: "--"
+                  text_font: ui_font_18
+                  text_color: 0x858B94
+
+        - button:
+            id: light_slot2_card
+            x: 250
+            y: 72
+            width: 210
+            height: 135
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(wall_panel_controller).activate_light_slot(2);
+            widgets:
+              - image:
+                  id: light_slot2_icon
+                  src: icon_lightbulb
+                  x: 16
+                  y: 16
+              - label:
+                  id: light_slot2_name_label
+                  x: 16
+                  y: 65
+                  text: "Light 2"
+                  text_font: ui_font_22
+                  text_color: 0xFFFFFF
+              - label:
+                  id: light_slot2_state_label
+                  x: 16
+                  y: 98
+                  text: "--"
+                  text_font: ui_font_18
+                  text_color: 0x858B94
+
+        - button:
+            id: light_slot3_card
+            x: 20
+            y: 222
+            width: 210
+            height: 135
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(wall_panel_controller).activate_light_slot(3);
+            widgets:
+              - image:
+                  id: light_slot3_icon
+                  src: icon_lightbulb
+                  x: 16
+                  y: 16
+              - label:
+                  id: light_slot3_name_label
+                  x: 16
+                  y: 65
+                  text: "Light 3"
+                  text_font: ui_font_22
+                  text_color: 0xFFFFFF
+              - label:
+                  id: light_slot3_state_label
+                  x: 16
+                  y: 98
+                  text: "--"
+                  text_font: ui_font_18
+                  text_color: 0x858B94
+
+        - button:
+            id: light_slot4_card
+            x: 250
+            y: 222
+            width: 210
+            height: 135
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(wall_panel_controller).activate_light_slot(4);
+            widgets:
+              - image:
+                  id: light_slot4_icon
+                  src: icon_lightbulb
+                  x: 16
+                  y: 16
+              - label:
+                  id: light_slot4_name_label
+                  x: 16
+                  y: 65
+                  text: "Sluk alt"
+                  text_font: ui_font_22
+                  text_color: 0xFFFFFF
+              - label:
+                  id: light_slot4_state_label
+                  x: 16
+                  y: 98
+                  text: "Alle lys"
+                  text_font: ui_font_18
+                  text_color: 0x858B94
+
+# Keep the LVGL cards synchronized with the C++ runtime state. This is kept
+# deliberately small for now; later the component can publish UI-change events
+# so the display does not need periodic polling.
+interval:
+  - interval: 250ms
+    then:
       - lambda: |-
-          id(wall_panel_controller).set_ignore_all_off(4, false);
+          auto update_card = [](lv_obj_t *card, lv_obj_t *name_label, lv_obj_t *state_label,
+                                const esphome::wall_panel::LightSlotState &slot) {
+            const bool all_off = slot.function == "Sluk alt";
+            const bool hidden = slot.function == "Skjult" || (slot.function == "Auto" && !slot.configured);
+
+            if (hidden) {
+              lv_obj_add_flag(card, LV_OBJ_FLAG_HIDDEN);
+              return;
+            }
+            lv_obj_clear_flag(card, LV_OBJ_FLAG_HIDDEN);
+
+            lv_label_set_text(name_label, slot.name.empty() ? (all_off ? "Sluk alt" : "Lys") : slot.name.c_str());
+
+            if (all_off) {
+              lv_obj_set_style_bg_color(card, lv_color_hex(0x181B20), LV_PART_MAIN);
+              lv_label_set_text(state_label, "Alle lys");
+              lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
+              return;
+            }
+
+            if (!slot.available) {
+              lv_obj_set_style_bg_color(card, lv_color_hex(0x181B20), LV_PART_MAIN);
+              lv_label_set_text(state_label, "Ikke tilgængelig");
+              lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
+              return;
+            }
+
+            if (slot.is_on) {
+              lv_obj_set_style_bg_color(card, lv_color_hex(0x343A44), LV_PART_MAIN);
+              if (slot.has_brightness) {
+                char text[16];
+                snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
+                lv_label_set_text(state_label, text);
+              } else {
+                lv_label_set_text(state_label, "Tændt");
+              }
+              lv_obj_set_style_text_color(state_label, lv_color_hex(0xFFB300), LV_PART_MAIN);
+            } else {
+              lv_obj_set_style_bg_color(card, lv_color_hex(0x181B20), LV_PART_MAIN);
+              lv_label_set_text(state_label, "Slukket");
+              lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
+            }
+          };
+
+          update_card(id(light_slot1_card), id(light_slot1_name_label), id(light_slot1_state_label),
+                      id(wall_panel_controller).get_light_slot(1));
+          update_card(id(light_slot2_card), id(light_slot2_name_label), id(light_slot2_state_label),
+                      id(wall_panel_controller).get_light_slot(2));
+          update_card(id(light_slot3_card), id(light_slot3_name_label), id(light_slot3_state_label),
+                      id(wall_panel_controller).get_light_slot(3));
+          update_card(id(light_slot4_card), id(light_slot4_name_label), id(light_slot4_state_label),
+                      id(wall_panel_controller).get_light_slot(4));
