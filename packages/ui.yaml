@@ -1,5 +1,25 @@
 # Shared UI resources
 
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - lambda: |-
+            id(wall_panel_language).publish_state(id(wall_panel_controller).get_language_option());
+
+select:
+  - platform: template
+    id: wall_panel_language
+    name: "Language"
+    entity_category: config
+    optimistic: true
+    restore_value: false
+    initial_option: "English"
+    options: ["English", "Danish"]
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_language(x);
+
 font:
   - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
     id: ui_font_18
@@ -86,31 +106,72 @@ image:
 
 # Home Assistant does not send an action response when ESPHome service calls are
 # blocked by the device option. The wall_panel component detects that timeout and
-# raises this modal so the user knows exactly which permission needs enabling.
+# raises this overlay so the user knows exactly which permission needs enabling.
 lvgl:
   id: wall_panel_lvgl
   on_boot:
-    - lvgl.widget.hide: ha_action_permission_message
-  msgboxes:
-    - id: ha_action_permission_message
-      title: "Home Assistant"
-      body:
-        text: |-
-          Panelet kan ikke udføre handlinger i Home Assistant.
+    - lvgl.widget.hide: ha_action_permission_overlay
+  top_layer:
+    widgets:
+      - obj:
+          id: ha_action_permission_overlay
+          x: 20
+          y: 80
+          width: 440
+          height: 300
+          bg_color: 0x181B20
+          bg_opa: 100%
+          radius: 20
+          border_width: 1
+          border_color: 0x343A44
+          clickable: true
+          widgets:
+            - label:
+                x: 24
+                y: 22
+                text: "Home Assistant"
+                text_font: ui_font_28
+                text_color: 0xFFFFFF
 
-          Aktivér "Allow device to perform Home Assistant actions" i ESPHome-enhedens indstillinger.
-      buttons:
-        - id: ha_action_permission_ok
-          text: "OK"
-          on_click:
-            - lambda: id(wall_panel_controller).dismiss_action_permission_warning();
-            - lvgl.widget.hide: ha_action_permission_message
+            - label:
+                id: ha_action_permission_body
+                x: 24
+                y: 78
+                width: 392
+                text: !lambda |-
+                  return id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::ACTION_PERMISSION_MESSAGE);
+                text_font: ui_font_18
+                text_color: 0xFFFFFF
+                long_mode: wrap
+
+            - button:
+                x: 300
+                y: 228
+                width: 116
+                height: 52
+                bg_color: 0x343A44
+                radius: 14
+                border_width: 0
+                on_click:
+                  - lambda: id(wall_panel_controller).dismiss_action_permission_warning();
+                  - lvgl.widget.hide: ha_action_permission_overlay
+                widgets:
+                  - label:
+                      align: CENTER
+                      text: "OK"
+                      text_font: ui_font_22
+                      text_color: 0xFFFFFF
 
 interval:
   - interval: 500ms
     then:
+      - lambda: |-
+          lv_label_set_text(
+            id(ha_action_permission_body),
+            id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::ACTION_PERMISSION_MESSAGE)
+          );
       - if:
           condition:
             lambda: return id(wall_panel_controller).has_action_permission_warning();
           then:
-            - lvgl.widget.show: ha_action_permission_message
+            - lvgl.widget.show: ha_action_permission_overlay
