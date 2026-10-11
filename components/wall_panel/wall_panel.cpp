@@ -14,23 +14,99 @@ static const char *const TAG = "wall_panel";
 void WallPanel::setup() {
   ESP_LOGCONFIG(TAG, "Setting up Wall Panel component...");
 
-  this->light_entity_pref_ = global_preferences->make_preference<LightEntityPreferences>(LIGHT_ENTITY_PREF_KEY, true);
-  this->light_entity_pref_ready_ = true;
+  this->set_light_defaults_();
+  this->light_slot_pref_ = global_preferences->make_preference<LightSlotPreferences>(LIGHT_SLOT_PREF_KEY, true);
+  this->light_slot_pref_ready_ = true;
+  this->load_light_configuration_();
 
-  LightEntityPreferences prefs{};
-  if (this->light_entity_pref_.load(&prefs) && prefs.version == 1) {
+  for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
+    if (this->light_slots_[i].configured)
+      this->subscribe_light_slot_(i + 1);
+  }
+}
+
+void WallPanel::set_light_defaults_() {
+  for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
+    auto &slot = this->light_slots_[i];
+    slot.entity_id.clear();
+    slot.name = "Light " + std::to_string(i + 1);
+    slot.function = "Auto";
+    slot.configured = false;
+    slot.available = false;
+    slot.is_on = false;
+    slot.has_brightness = false;
+    slot.brightness_pct = 0;
+    slot.ignore_all_off = false;
+  }
+
+  this->light_slots_[3].name = "Sluk alt";
+  this->light_slots_[3].function = "Sluk alt";
+}
+
+void WallPanel::load_light_configuration_() {
+  LightSlotPreferences prefs{};
+  if (this->light_slot_pref_.load(&prefs) && prefs.version == 2) {
     for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
       prefs.entity_ids[i][64] = '\0';
+      prefs.names[i][32] = '\0';
+      prefs.functions[i][15] = '\0';
+
       auto &slot = this->light_slots_[i];
       slot.entity_id = prefs.entity_ids[i];
+      slot.name = prefs.names[i];
+      slot.function = prefs.functions[i];
+      slot.ignore_all_off = prefs.ignore_all_off[i] != 0;
       slot.configured = !slot.entity_id.empty();
-      if (slot.configured)
-        this->subscribe_light_slot_(i + 1);
+
+      if (slot.name.empty())
+        slot.name = (i == 3) ? "Sluk alt" : "Light " + std::to_string(i + 1);
+      if (slot.function != "Auto" && slot.function != "Sluk alt" && slot.function != "Skjult")
+        slot.function = (i == 3) ? "Sluk alt" : "Auto";
     }
-    ESP_LOGI(TAG, "Loaded persisted light entity configuration");
-  } else {
-    ESP_LOGI(TAG, "No persisted light entity configuration found");
+    ESP_LOGI(TAG, "Loaded persisted light slot configuration");
+    return;
   }
+
+  // Migrate the v1 storage used by earlier firmware. That format only stored
+  // entity IDs, so the remaining fields keep their defaults on first migration.
+  auto legacy_pref = global_preferences->make_preference<LightEntityPreferencesV1>(LEGACY_LIGHT_ENTITY_PREF_KEY, true);
+  LightEntityPreferencesV1 legacy{};
+  if (legacy_pref.load(&legacy) && legacy.version == 1) {
+    for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
+      legacy.entity_ids[i][64] = '\0';
+      auto &slot = this->light_slots_[i];
+      slot.entity_id = legacy.entity_ids[i];
+      slot.configured = !slot.entity_id.empty();
+    }
+    ESP_LOGI(TAG, "Migrated legacy light entity configuration to full slot storage");
+    this->save_light_configuration_();
+    return;
+  }
+
+  ESP_LOGI(TAG, "No persisted light slot configuration found; using defaults");
+  this->save_light_configuration_();
+}
+
+void WallPanel::save_light_configuration_() {
+  if (!this->light_slot_pref_ready_)
+    return;
+
+  LightSlotPreferences prefs{};
+  prefs.version = 2;
+
+  for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
+    const auto &slot = this->light_slots_[i];
+    std::strncpy(prefs.entity_ids[i], slot.entity_id.c_str(), 64);
+    prefs.entity_ids[i][64] = '\0';
+    std::strncpy(prefs.names[i], slot.name.c_str(), 32);
+    prefs.names[i][32] = '\0';
+    std::strncpy(prefs.functions[i], slot.function.c_str(), 15);
+    prefs.functions[i][15] = '\0';
+    prefs.ignore_all_off[i] = slot.ignore_all_off ? 1 : 0;
+  }
+
+  if (!this->light_slot_pref_.save(&prefs))
+    ESP_LOGW(TAG, "Failed to persist light slot configuration");
 }
 
 void WallPanel::dump_config() {
@@ -39,9 +115,10 @@ void WallPanel::dump_config() {
 
   for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
     const auto &slot = this->light_slots_[i];
-    ESP_LOGCONFIG(TAG, "  Slot %u: %s (%s)", i + 1,
+    ESP_LOGCONFIG(TAG, "  Slot %u: %s | %s | %s | ignore all off=%s", i + 1,
+                  slot.name.c_str(),
                   slot.entity_id.empty() ? "<not configured>" : slot.entity_id.c_str(),
-                  slot.function.c_str());
+                  slot.function.c_str(), YESNO(slot.ignore_all_off));
   }
 }
 
@@ -57,38 +134,41 @@ void WallPanel::set_light_name(uint8_t slot, const std::string &name) {
   if (!this->valid_slot_(slot))
     return;
 
-  this->light_slots_[slot - 1].name = name;
+  auto &state = this->light_slots_[slot - 1];
+  if (state.name == name)
+    return;
+
+  state.name = name;
+  this->save_light_configuration_();
 }
 
 void WallPanel::set_light_function(uint8_t slot, const std::string &function) {
   if (!this->valid_slot_(slot))
     return;
 
-  this->light_slots_[slot - 1].function = function;
+  if (function != "Auto" && function != "Sluk alt" && function != "Skjult") {
+    ESP_LOGW(TAG, "Ignoring invalid function for light slot %u: %s", slot, function.c_str());
+    return;
+  }
+
+  auto &state = this->light_slots_[slot - 1];
+  if (state.function == function)
+    return;
+
+  state.function = function;
+  this->save_light_configuration_();
 }
 
 void WallPanel::set_ignore_all_off(uint8_t slot, bool ignore) {
   if (!this->valid_slot_(slot))
     return;
 
-  this->light_slots_[slot - 1].ignore_all_off = ignore;
-}
-
-void WallPanel::save_light_entities_() {
-  if (!this->light_entity_pref_ready_)
+  auto &state = this->light_slots_[slot - 1];
+  if (state.ignore_all_off == ignore)
     return;
 
-  LightEntityPreferences prefs{};
-  prefs.version = 1;
-
-  for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
-    const auto &entity_id = this->light_slots_[i].entity_id;
-    std::strncpy(prefs.entity_ids[i], entity_id.c_str(), 64);
-    prefs.entity_ids[i][64] = '\0';
-  }
-
-  if (!this->light_entity_pref_.save(&prefs))
-    ESP_LOGW(TAG, "Failed to persist light entity configuration");
+  state.ignore_all_off = ignore;
+  this->save_light_configuration_();
 }
 
 void WallPanel::set_light_entity(uint8_t slot, const std::string &entity_id) {
@@ -107,7 +187,7 @@ void WallPanel::set_light_entity(uint8_t slot, const std::string &entity_id) {
   state.has_brightness = false;
   state.brightness_pct = 0;
 
-  this->save_light_entities_();
+  this->save_light_configuration_();
 
   if (entity_id.empty()) {
     ESP_LOGI(TAG, "Light slot %u cleared and persisted", slot);
