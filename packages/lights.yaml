@@ -6,20 +6,39 @@
 #   - Function
 #   - Ignore All Off
 #
-# Entity changes are passed directly to the wall_panel component. The component
-# subscribes to the new Home Assistant entity at runtime, so no reboot is needed.
-# Light entity IDs are persisted by the wall_panel component so an intentionally
-# cleared entity remains cleared across reboots.
+# The wall_panel component is the source of truth for the full slot configuration.
+# All four settings are persisted independently of their Home Assistant display names,
+# so renaming/reordering config entities does not reset the panel configuration.
 
 esphome:
   on_boot:
     - priority: -100
       then:
         - lambda: |-
-            id(light_slot1_entity).publish_state(id(wall_panel_controller).get_light_slot(1).entity_id);
-            id(light_slot2_entity).publish_state(id(wall_panel_controller).get_light_slot(2).entity_id);
-            id(light_slot3_entity).publish_state(id(wall_panel_controller).get_light_slot(3).entity_id);
-            id(light_slot4_entity).publish_state(id(wall_panel_controller).get_light_slot(4).entity_id);
+            const auto &slot1 = id(wall_panel_controller).get_light_slot(1);
+            const auto &slot2 = id(wall_panel_controller).get_light_slot(2);
+            const auto &slot3 = id(wall_panel_controller).get_light_slot(3);
+            const auto &slot4 = id(wall_panel_controller).get_light_slot(4);
+
+            id(light_slot1_name).publish_state(slot1.name);
+            id(light_slot1_entity).publish_state(slot1.entity_id);
+            id(light_slot1_function).publish_state(slot1.function);
+            id(light_slot1_ignore_all_off).publish_state(slot1.ignore_all_off);
+
+            id(light_slot2_name).publish_state(slot2.name);
+            id(light_slot2_entity).publish_state(slot2.entity_id);
+            id(light_slot2_function).publish_state(slot2.function);
+            id(light_slot2_ignore_all_off).publish_state(slot2.ignore_all_off);
+
+            id(light_slot3_name).publish_state(slot3.name);
+            id(light_slot3_entity).publish_state(slot3.entity_id);
+            id(light_slot3_function).publish_state(slot3.function);
+            id(light_slot3_ignore_all_off).publish_state(slot3.ignore_all_off);
+
+            id(light_slot4_name).publish_state(slot4.name);
+            id(light_slot4_entity).publish_state(slot4.entity_id);
+            id(light_slot4_function).publish_state(slot4.function);
+            id(light_slot4_ignore_all_off).publish_state(slot4.ignore_all_off);
 
 globals:
   - id: active_light_slot
@@ -51,15 +70,14 @@ text:
     name: "Lys · Slot 1 · 1 Navn"
     entity_category: config
     optimistic: true
-    restore_value: true
+    restore_value: false
     initial_value: "Light 1"
     min_length: 0
     max_length: 32
     mode: text
-    on_value:
-      then:
-        - lambda: |-
-            id(wall_panel_controller).set_light_name(1, x);
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_light_name(1, x);
 
   - platform: template
     id: light_slot1_entity
@@ -71,10 +89,9 @@ text:
     min_length: 0
     max_length: 64
     mode: text
-    on_value:
-      then:
-        - lambda: |-
-            id(wall_panel_controller).set_light_entity(1, x);
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_light_entity(1, x);
 
   # ---------------------------------------------------------
   # Slot 2
@@ -84,15 +101,14 @@ text:
     name: "Lys · Slot 2 · 1 Navn"
     entity_category: config
     optimistic: true
-    restore_value: true
+    restore_value: false
     initial_value: "Light 2"
     min_length: 0
     max_length: 32
     mode: text
-    on_value:
-      then:
-        - lambda: |-
-            id(wall_panel_controller).set_light_name(2, x);
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_light_name(2, x);
 
   - platform: template
     id: light_slot2_entity
@@ -104,10 +120,9 @@ text:
     min_length: 0
     max_length: 64
     mode: text
-    on_value:
-      then:
-        - lambda: |-
-            id(wall_panel_controller).set_light_entity(2, x);
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_light_entity(2, x);
 
   # ---------------------------------------------------------
   # Slot 3
@@ -117,15 +132,14 @@ text:
     name: "Lys · Slot 3 · 1 Navn"
     entity_category: config
     optimistic: true
-    restore_value: true
+    restore_value: false
     initial_value: "Light 3"
     min_length: 0
     max_length: 32
     mode: text
-    on_value:
-      then:
-        - lambda: |-
-            id(wall_panel_controller).set_light_name(3, x);
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_light_name(3, x);
 
   - platform: template
     id: light_slot3_entity
@@ -137,10 +151,9 @@ text:
     min_length: 0
     max_length: 64
     mode: text
-    on_value:
-      then:
-        - lambda: |-
-            id(wall_panel_controller).set_light_entity(3, x);
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_light_entity(3, x);
 
   # ---------------------------------------------------------
   # Slot 4
@@ -150,15 +163,14 @@ text:
     name: "Lys · Slot 4 · 1 Navn"
     entity_category: config
     optimistic: true
-    restore_value: true
+    restore_value: false
     initial_value: "Sluk alt"
     min_length: 0
     max_length: 32
     mode: text
-    on_value:
-      then:
-        - lambda: |-
-            id(wall_panel_controller).set_light_name(4, x);
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_light_name(4, x);
 
   - platform: template
     id: light_slot4_entity
@@ -170,10 +182,9 @@ text:
     min_length: 0
     max_length: 64
     mode: text
-    on_value:
-      then:
-        - lambda: |-
-            id(wall_panel_controller).set_light_entity(4, x);
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_light_entity(4, x);
 
 select:
   - platform: template
@@ -181,52 +192,48 @@ select:
     name: "Lys · Slot 1 · 3 Funktion"
     entity_category: config
     optimistic: true
-    restore_value: true
+    restore_value: false
     initial_option: "Auto"
     options: ["Auto", "Sluk alt", "Skjult"]
-    on_value:
-      then:
-        - lambda: |-
-            id(wall_panel_controller).set_light_function(1, x);
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_light_function(1, x);
 
   - platform: template
     id: light_slot2_function
     name: "Lys · Slot 2 · 3 Funktion"
     entity_category: config
     optimistic: true
-    restore_value: true
+    restore_value: false
     initial_option: "Auto"
     options: ["Auto", "Sluk alt", "Skjult"]
-    on_value:
-      then:
-        - lambda: |-
-            id(wall_panel_controller).set_light_function(2, x);
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_light_function(2, x);
 
   - platform: template
     id: light_slot3_function
     name: "Lys · Slot 3 · 3 Funktion"
     entity_category: config
     optimistic: true
-    restore_value: true
+    restore_value: false
     initial_option: "Auto"
     options: ["Auto", "Sluk alt", "Skjult"]
-    on_value:
-      then:
-        - lambda: |-
-            id(wall_panel_controller).set_light_function(3, x);
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_light_function(3, x);
 
   - platform: template
     id: light_slot4_function
     name: "Lys · Slot 4 · 3 Funktion"
     entity_category: config
     optimistic: true
-    restore_value: true
+    restore_value: false
     initial_option: "Sluk alt"
     options: ["Auto", "Sluk alt", "Skjult"]
-    on_value:
-      then:
-        - lambda: |-
-            id(wall_panel_controller).set_light_function(4, x);
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_light_function(4, x);
 
 switch:
   - platform: template
@@ -234,10 +241,9 @@ switch:
     name: "Lys · Slot 1 · 4 Ignorer Sluk alt"
     entity_category: config
     optimistic: true
-    restore_mode: RESTORE_DEFAULT_OFF
-    on_turn_on:
+    turn_on_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(1, true);
-    on_turn_off:
+    turn_off_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(1, false);
 
   - platform: template
@@ -245,10 +251,9 @@ switch:
     name: "Lys · Slot 2 · 4 Ignorer Sluk alt"
     entity_category: config
     optimistic: true
-    restore_mode: RESTORE_DEFAULT_OFF
-    on_turn_on:
+    turn_on_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(2, true);
-    on_turn_off:
+    turn_off_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(2, false);
 
   - platform: template
@@ -256,10 +261,9 @@ switch:
     name: "Lys · Slot 3 · 4 Ignorer Sluk alt"
     entity_category: config
     optimistic: true
-    restore_mode: RESTORE_DEFAULT_OFF
-    on_turn_on:
+    turn_on_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(3, true);
-    on_turn_off:
+    turn_off_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(3, false);
 
   - platform: template
@@ -267,10 +271,9 @@ switch:
     name: "Lys · Slot 4 · 4 Ignorer Sluk alt"
     entity_category: config
     optimistic: true
-    restore_mode: RESTORE_DEFAULT_OFF
-    on_turn_on:
+    turn_on_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(4, true);
-    on_turn_off:
+    turn_off_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(4, false);
 
 # -----------------------------------------------------------
