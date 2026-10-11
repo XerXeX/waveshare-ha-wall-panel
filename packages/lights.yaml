@@ -48,7 +48,7 @@ text:
   # ---------------------------------------------------------
   - platform: template
     id: light_slot1_name
-    name: "Lys · Slot 1 · Navn"
+    name: "Lys · Slot 1 · 1 Navn"
     entity_category: config
     optimistic: true
     restore_value: true
@@ -63,7 +63,7 @@ text:
 
   - platform: template
     id: light_slot1_entity
-    name: "Lys · Slot 1 · Entity"
+    name: "Lys · Slot 1 · 2 Entity"
     entity_category: config
     optimistic: true
     restore_value: false
@@ -81,7 +81,7 @@ text:
   # ---------------------------------------------------------
   - platform: template
     id: light_slot2_name
-    name: "Lys · Slot 2 · Navn"
+    name: "Lys · Slot 2 · 1 Navn"
     entity_category: config
     optimistic: true
     restore_value: true
@@ -96,7 +96,7 @@ text:
 
   - platform: template
     id: light_slot2_entity
-    name: "Lys · Slot 2 · Entity"
+    name: "Lys · Slot 2 · 2 Entity"
     entity_category: config
     optimistic: true
     restore_value: false
@@ -114,7 +114,7 @@ text:
   # ---------------------------------------------------------
   - platform: template
     id: light_slot3_name
-    name: "Lys · Slot 3 · Navn"
+    name: "Lys · Slot 3 · 1 Navn"
     entity_category: config
     optimistic: true
     restore_value: true
@@ -129,7 +129,7 @@ text:
 
   - platform: template
     id: light_slot3_entity
-    name: "Lys · Slot 3 · Entity"
+    name: "Lys · Slot 3 · 2 Entity"
     entity_category: config
     optimistic: true
     restore_value: false
@@ -147,7 +147,7 @@ text:
   # ---------------------------------------------------------
   - platform: template
     id: light_slot4_name
-    name: "Lys · Slot 4 · Navn"
+    name: "Lys · Slot 4 · 1 Navn"
     entity_category: config
     optimistic: true
     restore_value: true
@@ -162,7 +162,7 @@ text:
 
   - platform: template
     id: light_slot4_entity
-    name: "Lys · Slot 4 · Entity"
+    name: "Lys · Slot 4 · 2 Entity"
     entity_category: config
     optimistic: true
     restore_value: false
@@ -178,7 +178,7 @@ text:
 select:
   - platform: template
     id: light_slot1_function
-    name: "Lys · Slot 1 · Funktion"
+    name: "Lys · Slot 1 · 3 Funktion"
     entity_category: config
     optimistic: true
     restore_value: true
@@ -191,7 +191,7 @@ select:
 
   - platform: template
     id: light_slot2_function
-    name: "Lys · Slot 2 · Funktion"
+    name: "Lys · Slot 2 · 3 Funktion"
     entity_category: config
     optimistic: true
     restore_value: true
@@ -204,7 +204,7 @@ select:
 
   - platform: template
     id: light_slot3_function
-    name: "Lys · Slot 3 · Funktion"
+    name: "Lys · Slot 3 · 3 Funktion"
     entity_category: config
     optimistic: true
     restore_value: true
@@ -217,7 +217,7 @@ select:
 
   - platform: template
     id: light_slot4_function
-    name: "Lys · Slot 4 · Funktion"
+    name: "Lys · Slot 4 · 3 Funktion"
     entity_category: config
     optimistic: true
     restore_value: true
@@ -231,7 +231,7 @@ select:
 switch:
   - platform: template
     id: light_slot1_ignore_all_off
-    name: "Lys · Slot 1 · Ignorer Sluk alt"
+    name: "Lys · Slot 1 · 4 Ignorer Sluk alt"
     entity_category: config
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
@@ -242,7 +242,7 @@ switch:
 
   - platform: template
     id: light_slot2_ignore_all_off
-    name: "Lys · Slot 2 · Ignorer Sluk alt"
+    name: "Lys · Slot 2 · 4 Ignorer Sluk alt"
     entity_category: config
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
@@ -253,7 +253,7 @@ switch:
 
   - platform: template
     id: light_slot3_ignore_all_off
-    name: "Lys · Slot 3 · Ignorer Sluk alt"
+    name: "Lys · Slot 3 · 4 Ignorer Sluk alt"
     entity_category: config
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
@@ -264,7 +264,7 @@ switch:
 
   - platform: template
     id: light_slot4_ignore_all_off
-    name: "Lys · Slot 4 · Ignorer Sluk alt"
+    name: "Lys · Slot 4 · 4 Ignorer Sluk alt"
     entity_category: config
     optimistic: true
     restore_mode: RESTORE_DEFAULT_OFF
