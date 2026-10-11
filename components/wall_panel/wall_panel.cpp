@@ -84,6 +84,8 @@ void WallPanel::activate_light_slot(uint8_t slot) {
     return;
 
   const auto &state = this->light_slots_[slot - 1];
+  ESP_LOGD(TAG, "Light slot %u pressed: %s (%s)", slot,
+           state.entity_id.empty() ? "<no entity>" : state.entity_id.c_str(), state.function.c_str());
 
   if (state.function == "Sluk alt") {
     this->all_lights_off();
@@ -109,6 +111,7 @@ void WallPanel::set_light_brightness(uint8_t slot, int brightness_pct) {
   if (brightness_pct > 100)
     brightness_pct = 100;
 
+  ESP_LOGD(TAG, "Light slot %u brightness -> %d%%", slot, brightness_pct);
   this->call_homeassistant_service(
       "light.turn_on",
       {{"entity_id", state.entity_id},
@@ -124,6 +127,7 @@ void WallPanel::turn_entity_off_(const std::string &entity_id) {
 }
 
 void WallPanel::all_lights_off() {
+  ESP_LOGD(TAG, "All lights off pressed");
   for (const auto &state : this->light_slots_) {
     if (state.function != "Auto" || !state.configured || state.entity_id.empty() || state.ignore_all_off)
       continue;
