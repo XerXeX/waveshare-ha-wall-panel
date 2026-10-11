@@ -34,6 +34,10 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void set_light_function(uint8_t slot, const std::string &function);
   void set_ignore_all_off(uint8_t slot, bool ignore);
 
+  void activate_light_slot(uint8_t slot);
+  void set_light_brightness(uint8_t slot, int brightness_pct);
+  void all_lights_off();
+
   const LightSlotState &get_light_slot(uint8_t slot) const;
 
  protected:
@@ -43,6 +47,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
 
   bool valid_slot_(uint8_t slot) const;
   void subscribe_light_slot_(uint8_t slot);
+  void turn_entity_off_(const std::string &entity_id);
 
   void on_entity_state_(const std::string &entity_id, StringRef value);
   void on_brightness_state_(const std::string &entity_id, StringRef value);
