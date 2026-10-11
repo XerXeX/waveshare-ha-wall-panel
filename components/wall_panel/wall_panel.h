@@ -5,6 +5,7 @@
 #include "esphome/components/api/custom_api_device.h"
 
 #include <array>
+#include <map>
 #include <string>
 
 namespace esphome {
@@ -55,6 +56,9 @@ class WallPanel : public Component, public api::CustomAPIDevice {
 
   const LightSlotState &get_light_slot(uint8_t slot) const;
 
+  bool has_action_permission_warning() const { return this->action_permission_warning_; }
+  void dismiss_action_permission_warning();
+
  protected:
   static constexpr uint8_t LIGHT_SLOT_COUNT = 4;
   static constexpr uint32_t LEGACY_LIGHT_ENTITY_PREF_KEY = 0x57504C45U;
@@ -64,12 +68,21 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   ESPPreferenceObject light_slot_pref_;
   bool light_slot_pref_ready_{false};
 
+  bool action_permission_confirmed_{false};
+  bool action_permission_probe_pending_{false};
+  bool action_permission_warning_{false};
+  uint32_t action_permission_probe_call_id_{0};
+  uint32_t next_action_call_id_{1};
+
   bool valid_slot_(uint8_t slot) const;
   void set_light_defaults_();
   void load_light_configuration_();
   void save_light_configuration_();
   void subscribe_light_slot_(uint8_t slot);
   void turn_entity_off_(const std::string &entity_id);
+
+  void call_homeassistant_service_checked_(const std::string &service_name,
+                                           const std::map<std::string, std::string> &data);
 
   void on_entity_state_(const std::string &entity_id, StringRef value);
   void on_brightness_state_(const std::string &entity_id, StringRef value);
