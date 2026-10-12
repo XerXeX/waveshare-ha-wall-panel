@@ -1,8 +1,8 @@
 # Configurable scenes/scripts page
 #
-# Each slot can either activate a scene/script entity or execute a compact list
-# of Home Assistant actions stored directly on the panel. Entity mode mirrors
-# the Home Assistant entity icon when it is part of the built-in icon set.
+# Each slot exposes Name, Entity and Function settings in Home Assistant.
+# scene.* and script.* entities are supported. Entity mode mirrors the Home
+# Assistant entity icon when it is part of the built-in icon set.
 
 text:
   - platform: template
@@ -28,17 +28,6 @@ text:
     mode: text
 
   - platform: template
-    id: scene_slot1_local_actions
-    name: "Scenes · Slot 1 · 4 Local Actions"
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: ""
-    min_length: 0
-    max_length: 255
-    mode: text
-
-  - platform: template
     id: scene_slot2_name
     name: "Scenes · Slot 2 · 1 Name"
     entity_category: config
@@ -58,17 +47,6 @@ text:
     initial_value: ""
     min_length: 0
     max_length: 64
-    mode: text
-
-  - platform: template
-    id: scene_slot2_local_actions
-    name: "Scenes · Slot 2 · 4 Local Actions"
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: ""
-    min_length: 0
-    max_length: 255
     mode: text
 
   - platform: template
@@ -94,17 +72,6 @@ text:
     mode: text
 
   - platform: template
-    id: scene_slot3_local_actions
-    name: "Scenes · Slot 3 · 4 Local Actions"
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: ""
-    min_length: 0
-    max_length: 255
-    mode: text
-
-  - platform: template
     id: scene_slot4_name
     name: "Scenes · Slot 4 · 1 Name"
     entity_category: config
@@ -126,17 +93,6 @@ text:
     max_length: 64
     mode: text
 
-  - platform: template
-    id: scene_slot4_local_actions
-    name: "Scenes · Slot 4 · 4 Local Actions"
-    entity_category: config
-    optimistic: true
-    restore_value: true
-    initial_value: ""
-    min_length: 0
-    max_length: 255
-    mode: text
-
 select:
   - platform: template
     id: scene_slot1_function
@@ -145,7 +101,7 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Auto"
-    options: ["Auto", "Local action", "Hidden"]
+    options: ["Auto", "Hidden"]
 
   - platform: template
     id: scene_slot2_function
@@ -154,7 +110,7 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Auto"
-    options: ["Auto", "Local action", "Hidden"]
+    options: ["Auto", "Hidden"]
 
   - platform: template
     id: scene_slot3_function
@@ -163,7 +119,7 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Auto"
-    options: ["Auto", "Local action", "Hidden"]
+    options: ["Auto", "Hidden"]
 
   - platform: template
     id: scene_slot4_function
@@ -172,10 +128,11 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Auto"
-    options: ["Auto", "Local action", "Hidden"]
+    options: ["Auto", "Hidden"]
 
-# MDI images are compiled into the firmware, so dynamically inherited icons are
-# resolved through this curated set. Unknown icons fall back to the Scenes icon.
+# ESPHome compiles image assets into the firmware. The inherited Home Assistant
+# icon name is therefore resolved through this built-in set, with the Scenes
+# icon used as fallback for names that are not present here.
 image:
   - platform: file
     file: mdi:home
@@ -216,6 +173,12 @@ image:
   - platform: file
     file: mdi:weather-sunny
     id: scene_icon_sunny
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:moon-waning-crescent
+    id: scene_icon_moon_waning_crescent
     resize: 42x42
     type: RGB565
     transparency: alpha_channel
@@ -348,18 +311,12 @@ lvgl:
             hidden: true
             on_click:
               - script.execute: ui_click
-              - if:
-                  condition:
-                    lambda: return id(scene_slot1_function).current_option() == "Local action";
-                  then:
-                    - lambda: id(wall_panel_controller).execute_local_actions(id(scene_slot1_local_actions).state);
-                  else:
-                    - homeassistant.action:
-                        action: homeassistant.turn_on
-                        data_template:
-                          entity_id: "{{ target_entity }}"
-                        variables:
-                          target_entity: !lambda return id(scene_slot1_entity).state;
+              - homeassistant.action:
+                  action: homeassistant.turn_on
+                  data_template:
+                    entity_id: "{{ target_entity }}"
+                  variables:
+                    target_entity: !lambda return id(scene_slot1_entity).state;
             widgets:
               - image:
                   id: scene_slot1_icon
@@ -390,18 +347,12 @@ lvgl:
             hidden: true
             on_click:
               - script.execute: ui_click
-              - if:
-                  condition:
-                    lambda: return id(scene_slot2_function).current_option() == "Local action";
-                  then:
-                    - lambda: id(wall_panel_controller).execute_local_actions(id(scene_slot2_local_actions).state);
-                  else:
-                    - homeassistant.action:
-                        action: homeassistant.turn_on
-                        data_template:
-                          entity_id: "{{ target_entity }}"
-                        variables:
-                          target_entity: !lambda return id(scene_slot2_entity).state;
+              - homeassistant.action:
+                  action: homeassistant.turn_on
+                  data_template:
+                    entity_id: "{{ target_entity }}"
+                  variables:
+                    target_entity: !lambda return id(scene_slot2_entity).state;
             widgets:
               - image:
                   id: scene_slot2_icon
@@ -432,18 +383,12 @@ lvgl:
             hidden: true
             on_click:
               - script.execute: ui_click
-              - if:
-                  condition:
-                    lambda: return id(scene_slot3_function).current_option() == "Local action";
-                  then:
-                    - lambda: id(wall_panel_controller).execute_local_actions(id(scene_slot3_local_actions).state);
-                  else:
-                    - homeassistant.action:
-                        action: homeassistant.turn_on
-                        data_template:
-                          entity_id: "{{ target_entity }}"
-                        variables:
-                          target_entity: !lambda return id(scene_slot3_entity).state;
+              - homeassistant.action:
+                  action: homeassistant.turn_on
+                  data_template:
+                    entity_id: "{{ target_entity }}"
+                  variables:
+                    target_entity: !lambda return id(scene_slot3_entity).state;
             widgets:
               - image:
                   id: scene_slot3_icon
@@ -474,18 +419,12 @@ lvgl:
             hidden: true
             on_click:
               - script.execute: ui_click
-              - if:
-                  condition:
-                    lambda: return id(scene_slot4_function).current_option() == "Local action";
-                  then:
-                    - lambda: id(wall_panel_controller).execute_local_actions(id(scene_slot4_local_actions).state);
-                  else:
-                    - homeassistant.action:
-                        action: homeassistant.turn_on
-                        data_template:
-                          entity_id: "{{ target_entity }}"
-                        variables:
-                          target_entity: !lambda return id(scene_slot4_entity).state;
+              - homeassistant.action:
+                  action: homeassistant.turn_on
+                  data_template:
+                    entity_id: "{{ target_entity }}"
+                  variables:
+                    target_entity: !lambda return id(scene_slot4_entity).state;
             widgets:
               - image:
                   id: scene_slot4_icon
@@ -539,6 +478,7 @@ interval:
             if (icon == "mdi:television") return id(scene_icon_television);
             if (icon == "mdi:weather-night") return id(scene_icon_night);
             if (icon == "mdi:weather-sunny") return id(scene_icon_sunny);
+            if (icon == "mdi:moon-waning-crescent") return id(scene_icon_moon_waning_crescent);
             if (icon == "mdi:bed") return id(scene_icon_bed);
             if (icon == "mdi:party-popper") return id(scene_icon_party);
             if (icon == "mdi:music") return id(scene_icon_music);
@@ -572,10 +512,6 @@ interval:
             id(scene_slot1_entity).state, id(scene_slot2_entity).state,
             id(scene_slot3_entity).state, id(scene_slot4_entity).state
           };
-          const std::string local_actions[4] = {
-            id(scene_slot1_local_actions).state, id(scene_slot2_local_actions).state,
-            id(scene_slot3_local_actions).state, id(scene_slot4_local_actions).state
-          };
           const std::string functions[4] = {
             id(scene_slot1_function).current_option(), id(scene_slot2_function).current_option(),
             id(scene_slot3_function).current_option(), id(scene_slot4_function).current_option()
@@ -600,9 +536,7 @@ interval:
           int visible_count = 0;
           for (int i = 0; i < 4; i++) {
             const bool supported_entity = entities[i].rfind("scene.", 0) == 0 || entities[i].rfind("script.", 0) == 0;
-            const bool entity_mode = functions[i] == "Auto" && supported_entity;
-            const bool local_mode = functions[i] == "Local action" && !local_actions[i].empty();
-            const bool visible = functions[i] != "Hidden" && (entity_mode || local_mode);
+            const bool visible = functions[i] != "Hidden" && supported_entity;
             set_hidden_if_changed(cards[i], !visible);
             if (visible)
               visible_indices[visible_count++] = i;
@@ -610,7 +544,7 @@ interval:
             const std::string fallback = "Scene " + std::to_string(i + 1);
             set_text_if_changed(labels[i], names[i].empty() ? fallback : names[i]);
 
-            const std::string inherited_icon = entity_mode ? id(wall_panel_controller).get_scene_icon(i + 1) : "";
+            const std::string inherited_icon = visible ? id(wall_panel_controller).get_scene_icon(i + 1) : "";
             if (last_icons[i] != inherited_icon) {
               last_icons[i] = inherited_icon;
               esphome::lvgl::lv_image_set_src(icons[i], icon_image(inherited_icon));
