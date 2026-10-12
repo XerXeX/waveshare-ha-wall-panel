@@ -144,11 +144,17 @@ text:
   - id: !extend scene_slot1_entity
     name: "Slot 1 · Entity"
     device_id: scenes_device
+  - id: !extend scene_slot1_local_actions
+    name: "Slot 1 · Local Actions"
+    device_id: scenes_device
   - id: !extend scene_slot2_name
     name: "Slot 2 · Name"
     device_id: scenes_device
   - id: !extend scene_slot2_entity
     name: "Slot 2 · Entity"
+    device_id: scenes_device
+  - id: !extend scene_slot2_local_actions
+    name: "Slot 2 · Local Actions"
     device_id: scenes_device
   - id: !extend scene_slot3_name
     name: "Slot 3 · Name"
@@ -156,11 +162,17 @@ text:
   - id: !extend scene_slot3_entity
     name: "Slot 3 · Entity"
     device_id: scenes_device
+  - id: !extend scene_slot3_local_actions
+    name: "Slot 3 · Local Actions"
+    device_id: scenes_device
   - id: !extend scene_slot4_name
     name: "Slot 4 · Name"
     device_id: scenes_device
   - id: !extend scene_slot4_entity
     name: "Slot 4 · Entity"
+    device_id: scenes_device
+  - id: !extend scene_slot4_local_actions
+    name: "Slot 4 · Local Actions"
     device_id: scenes_device
 
 switch:
