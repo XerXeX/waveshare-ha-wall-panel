@@ -1,0 +1,343 @@
+# Configurable clock screensaver
+
+# Home Assistant is the primary time source. If no timezone is specified,
+# ESPHome updates the timezone from Home Assistant when time synchronizes.
+time:
+  - platform: homeassistant
+    id: wall_panel_time
+
+select:
+  - platform: template
+    id: wall_panel_clock_style
+    name: "Clock Style"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Digital"
+    options: ["Digital", "Analog"]
+    set_action:
+      - script.execute: screensaver_update_visibility
+      - script.execute: screensaver_update_clock
+
+  - platform: template
+    id: wall_panel_time_format
+    name: "Time Format"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "24 hour"
+    options: ["24 hour", "12 hour"]
+    set_action:
+      - script.execute: screensaver_update_clock
+
+number:
+  - platform: template
+    id: wall_panel_screensaver_timeout
+    name: "Screensaver Timeout"
+    entity_category: config
+    unit_of_measurement: "s"
+    optimistic: true
+    restore_value: true
+    initial_value: 60
+    min_value: 15
+    max_value: 600
+    step: 15
+    mode: box
+
+  - platform: template
+    id: wall_panel_screensaver_brightness
+    name: "Screensaver Brightness"
+    entity_category: config
+    unit_of_measurement: "%"
+    optimistic: true
+    restore_value: true
+    initial_value: 30
+    min_value: 5
+    max_value: 100
+    step: 5
+    mode: slider
+    set_action:
+      - if:
+          condition:
+            lambda: return id(wall_panel_screensaver_active);
+          then:
+            - light.turn_on:
+                id: lcd_backlight
+                brightness: !lambda return x / 100.0f;
+                transition_length: 300ms
+
+globals:
+  - id: wall_panel_screensaver_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+font:
+  - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
+    id: screensaver_clock_font
+    size: 92
+    bpp: 4
+    glyphsets:
+      - GF_Latin_Core
+
+script:
+  - id: screensaver_update_visibility
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: return id(wall_panel_clock_style).state == "Analog";
+          then:
+            - lvgl.widget.hide: screensaver_digital
+            - lvgl.widget.show: screensaver_analog
+          else:
+            - lvgl.widget.show: screensaver_digital
+            - lvgl.widget.hide: screensaver_analog
+
+  - id: screensaver_update_clock
+    mode: restart
+    then:
+      - lambda: |-
+          auto now = id(wall_panel_time).now();
+
+          if (!now.is_valid()) {
+            lv_label_set_text(id(screensaver_digital_time), "--:--");
+            lv_label_set_text(id(screensaver_digital_date), "Waiting for time...");
+            lv_label_set_text(id(screensaver_analog_date), "Waiting for time...");
+            return;
+          }
+
+          char time_buffer[16];
+          if (id(wall_panel_time_format).state == "12 hour") {
+            int hour = now.hour % 12;
+            if (hour == 0)
+              hour = 12;
+            snprintf(time_buffer, sizeof(time_buffer), "%d:%02d %s", hour, now.minute,
+                     now.hour < 12 ? "AM" : "PM");
+          } else {
+            snprintf(time_buffer, sizeof(time_buffer), "%02d:%02d", now.hour, now.minute);
+          }
+          lv_label_set_text(id(screensaver_digital_time), time_buffer);
+
+          const bool danish = std::string(id(wall_panel_controller).get_language_option()) == "Danish";
+          static const char *const days_en[] = {
+              "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+          static const char *const months_en[] = {
+              "January", "February", "March", "April", "May", "June",
+              "July", "August", "September", "October", "November", "December"};
+          static const char *const days_da[] = {
+              "søndag", "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag"};
+          static const char *const months_da[] = {
+              "januar", "februar", "marts", "april", "maj", "juni",
+              "juli", "august", "september", "oktober", "november", "december"};
+
+          const int weekday = now.day_of_week >= 1 && now.day_of_week <= 7 ? now.day_of_week - 1 : 0;
+          const int month = now.month >= 1 && now.month <= 12 ? now.month - 1 : 0;
+          char date_buffer[64];
+          if (danish) {
+            snprintf(date_buffer, sizeof(date_buffer), "%s %d. %s %d",
+                     days_da[weekday], now.day_of_month, months_da[month], now.year);
+          } else {
+            snprintf(date_buffer, sizeof(date_buffer), "%s %d %s %d",
+                     days_en[weekday], now.day_of_month, months_en[month], now.year);
+          }
+          lv_label_set_text(id(screensaver_digital_date), date_buffer);
+          lv_label_set_text(id(screensaver_analog_date), date_buffer);
+
+      - lvgl.indicator.update:
+          id: screensaver_minute_hand
+          value: !lambda |-
+            auto now = id(wall_panel_time).now();
+            return now.is_valid() ? now.minute : 0;
+      - lvgl.indicator.update:
+          id: screensaver_hour_hand
+          value: !lambda |-
+            auto now = id(wall_panel_time).now();
+            return now.is_valid() ? (now.hour % 12) * 60 + now.minute : 0;
+      - lvgl.indicator.update:
+          id: screensaver_second_hand
+          value: !lambda |-
+            auto now = id(wall_panel_time).now();
+            return now.is_valid() ? now.second : 0;
+
+  - id: screensaver_show
+    mode: restart
+    then:
+      - lambda: id(wall_panel_screensaver_active) = true;
+      - script.execute: screensaver_update_visibility
+      - script.execute: screensaver_update_clock
+      - lvgl.widget.show: screensaver_overlay
+      - light.turn_on:
+          id: lcd_backlight
+          brightness: !lambda return id(wall_panel_screensaver_brightness).state / 100.0f;
+          transition_length: 500ms
+
+  - id: screensaver_hide
+    mode: restart
+    then:
+      - lambda: id(wall_panel_screensaver_active) = false;
+      - light.turn_on:
+          id: lcd_backlight
+          brightness: 100%
+          transition_length: 250ms
+      - lvgl.widget.hide: screensaver_overlay
+
+lvgl:
+  id: wall_panel_lvgl
+  on_idle:
+    - timeout: !lambda |-
+        return static_cast<uint32_t>(id(wall_panel_screensaver_timeout).state * 1000.0f);
+      then:
+        - if:
+            condition:
+              lambda: return !id(wall_panel_screensaver_active);
+            then:
+              - script.execute: screensaver_show
+
+  top_layer:
+    widgets:
+      - obj:
+          id: screensaver_overlay
+          x: 0
+          y: 0
+          width: 480
+          height: 480
+          bg_color: 0x101216
+          bg_opa: 100%
+          border_width: 0
+          radius: 0
+          clickable: true
+          hidden: true
+          on_release:
+            - script.execute: screensaver_hide
+          widgets:
+            - obj:
+                id: screensaver_digital
+                x: 0
+                y: 0
+                width: 480
+                height: 480
+                bg_opa: TRANSP
+                border_width: 0
+                clickable: false
+                widgets:
+                  - label:
+                      id: screensaver_digital_time
+                      align: CENTER
+                      y: -35
+                      text: "--:--"
+                      text_font: screensaver_clock_font
+                      text_color: 0xFFFFFF
+
+                  - label:
+                      id: screensaver_digital_date
+                      align: CENTER
+                      y: 70
+                      width: 440
+                      text: "Waiting for time..."
+                      text_align: CENTER
+                      text_font: ui_font_22
+                      text_color: 0x858B94
+
+            - obj:
+                id: screensaver_analog
+                x: 0
+                y: 0
+                width: 480
+                height: 480
+                bg_opa: TRANSP
+                border_width: 0
+                clickable: false
+                hidden: true
+                widgets:
+                  - meter:
+                      id: screensaver_analog_meter
+                      width: 340
+                      height: 340
+                      align: CENTER
+                      y: -28
+                      bg_opa: TRANSP
+                      border_width: 0
+                      text_color: 0x858B94
+                      text_font: ui_font_18
+                      indicator:
+                        bg_color: 0xFFFFFF
+                        bg_opa: 100%
+                      scales:
+                        - range_from: 0
+                          range_to: 60
+                          angle_range: 360
+                          rotation: 270
+                          ticks:
+                            width: 2
+                            count: 61
+                            length: 9
+                            color: 0x343A44
+                            major:
+                              stride: 5
+                              width: 3
+                              length: 15
+                              color: 0x858B94
+                          indicators:
+                            - line:
+                                id: screensaver_minute_hand
+                                width: 4
+                                color: 0xFFFFFF
+                                length: 88%
+                                rounded: true
+                                value: 0
+                            - line:
+                                id: screensaver_second_hand
+                                width: 2
+                                color: 0x858B94
+                                length: 92%
+                                rounded: true
+                                value: 0
+
+                        - range_from: 1
+                          range_to: 12
+                          angle_range: 330
+                          rotation: 300
+                          ticks:
+                            width: 1
+                            count: 12
+                            length: 1
+                            color: 0x101216
+                            major:
+                              stride: 1
+                              width: 0
+                              length: 0
+                              color: 0x101216
+                              label_gap: 16
+
+                        - range_from: 0
+                          range_to: 720
+                          angle_range: 360
+                          rotation: 270
+                          indicators:
+                            - line:
+                                id: screensaver_hour_hand
+                                width: 6
+                                color: 0xFFFFFF
+                                length: 62%
+                                rounded: true
+                                value: 0
+
+                  - label:
+                      id: screensaver_analog_date
+                      align: BOTTOM_MID
+                      y: -28
+                      width: 440
+                      text: "Waiting for time..."
+                      text_align: CENTER
+                      text_font: ui_font_22
+                      text_color: 0x858B94
+
+interval:
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            lambda: return id(wall_panel_screensaver_active);
+          then:
+            - script.execute: screensaver_update_clock
