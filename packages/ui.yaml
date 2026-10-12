@@ -8,6 +8,12 @@ esphome:
             id(wall_panel_language).publish_state(id(wall_panel_controller).get_language_option());
             id(wall_panel_rotation).publish_state(id(wall_panel_controller).get_display_rotation_option());
 
+globals:
+  - id: wall_panel_last_user_page
+    type: int
+    restore_value: false
+    initial_value: '1'
+
 select:
   - platform: template
     id: wall_panel_language
@@ -37,6 +43,77 @@ select:
           lvgl_id: wall_panel_lvgl
           rotation: !lambda |-
             return x == "90°" ? 90 : x == "180°" ? 180 : x == "270°" ? 270 : 0;
+
+  - platform: template
+    id: wall_panel_default_page
+    name: "Default Page"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Lights"
+    options: ["None", "Lights", "Blinds", "Audio", "Scenes"]
+
+script:
+  - id: wall_panel_show_main_page
+    mode: restart
+    parameters:
+      page: int
+      remember: bool
+    then:
+      - if:
+          condition:
+            lambda: return page == 1;
+          then:
+            - lvgl.page.show: lights_page
+      - if:
+          condition:
+            lambda: return page == 2;
+          then:
+            - lvgl.page.show: blinds_page
+      - if:
+          condition:
+            lambda: return page == 3;
+          then:
+            - lvgl.page.show: audio_page
+      - if:
+          condition:
+            lambda: return page == 4;
+          then:
+            - lvgl.page.show: scenes_page
+      - lambda: |-
+          if (remember && page >= 1 && page <= 4)
+            id(wall_panel_last_user_page) = page;
+
+          lv_obj_t *buttons[4] = {
+            id(nav_light_button), id(nav_blinds_button), id(nav_audio_button), id(nav_scenes_button)
+          };
+          lv_obj_t *icons[4] = {
+            id(nav_light_icon), id(nav_blinds_icon), id(nav_audio_icon), id(nav_scenes_icon)
+          };
+
+          for (int i = 0; i < 4; i++) {
+            const bool active = page == i + 1;
+            if (active)
+              lv_obj_clear_flag(buttons[i], LV_OBJ_FLAG_CLICKABLE);
+            else
+              lv_obj_add_flag(buttons[i], LV_OBJ_FLAG_CLICKABLE);
+            lv_obj_set_style_bg_color(buttons[i], lv_color_hex(active ? 0x343A44 : 0x181B20), LV_PART_MAIN);
+            lv_obj_set_style_image_recolor(icons[i], lv_color_hex(active ? 0xFFFFFF : 0x858B94), LV_PART_MAIN);
+          }
+
+  - id: wall_panel_show_default_page
+    mode: restart
+    then:
+      - script.execute:
+          id: wall_panel_show_main_page
+          page: !lambda |-
+            const auto option = id(wall_panel_default_page).current_option();
+            if (option == "Lights") return 1;
+            if (option == "Blinds") return 2;
+            if (option == "Audio") return 3;
+            if (option == "Scenes") return 4;
+            return id(wall_panel_last_user_page);
+          remember: false
 
 font:
   - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
@@ -136,7 +213,10 @@ lvgl:
     - lvgl.widget.hide: ha_action_permission_overlay
     - lvgl.display.set_rotation:
         rotation: !lambda return id(wall_panel_controller).get_display_rotation();
-    - lvgl.page.show: lights_page
+    - script.execute:
+        id: wall_panel_show_main_page
+        page: 1
+        remember: true
   top_layer:
     widgets:
       - obj:
@@ -165,20 +245,10 @@ lvgl:
                 clickable: false
                 on_click:
                   - script.execute: ui_click
-                  - lvgl.page.show: lights_page
-                  - lambda: |-
-                      lv_obj_clear_flag(id(nav_light_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_add_flag(id(nav_blinds_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_add_flag(id(nav_audio_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_add_flag(id(nav_scenes_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_set_style_bg_color(id(nav_light_button), lv_color_hex(0x343A44), LV_PART_MAIN);
-                      lv_obj_set_style_bg_color(id(nav_blinds_button), lv_color_hex(0x181B20), LV_PART_MAIN);
-                      lv_obj_set_style_bg_color(id(nav_audio_button), lv_color_hex(0x181B20), LV_PART_MAIN);
-                      lv_obj_set_style_bg_color(id(nav_scenes_button), lv_color_hex(0x181B20), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_light_icon), lv_color_hex(0xFFFFFF), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_blinds_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_audio_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_scenes_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                  - script.execute:
+                      id: wall_panel_show_main_page
+                      page: 1
+                      remember: true
                 widgets:
                   - image:
                       id: nav_light_icon
@@ -198,20 +268,10 @@ lvgl:
                 border_width: 0
                 on_click:
                   - script.execute: ui_click
-                  - lvgl.page.show: blinds_page
-                  - lambda: |-
-                      lv_obj_add_flag(id(nav_light_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_clear_flag(id(nav_blinds_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_add_flag(id(nav_audio_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_add_flag(id(nav_scenes_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_set_style_bg_color(id(nav_light_button), lv_color_hex(0x181B20), LV_PART_MAIN);
-                      lv_obj_set_style_bg_color(id(nav_blinds_button), lv_color_hex(0x343A44), LV_PART_MAIN);
-                      lv_obj_set_style_bg_color(id(nav_audio_button), lv_color_hex(0x181B20), LV_PART_MAIN);
-                      lv_obj_set_style_bg_color(id(nav_scenes_button), lv_color_hex(0x181B20), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_light_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_blinds_icon), lv_color_hex(0xFFFFFF), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_audio_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_scenes_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                  - script.execute:
+                      id: wall_panel_show_main_page
+                      page: 2
+                      remember: true
                 widgets:
                   - image:
                       id: nav_blinds_icon
@@ -231,20 +291,10 @@ lvgl:
                 border_width: 0
                 on_click:
                   - script.execute: ui_click
-                  - lvgl.page.show: audio_page
-                  - lambda: |-
-                      lv_obj_add_flag(id(nav_light_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_add_flag(id(nav_blinds_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_clear_flag(id(nav_audio_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_add_flag(id(nav_scenes_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_set_style_bg_color(id(nav_light_button), lv_color_hex(0x181B20), LV_PART_MAIN);
-                      lv_obj_set_style_bg_color(id(nav_blinds_button), lv_color_hex(0x181B20), LV_PART_MAIN);
-                      lv_obj_set_style_bg_color(id(nav_audio_button), lv_color_hex(0x343A44), LV_PART_MAIN);
-                      lv_obj_set_style_bg_color(id(nav_scenes_button), lv_color_hex(0x181B20), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_light_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_blinds_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_audio_icon), lv_color_hex(0xFFFFFF), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_scenes_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                  - script.execute:
+                      id: wall_panel_show_main_page
+                      page: 3
+                      remember: true
                 widgets:
                   - image:
                       id: nav_audio_icon
@@ -264,20 +314,10 @@ lvgl:
                 border_width: 0
                 on_click:
                   - script.execute: ui_click
-                  - lvgl.page.show: scenes_page
-                  - lambda: |-
-                      lv_obj_add_flag(id(nav_light_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_add_flag(id(nav_blinds_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_add_flag(id(nav_audio_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_clear_flag(id(nav_scenes_button), LV_OBJ_FLAG_CLICKABLE);
-                      lv_obj_set_style_bg_color(id(nav_light_button), lv_color_hex(0x181B20), LV_PART_MAIN);
-                      lv_obj_set_style_bg_color(id(nav_blinds_button), lv_color_hex(0x181B20), LV_PART_MAIN);
-                      lv_obj_set_style_bg_color(id(nav_audio_button), lv_color_hex(0x181B20), LV_PART_MAIN);
-                      lv_obj_set_style_bg_color(id(nav_scenes_button), lv_color_hex(0x343A44), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_light_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_blinds_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_audio_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
-                      lv_obj_set_style_image_recolor(id(nav_scenes_icon), lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+                  - script.execute:
+                      id: wall_panel_show_main_page
+                      page: 4
+                      remember: true
                 widgets:
                   - image:
                       id: nav_scenes_icon
@@ -339,15 +379,25 @@ interval:
   - interval: 500ms
     then:
       - lambda: |-
-          lv_label_set_text(
+          auto set_label_if_changed = [](lv_obj_t *label, const char *text) {
+            const char *current = lv_label_get_text(label);
+            if (current == nullptr || std::strcmp(current, text) != 0)
+              lv_label_set_text(label, text);
+          };
+
+          set_label_if_changed(
             id(ha_action_permission_body),
             id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::ACTION_PERMISSION_MESSAGE)
           );
-          lv_label_set_text(id(blinds_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::BLINDS));
-          lv_label_set_text(id(audio_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::AUDIO));
-          lv_label_set_text(id(scenes_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::SCENES));
+          set_label_if_changed(id(blinds_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::BLINDS));
+          set_label_if_changed(id(audio_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::AUDIO));
+          set_label_if_changed(id(scenes_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::SCENES));
       - if:
           condition:
             lambda: return id(wall_panel_controller).has_action_permission_warning();
           then:
-            - lvgl.widget.show: ha_action_permission_overlay
+            - if:
+                condition:
+                  lambda: return lv_obj_has_flag(id(ha_action_permission_overlay), LV_OBJ_FLAG_HIDDEN);
+                then:
+                  - lvgl.widget.show: ha_action_permission_overlay
