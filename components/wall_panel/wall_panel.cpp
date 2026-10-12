@@ -539,6 +539,8 @@ void WallPanel::subscribe_light_slot_(uint8_t slot) {
     return;
   this->subscribe_homeassistant_state(&WallPanel::on_entity_state_, entity_id);
   this->subscribe_homeassistant_state(&WallPanel::on_brightness_state_, entity_id, "brightness");
+  this->subscribe_homeassistant_state(&WallPanel::on_light_supported_color_modes_state_, entity_id,
+                                      "supported_color_modes");
   this->refresh_ha_subscriptions_();
 }
 
@@ -583,9 +585,33 @@ void WallPanel::on_brightness_state_(const std::string &entity_id, StringRef val
     pct = 100;
   for (auto &slot : this->light_slots_) {
     if (slot.entity_id == entity_id) {
+      // A valid brightness value is also a useful fallback capability signal.
       slot.has_brightness = true;
       slot.brightness_pct = pct;
     }
+  }
+}
+
+void WallPanel::on_light_supported_color_modes_state_(const std::string &entity_id, StringRef value) {
+  const std::string modes = value.str();
+
+  // Home Assistant exposes dimming capability through supported_color_modes even
+  // while a light is off, unlike the brightness attribute which can be absent.
+  const bool supports_brightness =
+      modes.find("brightness") != std::string::npos || modes.find("color_temp") != std::string::npos ||
+      modes.find("hs") != std::string::npos || modes.find("xy") != std::string::npos ||
+      modes.find("rgb") != std::string::npos || modes.find("rgbw") != std::string::npos ||
+      modes.find("rgbww") != std::string::npos || modes.find("white") != std::string::npos;
+  const bool explicitly_onoff = modes.find("onoff") != std::string::npos;
+
+  // Ignore missing/unknown representations instead of accidentally removing a
+  // capability already learned from a valid brightness update.
+  if (!supports_brightness && !explicitly_onoff)
+    return;
+
+  for (auto &slot : this->light_slots_) {
+    if (slot.entity_id == entity_id)
+      slot.has_brightness = supports_brightness;
   }
 }
 
