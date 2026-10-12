@@ -150,6 +150,8 @@ lvgl:
           border_width: 0
           radius: 0
           clickable: false
+          scrollable: false
+          scrollbar_mode: "OFF"
           widgets:
             - button:
                 id: nav_light_button
