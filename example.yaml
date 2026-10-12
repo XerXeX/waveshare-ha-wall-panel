@@ -51,3 +51,4 @@ packages:
       - packages/blinds.yaml
       - packages/audio.yaml
       - packages/scenes.yaml
+      - packages/screensaver.yaml
