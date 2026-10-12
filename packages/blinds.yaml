@@ -1,4 +1,132 @@
-# Blinds page shell
+# Configurable blinds page
+#
+# Each slot exposes a Name and Entity setting in Home Assistant. The selected
+# entity should normally be a cover.* entity. The panel subscribes to state,
+# current_position and supported_features dynamically.
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - lambda: |-
+            const auto &slot1 = id(wall_panel_controller).get_cover_slot(1);
+            const auto &slot2 = id(wall_panel_controller).get_cover_slot(2);
+            const auto &slot3 = id(wall_panel_controller).get_cover_slot(3);
+            const auto &slot4 = id(wall_panel_controller).get_cover_slot(4);
+
+            id(cover_slot1_name).publish_state(slot1.name);
+            id(cover_slot1_entity).publish_state(slot1.entity_id);
+            id(cover_slot2_name).publish_state(slot2.name);
+            id(cover_slot2_entity).publish_state(slot2.entity_id);
+            id(cover_slot3_name).publish_state(slot3.name);
+            id(cover_slot3_entity).publish_state(slot3.entity_id);
+            id(cover_slot4_name).publish_state(slot4.name);
+            id(cover_slot4_entity).publish_state(slot4.entity_id);
+
+text:
+  - platform: template
+    id: cover_slot1_name
+    name: "Blinds · Slot 1 · 1 Name"
+    entity_category: config
+    optimistic: true
+    restore_value: false
+    initial_value: "Blind 1"
+    min_length: 0
+    max_length: 32
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_cover_name(1, x);
+
+  - platform: template
+    id: cover_slot1_entity
+    name: "Blinds · Slot 1 · 2 Entity"
+    entity_category: config
+    optimistic: true
+    restore_value: false
+    initial_value: ""
+    min_length: 0
+    max_length: 64
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_cover_entity(1, x);
+
+  - platform: template
+    id: cover_slot2_name
+    name: "Blinds · Slot 2 · 1 Name"
+    entity_category: config
+    optimistic: true
+    restore_value: false
+    initial_value: "Blind 2"
+    min_length: 0
+    max_length: 32
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_cover_name(2, x);
+
+  - platform: template
+    id: cover_slot2_entity
+    name: "Blinds · Slot 2 · 2 Entity"
+    entity_category: config
+    optimistic: true
+    restore_value: false
+    initial_value: ""
+    min_length: 0
+    max_length: 64
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_cover_entity(2, x);
+
+  - platform: template
+    id: cover_slot3_name
+    name: "Blinds · Slot 3 · 1 Name"
+    entity_category: config
+    optimistic: true
+    restore_value: false
+    initial_value: "Blind 3"
+    min_length: 0
+    max_length: 32
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_cover_name(3, x);
+
+  - platform: template
+    id: cover_slot3_entity
+    name: "Blinds · Slot 3 · 2 Entity"
+    entity_category: config
+    optimistic: true
+    restore_value: false
+    initial_value: ""
+    min_length: 0
+    max_length: 64
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_cover_entity(3, x);
+
+  - platform: template
+    id: cover_slot4_name
+    name: "Blinds · Slot 4 · 1 Name"
+    entity_category: config
+    optimistic: true
+    restore_value: false
+    initial_value: "Blind 4"
+    min_length: 0
+    max_length: 32
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_cover_name(4, x);
+
+  - platform: template
+    id: cover_slot4_entity
+    name: "Blinds · Slot 4 · 2 Entity"
+    entity_category: config
+    optimistic: true
+    restore_value: false
+    initial_value: ""
+    min_length: 0
+    max_length: 64
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_cover_entity(4, x);
 
 lvgl:
   id: wall_panel_lvgl
@@ -13,3 +141,382 @@ lvgl:
             text: "Blinds"
             text_font: ui_font_34
             text_color: 0xFFFFFF
+
+        - obj:
+            id: cover_slot1_card
+            x: 20
+            y: 72
+            width: 210
+            height: 135
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            pad_all: 0
+            scrollable: false
+            hidden: true
+            widgets:
+              - label:
+                  id: cover_slot1_name_label
+                  x: 14
+                  y: 12
+                  text: "Blind 1"
+                  text_font: ui_font_22
+                  text_color: 0xFFFFFF
+              - label:
+                  id: cover_slot1_state_label
+                  x: 14
+                  y: 45
+                  text: "--"
+                  text_font: ui_font_18
+                  text_color: 0x858B94
+              - button:
+                  x: 10
+                  y: 82
+                  width: 58
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).open_cover(1);
+                  widgets:
+                    - label:
+                        id: cover_slot1_open_label
+                        align: CENTER
+                        text: "UP"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  x: 76
+                  y: 82
+                  width: 58
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).stop_cover(1);
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "STOP"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  x: 142
+                  y: 82
+                  width: 58
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).close_cover(1);
+                  widgets:
+                    - label:
+                        id: cover_slot1_close_label
+                        align: CENTER
+                        text: "DOWN"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+
+        - obj:
+            id: cover_slot2_card
+            x: 250
+            y: 72
+            width: 210
+            height: 135
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            pad_all: 0
+            scrollable: false
+            hidden: true
+            widgets:
+              - label:
+                  id: cover_slot2_name_label
+                  x: 14
+                  y: 12
+                  text: "Blind 2"
+                  text_font: ui_font_22
+                  text_color: 0xFFFFFF
+              - label:
+                  id: cover_slot2_state_label
+                  x: 14
+                  y: 45
+                  text: "--"
+                  text_font: ui_font_18
+                  text_color: 0x858B94
+              - button:
+                  x: 10
+                  y: 82
+                  width: 58
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).open_cover(2);
+                  widgets:
+                    - label:
+                        id: cover_slot2_open_label
+                        align: CENTER
+                        text: "UP"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  x: 76
+                  y: 82
+                  width: 58
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).stop_cover(2);
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "STOP"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  x: 142
+                  y: 82
+                  width: 58
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).close_cover(2);
+                  widgets:
+                    - label:
+                        id: cover_slot2_close_label
+                        align: CENTER
+                        text: "DOWN"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+
+        - obj:
+            id: cover_slot3_card
+            x: 20
+            y: 222
+            width: 210
+            height: 135
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            pad_all: 0
+            scrollable: false
+            hidden: true
+            widgets:
+              - label:
+                  id: cover_slot3_name_label
+                  x: 14
+                  y: 12
+                  text: "Blind 3"
+                  text_font: ui_font_22
+                  text_color: 0xFFFFFF
+              - label:
+                  id: cover_slot3_state_label
+                  x: 14
+                  y: 45
+                  text: "--"
+                  text_font: ui_font_18
+                  text_color: 0x858B94
+              - button:
+                  x: 10
+                  y: 82
+                  width: 58
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).open_cover(3);
+                  widgets:
+                    - label:
+                        id: cover_slot3_open_label
+                        align: CENTER
+                        text: "UP"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  x: 76
+                  y: 82
+                  width: 58
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).stop_cover(3);
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "STOP"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  x: 142
+                  y: 82
+                  width: 58
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).close_cover(3);
+                  widgets:
+                    - label:
+                        id: cover_slot3_close_label
+                        align: CENTER
+                        text: "DOWN"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+
+        - obj:
+            id: cover_slot4_card
+            x: 250
+            y: 222
+            width: 210
+            height: 135
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            pad_all: 0
+            scrollable: false
+            hidden: true
+            widgets:
+              - label:
+                  id: cover_slot4_name_label
+                  x: 14
+                  y: 12
+                  text: "Blind 4"
+                  text_font: ui_font_22
+                  text_color: 0xFFFFFF
+              - label:
+                  id: cover_slot4_state_label
+                  x: 14
+                  y: 45
+                  text: "--"
+                  text_font: ui_font_18
+                  text_color: 0x858B94
+              - button:
+                  x: 10
+                  y: 82
+                  width: 58
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).open_cover(4);
+                  widgets:
+                    - label:
+                        id: cover_slot4_open_label
+                        align: CENTER
+                        text: "UP"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  x: 76
+                  y: 82
+                  width: 58
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).stop_cover(4);
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "STOP"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  x: 142
+                  y: 82
+                  width: 58
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).close_cover(4);
+                  widgets:
+                    - label:
+                        id: cover_slot4_close_label
+                        align: CENTER
+                        text: "DOWN"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+
+interval:
+  - interval: 250ms
+    then:
+      - lambda: |-
+          auto &panel = *id(wall_panel_controller);
+          const bool da = std::string(panel.get_language_option()) == "Danish";
+          lv_label_set_text(id(blinds_page_title), panel.tr(esphome::wall_panel::TranslationKey::BLINDS));
+
+          lv_label_set_text(id(cover_slot1_open_label), da ? "OP" : "UP");
+          lv_label_set_text(id(cover_slot2_open_label), da ? "OP" : "UP");
+          lv_label_set_text(id(cover_slot3_open_label), da ? "OP" : "UP");
+          lv_label_set_text(id(cover_slot4_open_label), da ? "OP" : "UP");
+          lv_label_set_text(id(cover_slot1_close_label), da ? "NED" : "DOWN");
+          lv_label_set_text(id(cover_slot2_close_label), da ? "NED" : "DOWN");
+          lv_label_set_text(id(cover_slot3_close_label), da ? "NED" : "DOWN");
+          lv_label_set_text(id(cover_slot4_close_label), da ? "NED" : "DOWN");
+
+          auto update_card = [da](lv_obj_t *card, lv_obj_t *name_label, lv_obj_t *state_label,
+                                  const esphome::wall_panel::CoverSlotState &slot) {
+            if (!slot.configured) {
+              lv_obj_add_flag(card, LV_OBJ_FLAG_HIDDEN);
+              return;
+            }
+            lv_obj_clear_flag(card, LV_OBJ_FLAG_HIDDEN);
+            lv_label_set_text(name_label, slot.name.c_str());
+
+            if (!slot.available) {
+              lv_label_set_text(state_label, da ? "Ikke tilgængelig" : "Unavailable");
+              lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
+              return;
+            }
+
+            char text[48];
+            if (slot.state == "opening") {
+              snprintf(text, sizeof(text), "%s", da ? "Åbner" : "Opening");
+            } else if (slot.state == "closing") {
+              snprintf(text, sizeof(text), "%s", da ? "Lukker" : "Closing");
+            } else if (slot.has_position) {
+              snprintf(text, sizeof(text), "%d%%", slot.position_pct);
+            } else if (slot.state == "open") {
+              snprintf(text, sizeof(text), "%s", da ? "Åben" : "Open");
+            } else if (slot.state == "closed") {
+              snprintf(text, sizeof(text), "%s", da ? "Lukket" : "Closed");
+            } else {
+              snprintf(text, sizeof(text), "%s", slot.state.c_str());
+            }
+            lv_label_set_text(state_label, text);
+            lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
+          };
+
+          update_card(id(cover_slot1_card), id(cover_slot1_name_label), id(cover_slot1_state_label), panel.get_cover_slot(1));
+          update_card(id(cover_slot2_card), id(cover_slot2_name_label), id(cover_slot2_state_label), panel.get_cover_slot(2));
+          update_card(id(cover_slot3_card), id(cover_slot3_name_label), id(cover_slot3_state_label), panel.get_cover_slot(3));
+          update_card(id(cover_slot4_card), id(cover_slot4_name_label), id(cover_slot4_state_label), panel.get_cover_slot(4));
