@@ -86,7 +86,7 @@ script:
     then:
       - if:
           condition:
-            lambda: return id(wall_panel_clock_style).state == "Analog";
+            lambda: return id(wall_panel_clock_style).current_option() == "Analog";
           then:
             - lvgl.widget.hide: screensaver_digital
             - lvgl.widget.show: screensaver_analog
@@ -108,7 +108,7 @@ script:
           }
 
           char time_buffer[16];
-          if (id(wall_panel_time_format).state == "12 hour") {
+          if (id(wall_panel_time_format).current_option() == "12 hour") {
             int hour = now.hour % 12;
             if (hour == 0)
               hour = 12;
