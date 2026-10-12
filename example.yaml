@@ -52,3 +52,4 @@ packages:
       - packages/audio.yaml
       - packages/scenes.yaml
       - packages/screensaver.yaml
+      - packages/subdevices.yaml
