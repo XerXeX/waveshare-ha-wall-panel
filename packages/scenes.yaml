@@ -1,9 +1,8 @@
 # Configurable scenes/scripts page
 #
-# Each slot exposes Name, Entity and Function settings in Home Assistant.
-# scene.* and script.* entities are both supported. The generic
-# homeassistant.turn_on action lets Home Assistant route the request to the
-# correct domain.
+# Each slot can either activate a scene/script entity or execute a compact list
+# of Home Assistant actions stored directly on the panel. Entity mode mirrors
+# the Home Assistant entity icon when it is part of the built-in icon set.
 
 text:
   - platform: template
@@ -29,6 +28,17 @@ text:
     mode: text
 
   - platform: template
+    id: scene_slot1_local_actions
+    name: "Scenes · Slot 1 · 4 Local Actions"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 255
+    mode: text
+
+  - platform: template
     id: scene_slot2_name
     name: "Scenes · Slot 2 · 1 Name"
     entity_category: config
@@ -48,6 +58,17 @@ text:
     initial_value: ""
     min_length: 0
     max_length: 64
+    mode: text
+
+  - platform: template
+    id: scene_slot2_local_actions
+    name: "Scenes · Slot 2 · 4 Local Actions"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 255
     mode: text
 
   - platform: template
@@ -73,6 +94,17 @@ text:
     mode: text
 
   - platform: template
+    id: scene_slot3_local_actions
+    name: "Scenes · Slot 3 · 4 Local Actions"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 255
+    mode: text
+
+  - platform: template
     id: scene_slot4_name
     name: "Scenes · Slot 4 · 1 Name"
     entity_category: config
@@ -94,6 +126,17 @@ text:
     max_length: 64
     mode: text
 
+  - platform: template
+    id: scene_slot4_local_actions
+    name: "Scenes · Slot 4 · 4 Local Actions"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 255
+    mode: text
+
 select:
   - platform: template
     id: scene_slot1_function
@@ -102,7 +145,7 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Auto"
-    options: ["Auto", "Hidden"]
+    options: ["Auto", "Local action", "Hidden"]
 
   - platform: template
     id: scene_slot2_function
@@ -111,7 +154,7 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Auto"
-    options: ["Auto", "Hidden"]
+    options: ["Auto", "Local action", "Hidden"]
 
   - platform: template
     id: scene_slot3_function
@@ -120,7 +163,7 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Auto"
-    options: ["Auto", "Hidden"]
+    options: ["Auto", "Local action", "Hidden"]
 
   - platform: template
     id: scene_slot4_function
@@ -129,7 +172,155 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Auto"
-    options: ["Auto", "Hidden"]
+    options: ["Auto", "Local action", "Hidden"]
+
+# MDI images are compiled into the firmware, so dynamically inherited icons are
+# resolved through this curated set. Unknown icons fall back to the Scenes icon.
+image:
+  - platform: file
+    file: mdi:home
+    id: scene_icon_home
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:lightbulb
+    id: scene_icon_lightbulb
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:lightbulb-group
+    id: scene_icon_lightbulb_group
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:movie-open
+    id: scene_icon_movie
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:television
+    id: scene_icon_television
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:weather-night
+    id: scene_icon_night
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:weather-sunny
+    id: scene_icon_sunny
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:bed
+    id: scene_icon_bed
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:party-popper
+    id: scene_icon_party
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:music
+    id: scene_icon_music
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:gamepad-variant
+    id: scene_icon_gamepad
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:fireplace
+    id: scene_icon_fireplace
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:coffee
+    id: scene_icon_coffee
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:power
+    id: scene_icon_power
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:shield-home
+    id: scene_icon_shield_home
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:door-open
+    id: scene_icon_door_open
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:door-closed
+    id: scene_icon_door_closed
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:window-shutter
+    id: scene_icon_shutter
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:blinds
+    id: scene_icon_blinds
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:silverware-fork-knife
+    id: scene_icon_dining
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:book-open-page-variant
+    id: scene_icon_book
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:heart
+    id: scene_icon_heart
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:star
+    id: scene_icon_star
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+  - platform: file
+    file: mdi:palette
+    id: scene_icon_palette
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
 
 lvgl:
   id: wall_panel_lvgl
@@ -157,12 +348,18 @@ lvgl:
             hidden: true
             on_click:
               - script.execute: ui_click
-              - homeassistant.action:
-                  action: homeassistant.turn_on
-                  data_template:
-                    entity_id: "{{ target_entity }}"
-                  variables:
-                    target_entity: !lambda return id(scene_slot1_entity).state;
+              - if:
+                  condition:
+                    lambda: return id(scene_slot1_function).current_option() == "Local action";
+                  then:
+                    - lambda: id(wall_panel_controller).execute_local_actions(id(scene_slot1_local_actions).state);
+                  else:
+                    - homeassistant.action:
+                        action: homeassistant.turn_on
+                        data_template:
+                          entity_id: "{{ target_entity }}"
+                        variables:
+                          target_entity: !lambda return id(scene_slot1_entity).state;
             widgets:
               - image:
                   id: scene_slot1_icon
@@ -193,12 +390,18 @@ lvgl:
             hidden: true
             on_click:
               - script.execute: ui_click
-              - homeassistant.action:
-                  action: homeassistant.turn_on
-                  data_template:
-                    entity_id: "{{ target_entity }}"
-                  variables:
-                    target_entity: !lambda return id(scene_slot2_entity).state;
+              - if:
+                  condition:
+                    lambda: return id(scene_slot2_function).current_option() == "Local action";
+                  then:
+                    - lambda: id(wall_panel_controller).execute_local_actions(id(scene_slot2_local_actions).state);
+                  else:
+                    - homeassistant.action:
+                        action: homeassistant.turn_on
+                        data_template:
+                          entity_id: "{{ target_entity }}"
+                        variables:
+                          target_entity: !lambda return id(scene_slot2_entity).state;
             widgets:
               - image:
                   id: scene_slot2_icon
@@ -229,12 +432,18 @@ lvgl:
             hidden: true
             on_click:
               - script.execute: ui_click
-              - homeassistant.action:
-                  action: homeassistant.turn_on
-                  data_template:
-                    entity_id: "{{ target_entity }}"
-                  variables:
-                    target_entity: !lambda return id(scene_slot3_entity).state;
+              - if:
+                  condition:
+                    lambda: return id(scene_slot3_function).current_option() == "Local action";
+                  then:
+                    - lambda: id(wall_panel_controller).execute_local_actions(id(scene_slot3_local_actions).state);
+                  else:
+                    - homeassistant.action:
+                        action: homeassistant.turn_on
+                        data_template:
+                          entity_id: "{{ target_entity }}"
+                        variables:
+                          target_entity: !lambda return id(scene_slot3_entity).state;
             widgets:
               - image:
                   id: scene_slot3_icon
@@ -265,12 +474,18 @@ lvgl:
             hidden: true
             on_click:
               - script.execute: ui_click
-              - homeassistant.action:
-                  action: homeassistant.turn_on
-                  data_template:
-                    entity_id: "{{ target_entity }}"
-                  variables:
-                    target_entity: !lambda return id(scene_slot4_entity).state;
+              - if:
+                  condition:
+                    lambda: return id(scene_slot4_function).current_option() == "Local action";
+                  then:
+                    - lambda: id(wall_panel_controller).execute_local_actions(id(scene_slot4_local_actions).state);
+                  else:
+                    - homeassistant.action:
+                        action: homeassistant.turn_on
+                        data_template:
+                          entity_id: "{{ target_entity }}"
+                        variables:
+                          target_entity: !lambda return id(scene_slot4_entity).state;
             widgets:
               - image:
                   id: scene_slot4_icon
@@ -316,18 +531,38 @@ interval:
               lv_obj_set_width(obj, width);
           };
 
+          auto icon_image = [](const std::string &icon) -> esphome::image::Image * {
+            if (icon == "mdi:home") return id(scene_icon_home);
+            if (icon == "mdi:lightbulb") return id(scene_icon_lightbulb);
+            if (icon == "mdi:lightbulb-group") return id(scene_icon_lightbulb_group);
+            if (icon == "mdi:movie-open") return id(scene_icon_movie);
+            if (icon == "mdi:television") return id(scene_icon_television);
+            if (icon == "mdi:weather-night") return id(scene_icon_night);
+            if (icon == "mdi:weather-sunny") return id(scene_icon_sunny);
+            if (icon == "mdi:bed") return id(scene_icon_bed);
+            if (icon == "mdi:party-popper") return id(scene_icon_party);
+            if (icon == "mdi:music") return id(scene_icon_music);
+            if (icon == "mdi:gamepad-variant") return id(scene_icon_gamepad);
+            if (icon == "mdi:fireplace") return id(scene_icon_fireplace);
+            if (icon == "mdi:coffee") return id(scene_icon_coffee);
+            if (icon == "mdi:power") return id(scene_icon_power);
+            if (icon == "mdi:shield-home") return id(scene_icon_shield_home);
+            if (icon == "mdi:door-open") return id(scene_icon_door_open);
+            if (icon == "mdi:door-closed") return id(scene_icon_door_closed);
+            if (icon == "mdi:window-shutter") return id(scene_icon_shutter);
+            if (icon == "mdi:blinds") return id(scene_icon_blinds);
+            if (icon == "mdi:silverware-fork-knife") return id(scene_icon_dining);
+            if (icon == "mdi:book-open-page-variant") return id(scene_icon_book);
+            if (icon == "mdi:heart") return id(scene_icon_heart);
+            if (icon == "mdi:star") return id(scene_icon_star);
+            if (icon == "mdi:palette") return id(scene_icon_palette);
+            return id(nav_scenes);
+          };
+
           set_text_if_changed(
             id(scenes_page_title),
             id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::SCENES)
           );
-
-          lv_obj_t *cards[4] = {
-            id(scene_slot1_card), id(scene_slot2_card), id(scene_slot3_card), id(scene_slot4_card)
-          };
-          lv_obj_t *labels[4] = {
-            id(scene_slot1_name_label), id(scene_slot2_name_label),
-            id(scene_slot3_name_label), id(scene_slot4_name_label)
-          };
 
           const std::string names[4] = {
             id(scene_slot1_name).state, id(scene_slot2_name).state,
@@ -337,22 +572,49 @@ interval:
             id(scene_slot1_entity).state, id(scene_slot2_entity).state,
             id(scene_slot3_entity).state, id(scene_slot4_entity).state
           };
+          const std::string local_actions[4] = {
+            id(scene_slot1_local_actions).state, id(scene_slot2_local_actions).state,
+            id(scene_slot3_local_actions).state, id(scene_slot4_local_actions).state
+          };
           const std::string functions[4] = {
             id(scene_slot1_function).current_option(), id(scene_slot2_function).current_option(),
             id(scene_slot3_function).current_option(), id(scene_slot4_function).current_option()
           };
 
+          for (int i = 0; i < 4; i++)
+            id(wall_panel_controller).set_scene_icon_entity(i + 1, functions[i] == "Auto" ? entities[i] : "");
+
+          lv_obj_t *cards[4] = {
+            id(scene_slot1_card), id(scene_slot2_card), id(scene_slot3_card), id(scene_slot4_card)
+          };
+          lv_obj_t *labels[4] = {
+            id(scene_slot1_name_label), id(scene_slot2_name_label),
+            id(scene_slot3_name_label), id(scene_slot4_name_label)
+          };
+          lv_obj_t *icons[4] = {
+            id(scene_slot1_icon), id(scene_slot2_icon), id(scene_slot3_icon), id(scene_slot4_icon)
+          };
+
+          static std::string last_icons[4];
           int visible_indices[4];
           int visible_count = 0;
           for (int i = 0; i < 4; i++) {
             const bool supported_entity = entities[i].rfind("scene.", 0) == 0 || entities[i].rfind("script.", 0) == 0;
-            const bool visible = functions[i] != "Hidden" && supported_entity;
+            const bool entity_mode = functions[i] == "Auto" && supported_entity;
+            const bool local_mode = functions[i] == "Local action" && !local_actions[i].empty();
+            const bool visible = functions[i] != "Hidden" && (entity_mode || local_mode);
             set_hidden_if_changed(cards[i], !visible);
             if (visible)
               visible_indices[visible_count++] = i;
 
             const std::string fallback = "Scene " + std::to_string(i + 1);
             set_text_if_changed(labels[i], names[i].empty() ? fallback : names[i]);
+
+            const std::string inherited_icon = entity_mode ? id(wall_panel_controller).get_scene_icon(i + 1) : "";
+            if (last_icons[i] != inherited_icon) {
+              last_icons[i] = inherited_icon;
+              esphome::lvgl::lv_image_set_src(icons[i], icon_image(inherited_icon));
+            }
           }
 
           for (int rank = 0; rank < visible_count; rank++) {
