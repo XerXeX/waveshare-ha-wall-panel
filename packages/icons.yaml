@@ -22,6 +22,7 @@ image:
   - { platform: file, file: "mdi:bell", id: icon_bell, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:bell-outline", id: icon_bell_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:blinds", id: icon_blinds, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:blinds-open", id: icon_blinds_open, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:bluetooth", id: icon_bluetooth, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:book-open-page-variant", id: icon_book_open_page_variant, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:camera", id: icon_camera, resize: 42x42, type: RGB565, transparency: alpha_channel }
