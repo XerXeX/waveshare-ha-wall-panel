@@ -8,12 +8,20 @@ The project is designed as a reusable Home Assistant wall panel with runtime-con
 
 - `components/wall_panel/` – custom ESPHome component and runtime logic
 - `packages/hardware.yaml` – display, touch, backlight and board hardware
-- `packages/ui.yaml` – shared fonts, icons, language selection and global UI elements
+- `packages/icons.yaml` – shared Material Design Icon image library
+- `packages/ui.yaml` – shared fonts, language selection and global UI elements
 - `packages/lights.yaml` – dynamic light controls
 - `packages/blinds.yaml` – blinds controls
 - `packages/audio.yaml` – audio controls
-- `packages/scenes.yaml` – scene controls
+- `packages/scenes.yaml` – scene controls and Home Assistant icon inheritance
+- `packages/screensaver.yaml` – screensaver behavior
+- `packages/subdevices.yaml` – Home Assistant sub-device organization
+- `ICONS.md` – icon naming convention and included icon list
 - `example.yaml` – top-level ESPHome example configuration
+
+## Icons
+
+Shared images use a predictable ID derived from the MDI name. For example, `mdi:weather-night` is exposed as `icon_weather_night`. See `ICONS.md` for the complete built-in list and extension notes.
 
 ## Languages
 
