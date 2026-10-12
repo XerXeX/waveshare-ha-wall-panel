@@ -72,6 +72,11 @@ globals:
     restore_value: no
     initial_value: "false"
 
+  - id: wall_panel_backlight_before_screensaver
+    type: float
+    restore_value: no
+    initial_value: "1.0f"
+
 font:
   - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
     id: screensaver_clock_font
@@ -163,7 +168,12 @@ script:
   - id: screensaver_show
     mode: restart
     then:
-      - lambda: id(wall_panel_screensaver_active) = true;
+      - lambda: |-
+          float brightness = id(lcd_backlight).current_values.get_brightness();
+          if (!std::isfinite(brightness) || brightness <= 0.0f)
+            brightness = 1.0f;
+          id(wall_panel_backlight_before_screensaver) = brightness;
+          id(wall_panel_screensaver_active) = true;
       - script.execute: screensaver_update_visibility
       - script.execute: screensaver_update_clock
       - lvgl.widget.show: screensaver_overlay
@@ -178,7 +188,7 @@ script:
       - lambda: id(wall_panel_screensaver_active) = false;
       - light.turn_on:
           id: lcd_backlight
-          brightness: 100%
+          brightness: !lambda return id(wall_panel_backlight_before_screensaver);
           transition_length: 250ms
       - lvgl.widget.hide: screensaver_overlay
 
