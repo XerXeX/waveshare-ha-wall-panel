@@ -282,11 +282,6 @@ lvgl:
                             count: 61
                             length: 9
                             color: 0x343A44
-                            major:
-                              stride: 5
-                              width: 3
-                              length: 15
-                              color: 0x858B94
                           indicators:
                             - line:
                                 id: screensaver_minute_hand
@@ -314,9 +309,9 @@ lvgl:
                             color: 0x101216
                             major:
                               stride: 1
-                              width: 0
-                              length: 0
-                              color: 0x101216
+                              width: 3
+                              length: 15
+                              color: 0x858B94
                               label_gap: 16
 
                         - range_from: 0
