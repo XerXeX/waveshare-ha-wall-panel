@@ -59,12 +59,14 @@ number:
     set_action:
       - if:
           condition:
-            lambda: return id(wall_panel_screensaver_active);
+            lambda: return id(wall_panel_screensaver_active) && id(lcd_backlight).current_values.is_on();
           then:
+            - lambda: id(wall_panel_backlight_internal_change) = true;
             - light.turn_on:
                 id: lcd_backlight
                 brightness: !lambda return x / 100.0f;
                 transition_length: 300ms
+            - lambda: id(wall_panel_backlight_internal_change) = false;
 
 globals:
   - id: wall_panel_screensaver_active
@@ -76,6 +78,26 @@ globals:
     type: float
     restore_value: no
     initial_value: "1.0f"
+
+  - id: wall_panel_backlight_internal_change
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+light:
+  - id: !extend lcd_backlight
+    on_turn_off:
+      - if:
+          condition:
+            lambda: return !id(wall_panel_backlight_internal_change);
+          then:
+            - script.execute: screensaver_backlight_off
+    on_turn_on:
+      - if:
+          condition:
+            lambda: return !id(wall_panel_backlight_internal_change);
+          then:
+            - script.execute: screensaver_backlight_on
 
 font:
   - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
@@ -103,12 +125,18 @@ script:
     mode: restart
     then:
       - lambda: |-
+          auto set_label_if_changed = [](lv_obj_t *label, const char *text) {
+            const char *current = lv_label_get_text(label);
+            if (current == nullptr || std::strcmp(current, text) != 0)
+              lv_label_set_text(label, text);
+          };
+
           auto now = id(wall_panel_time).now();
 
           if (!now.is_valid()) {
-            lv_label_set_text(id(screensaver_digital_time), "--:--");
-            lv_label_set_text(id(screensaver_digital_date), "Waiting for time...");
-            lv_label_set_text(id(screensaver_analog_date), "Waiting for time...");
+            set_label_if_changed(id(screensaver_digital_time), "--:--");
+            set_label_if_changed(id(screensaver_digital_date), "Waiting for time...");
+            set_label_if_changed(id(screensaver_analog_date), "Waiting for time...");
             return;
           }
 
@@ -122,7 +150,7 @@ script:
           } else {
             snprintf(time_buffer, sizeof(time_buffer), "%02d:%02d", now.hour, now.minute);
           }
-          lv_label_set_text(id(screensaver_digital_time), time_buffer);
+          set_label_if_changed(id(screensaver_digital_time), time_buffer);
 
           const bool danish = std::string(id(wall_panel_controller).get_language_option()) == "Danish";
           static const char *const days_en[] = {
@@ -146,8 +174,8 @@ script:
             snprintf(date_buffer, sizeof(date_buffer), "%s %d %s %d",
                      days_en[weekday], now.day_of_month, months_en[month], now.year);
           }
-          lv_label_set_text(id(screensaver_digital_date), date_buffer);
-          lv_label_set_text(id(screensaver_analog_date), date_buffer);
+          set_label_if_changed(id(screensaver_digital_date), date_buffer);
+          set_label_if_changed(id(screensaver_analog_date), date_buffer);
 
       - lvgl.indicator.update:
           id: screensaver_minute_hand
@@ -168,29 +196,61 @@ script:
   - id: screensaver_show
     mode: restart
     then:
-      - lambda: |-
-          float brightness = id(lcd_backlight).current_values.get_brightness();
-          if (!std::isfinite(brightness) || brightness <= 0.0f)
-            brightness = 1.0f;
-          id(wall_panel_backlight_before_screensaver) = brightness;
-          id(wall_panel_screensaver_active) = true;
-      - script.execute: screensaver_update_visibility
-      - script.execute: screensaver_update_clock
-      - lvgl.widget.show: screensaver_overlay
-      - light.turn_on:
-          id: lcd_backlight
-          brightness: !lambda return id(wall_panel_screensaver_brightness).state / 100.0f;
-          transition_length: 500ms
+      - if:
+          condition:
+            lambda: return id(lcd_backlight).current_values.is_on();
+          then:
+            - lambda: |-
+                float brightness = id(lcd_backlight).current_values.get_brightness();
+                if (!std::isfinite(brightness) || brightness <= 0.0f)
+                  brightness = 1.0f;
+                id(wall_panel_backlight_before_screensaver) = brightness;
+                id(wall_panel_screensaver_active) = true;
+            - script.execute: wall_panel_show_default_page
+            - script.execute: screensaver_update_visibility
+            - script.execute: screensaver_update_clock
+            - lvgl.widget.show: screensaver_overlay
+            - lambda: id(wall_panel_backlight_internal_change) = true;
+            - light.turn_on:
+                id: lcd_backlight
+                brightness: !lambda return id(wall_panel_screensaver_brightness).state / 100.0f;
+                transition_length: 500ms
+            - lambda: id(wall_panel_backlight_internal_change) = false;
 
   - id: screensaver_hide
     mode: restart
     then:
       - lambda: id(wall_panel_screensaver_active) = false;
-      - light.turn_on:
-          id: lcd_backlight
-          brightness: !lambda return id(wall_panel_backlight_before_screensaver);
-          transition_length: 250ms
+      - script.execute: wall_panel_show_default_page
       - lvgl.widget.hide: screensaver_overlay
+      - if:
+          condition:
+            lambda: return id(lcd_backlight).current_values.is_on();
+          then:
+            - lambda: id(wall_panel_backlight_internal_change) = true;
+            - light.turn_on:
+                id: lcd_backlight
+                brightness: !lambda return id(wall_panel_backlight_before_screensaver);
+                transition_length: 250ms
+            - lambda: id(wall_panel_backlight_internal_change) = false;
+
+  - id: screensaver_backlight_off
+    mode: restart
+    then:
+      - lambda: id(wall_panel_screensaver_active) = false;
+      - lvgl.widget.hide: screensaver_overlay
+      - lvgl.pause:
+          lvgl_id: wall_panel_lvgl
+
+  - id: screensaver_backlight_on
+    mode: restart
+    then:
+      - lambda: id(wall_panel_screensaver_active) = false;
+      - lvgl.resume:
+          lvgl_id: wall_panel_lvgl
+      - script.execute: wall_panel_show_default_page
+      - lvgl.widget.hide: screensaver_overlay
+      - lambda: lv_display_trigger_activity(nullptr);
 
 lvgl:
   id: wall_panel_lvgl
@@ -200,7 +260,8 @@ lvgl:
       then:
         - if:
             condition:
-              lambda: return !id(wall_panel_screensaver_active);
+              lambda: |-
+                return !id(wall_panel_screensaver_active) && id(lcd_backlight).current_values.is_on();
             then:
               - script.execute: screensaver_show
 
