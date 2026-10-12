@@ -91,8 +91,10 @@ script:
             lv_obj_t *light_cards[4] = {
               id(light_slot1_card), id(light_slot2_card), id(light_slot3_card), id(light_slot4_card)
             };
-            for (int i = 0; i < 4; i++)
-              lv_obj_clear_state(light_cards[i], LV_STATE_PRESSED | LV_STATE_FOCUSED);
+            for (int i = 0; i < 4; i++) {
+              lv_obj_clear_state(light_cards[i], LV_STATE_PRESSED);
+              lv_obj_clear_state(light_cards[i], LV_STATE_FOCUSED);
+            }
           }
 
           if (remember && page >= 1 && page <= 4)
@@ -106,7 +108,8 @@ script:
           };
 
           for (int i = 0; i < 4; i++) {
-            lv_obj_clear_state(buttons[i], LV_STATE_PRESSED | LV_STATE_FOCUSED);
+            lv_obj_clear_state(buttons[i], LV_STATE_PRESSED);
+            lv_obj_clear_state(buttons[i], LV_STATE_FOCUSED);
             const bool active = page == i + 1;
             if (active)
               lv_obj_clear_flag(buttons[i], LV_OBJ_FLAG_CLICKABLE);
