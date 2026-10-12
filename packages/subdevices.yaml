@@ -38,38 +38,32 @@ select:
   - id: !extend wall_panel_time_format
     device_id: settings_device
 
-  # Lights
+  # Lights - non-text settings come after Name and Entity in each slot.
   - id: !extend light_slot1_function
-    name: "Slot 1 · Function"
+    name: "Slot 1 · 3 Function"
     device_id: lights_device
-
   - id: !extend light_slot2_function
-    name: "Slot 2 · Function"
+    name: "Slot 2 · 3 Function"
     device_id: lights_device
-
   - id: !extend light_slot3_function
-    name: "Slot 3 · Function"
+    name: "Slot 3 · 3 Function"
     device_id: lights_device
-
   - id: !extend light_slot4_function
-    name: "Slot 4 · Function"
+    name: "Slot 4 · 3 Function"
     device_id: lights_device
 
   # Scenes
   - id: !extend scene_slot1_function
-    name: "Slot 1 · Function"
+    name: "Slot 1 · 3 Function"
     device_id: scenes_device
-
   - id: !extend scene_slot2_function
-    name: "Slot 2 · Function"
+    name: "Slot 2 · 3 Function"
     device_id: scenes_device
-
   - id: !extend scene_slot3_function
-    name: "Slot 3 · Function"
+    name: "Slot 3 · 3 Function"
     device_id: scenes_device
-
   - id: !extend scene_slot4_function
-    name: "Slot 4 · Function"
+    name: "Slot 4 · 3 Function"
     device_id: scenes_device
 
 number:
@@ -87,104 +81,92 @@ light:
 text:
   # Lights
   - id: !extend light_slot1_name
-    name: "Slot 1 · Name"
+    name: "Slot 1 · 1 Name"
     device_id: lights_device
   - id: !extend light_slot1_entity
-    name: "Slot 1 · Entity"
+    name: "Slot 1 · 2 Entity"
     device_id: lights_device
   - id: !extend light_slot2_name
-    name: "Slot 2 · Name"
+    name: "Slot 2 · 1 Name"
     device_id: lights_device
   - id: !extend light_slot2_entity
-    name: "Slot 2 · Entity"
+    name: "Slot 2 · 2 Entity"
     device_id: lights_device
   - id: !extend light_slot3_name
-    name: "Slot 3 · Name"
+    name: "Slot 3 · 1 Name"
     device_id: lights_device
   - id: !extend light_slot3_entity
-    name: "Slot 3 · Entity"
+    name: "Slot 3 · 2 Entity"
     device_id: lights_device
   - id: !extend light_slot4_name
-    name: "Slot 4 · Name"
+    name: "Slot 4 · 1 Name"
     device_id: lights_device
   - id: !extend light_slot4_entity
-    name: "Slot 4 · Entity"
+    name: "Slot 4 · 2 Entity"
     device_id: lights_device
 
   # Blinds
   - id: !extend cover_slot1_name
-    name: "Slot 1 · Name"
+    name: "Slot 1 · 1 Name"
     device_id: blinds_device
   - id: !extend cover_slot1_entity
-    name: "Slot 1 · Entity"
+    name: "Slot 1 · 2 Entity"
     device_id: blinds_device
   - id: !extend cover_slot2_name
-    name: "Slot 2 · Name"
+    name: "Slot 2 · 1 Name"
     device_id: blinds_device
   - id: !extend cover_slot2_entity
-    name: "Slot 2 · Entity"
+    name: "Slot 2 · 2 Entity"
     device_id: blinds_device
   - id: !extend cover_slot3_name
-    name: "Slot 3 · Name"
+    name: "Slot 3 · 1 Name"
     device_id: blinds_device
   - id: !extend cover_slot3_entity
-    name: "Slot 3 · Entity"
+    name: "Slot 3 · 2 Entity"
     device_id: blinds_device
   - id: !extend cover_slot4_name
-    name: "Slot 4 · Name"
+    name: "Slot 4 · 1 Name"
     device_id: blinds_device
   - id: !extend cover_slot4_entity
-    name: "Slot 4 · Entity"
+    name: "Slot 4 · 2 Entity"
     device_id: blinds_device
 
   # Scenes
   - id: !extend scene_slot1_name
-    name: "Slot 1 · Name"
+    name: "Slot 1 · 1 Name"
     device_id: scenes_device
   - id: !extend scene_slot1_entity
-    name: "Slot 1 · Entity"
-    device_id: scenes_device
-  - id: !extend scene_slot1_local_actions
-    name: "Slot 1 · Local Actions"
+    name: "Slot 1 · 2 Entity"
     device_id: scenes_device
   - id: !extend scene_slot2_name
-    name: "Slot 2 · Name"
+    name: "Slot 2 · 1 Name"
     device_id: scenes_device
   - id: !extend scene_slot2_entity
-    name: "Slot 2 · Entity"
-    device_id: scenes_device
-  - id: !extend scene_slot2_local_actions
-    name: "Slot 2 · Local Actions"
+    name: "Slot 2 · 2 Entity"
     device_id: scenes_device
   - id: !extend scene_slot3_name
-    name: "Slot 3 · Name"
+    name: "Slot 3 · 1 Name"
     device_id: scenes_device
   - id: !extend scene_slot3_entity
-    name: "Slot 3 · Entity"
-    device_id: scenes_device
-  - id: !extend scene_slot3_local_actions
-    name: "Slot 3 · Local Actions"
+    name: "Slot 3 · 2 Entity"
     device_id: scenes_device
   - id: !extend scene_slot4_name
-    name: "Slot 4 · Name"
+    name: "Slot 4 · 1 Name"
     device_id: scenes_device
   - id: !extend scene_slot4_entity
-    name: "Slot 4 · Entity"
-    device_id: scenes_device
-  - id: !extend scene_slot4_local_actions
-    name: "Slot 4 · Local Actions"
+    name: "Slot 4 · 2 Entity"
     device_id: scenes_device
 
 switch:
   - id: !extend light_slot1_ignore_all_off
-    name: "Slot 1 · Ignore All Off"
+    name: "Slot 1 · 4 Ignore All Off"
     device_id: lights_device
   - id: !extend light_slot2_ignore_all_off
-    name: "Slot 2 · Ignore All Off"
+    name: "Slot 2 · 4 Ignore All Off"
     device_id: lights_device
   - id: !extend light_slot3_ignore_all_off
-    name: "Slot 3 · Ignore All Off"
+    name: "Slot 3 · 4 Ignore All Off"
     device_id: lights_device
   - id: !extend light_slot4_ignore_all_off
-    name: "Slot 4 · Ignore All Off"
+    name: "Slot 4 · 4 Ignore All Off"
     device_id: lights_device
