@@ -21,11 +21,8 @@ esphome:
     - id: settings_device
       name: "Settings"
 
-# -----------------------------------------------------------------------------
-# Settings
-# -----------------------------------------------------------------------------
-
 select:
+  # Settings
   - id: !extend wall_panel_language
     device_id: settings_device
 
@@ -37,6 +34,23 @@ select:
 
   - id: !extend wall_panel_time_format
     device_id: settings_device
+
+  # Lights
+  - id: !extend light_slot1_function
+    name: "Slot 1 · Function"
+    device_id: lights_device
+
+  - id: !extend light_slot2_function
+    name: "Slot 2 · Function"
+    device_id: lights_device
+
+  - id: !extend light_slot3_function
+    name: "Slot 3 · Function"
+    device_id: lights_device
+
+  - id: !extend light_slot4_function
+    name: "Slot 4 · Function"
+    device_id: lights_device
 
 number:
   - id: !extend wall_panel_screensaver_timeout
@@ -50,11 +64,8 @@ light:
     name: "Backlight"
     device_id: settings_device
 
-# -----------------------------------------------------------------------------
-# Lights
-# -----------------------------------------------------------------------------
-
 text:
+  # Lights
   - id: !extend light_slot1_name
     name: "Slot 1 · Name"
     device_id: lights_device
@@ -80,39 +91,7 @@ text:
     name: "Slot 4 · Entity"
     device_id: lights_device
 
-select:
-  - id: !extend light_slot1_function
-    name: "Slot 1 · Function"
-    device_id: lights_device
-  - id: !extend light_slot2_function
-    name: "Slot 2 · Function"
-    device_id: lights_device
-  - id: !extend light_slot3_function
-    name: "Slot 3 · Function"
-    device_id: lights_device
-  - id: !extend light_slot4_function
-    name: "Slot 4 · Function"
-    device_id: lights_device
-
-switch:
-  - id: !extend light_slot1_ignore_all_off
-    name: "Slot 1 · Ignore All Off"
-    device_id: lights_device
-  - id: !extend light_slot2_ignore_all_off
-    name: "Slot 2 · Ignore All Off"
-    device_id: lights_device
-  - id: !extend light_slot3_ignore_all_off
-    name: "Slot 3 · Ignore All Off"
-    device_id: lights_device
-  - id: !extend light_slot4_ignore_all_off
-    name: "Slot 4 · Ignore All Off"
-    device_id: lights_device
-
-# -----------------------------------------------------------------------------
-# Blinds
-# -----------------------------------------------------------------------------
-
-text:
+  # Blinds
   - id: !extend blind_slot1_name
     name: "Slot 1 · Name"
     device_id: blinds_device
@@ -137,3 +116,17 @@ text:
   - id: !extend blind_slot4_entity
     name: "Slot 4 · Entity"
     device_id: blinds_device
+
+switch:
+  - id: !extend light_slot1_ignore_all_off
+    name: "Slot 1 · Ignore All Off"
+    device_id: lights_device
+  - id: !extend light_slot2_ignore_all_off
+    name: "Slot 2 · Ignore All Off"
+    device_id: lights_device
+  - id: !extend light_slot3_ignore_all_off
+    name: "Slot 3 · Ignore All Off"
+    device_id: lights_device
+  - id: !extend light_slot4_ignore_all_off
+    name: "Slot 4 · Ignore All Off"
+    device_id: lights_device
