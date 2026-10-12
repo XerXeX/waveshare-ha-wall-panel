@@ -208,6 +208,14 @@ lvgl:
                   text: "--"
                   text_font: ui_font_18
                   text_color: 0x858B94
+              - image:
+                  id: cover_slot1_icon
+                  src: icon_blinds
+                  align: TOP_RIGHT
+                  x: -14
+                  y: 10
+                  image_recolor: 0xFFB300
+                  image_recolor_opa: 100%
               - button:
                   id: cover_slot1_p0_button
                   x: 10
@@ -366,6 +374,14 @@ lvgl:
                   text: "--"
                   text_font: ui_font_18
                   text_color: 0x858B94
+              - image:
+                  id: cover_slot2_icon
+                  src: icon_blinds
+                  align: TOP_RIGHT
+                  x: -14
+                  y: 10
+                  image_recolor: 0xFFB300
+                  image_recolor_opa: 100%
               - button:
                   id: cover_slot2_p0_button
                   x: 10
@@ -524,6 +540,14 @@ lvgl:
                   text: "--"
                   text_font: ui_font_18
                   text_color: 0x858B94
+              - image:
+                  id: cover_slot3_icon
+                  src: icon_blinds
+                  align: TOP_RIGHT
+                  x: -14
+                  y: 10
+                  image_recolor: 0xFFB300
+                  image_recolor_opa: 100%
               - button:
                   id: cover_slot3_p0_button
                   x: 10
@@ -682,6 +706,14 @@ lvgl:
                   text: "--"
                   text_font: ui_font_18
                   text_color: 0x858B94
+              - image:
+                  id: cover_slot4_icon
+                  src: icon_blinds
+                  align: TOP_RIGHT
+                  x: -14
+                  y: 10
+                  image_recolor: 0xFFB300
+                  image_recolor_opa: 100%
               - button:
                   id: cover_slot4_p0_button
                   x: 10
@@ -913,6 +945,17 @@ lvgl:
                   text: "DOWN"
                   text_font: ui_font_18
                   text_color: 0xFFFFFF
+  top_layer:
+    widgets:
+      - obj:
+          id: !extend bottom_nav
+          widgets:
+            - button:
+                id: !extend nav_blinds_button
+                widgets:
+                  - image:
+                      id: !extend nav_blinds_icon
+                      src: icon_blinds
 interval:
   - interval: 250ms
     then:
@@ -947,6 +990,9 @@ interval:
 
           lv_obj_t *cards[4] = {
             id(cover_slot1_card), id(cover_slot2_card), id(cover_slot3_card), id(cover_slot4_card)
+          };
+          lv_obj_t *cover_icons[4] = {
+            id(cover_slot1_icon), id(cover_slot2_icon), id(cover_slot3_icon), id(cover_slot4_icon)
           };
           lv_obj_t *p0[4] = {
             id(cover_slot1_p0_button), id(cover_slot2_p0_button), id(cover_slot3_p0_button), id(cover_slot4_p0_button)
@@ -984,6 +1030,7 @@ interval:
             &panel.get_cover_slot(1), &panel.get_cover_slot(2),
             &panel.get_cover_slot(3), &panel.get_cover_slot(4)
           };
+          static int last_cover_icon_state[4] = {-1, -1, -1, -1};
 
           int visible_indices[4];
           int visible_count = 0;
@@ -997,6 +1044,17 @@ interval:
             const int i = visible_indices[rank];
             const bool full_width = visible_count <= 2;
             const bool positioned = slots[i]->has_position;
+            const bool fully_open = slots[i]->available &&
+              ((slots[i]->has_position && slots[i]->position_pct >= 100) ||
+               (!slots[i]->has_position && slots[i]->state == "open"));
+            const int icon_state = fully_open ? 1 : 0;
+
+            if (last_cover_icon_state[i] != icon_state) {
+              last_cover_icon_state[i] = icon_state;
+              esphome::lvgl::lv_image_set_src(
+                cover_icons[i], fully_open ? id(icon_blinds_open) : id(icon_blinds)
+              );
+            }
 
             if (full_width)
               set_geometry_if_changed(cards[i], 20, 72 + rank * 150, 440);
