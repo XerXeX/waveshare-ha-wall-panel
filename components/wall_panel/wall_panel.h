@@ -5,7 +5,6 @@
 #include "esphome/components/api/custom_api_device.h"
 
 #include <array>
-#include <cctype>
 #include <map>
 #include <string>
 
@@ -142,66 +141,6 @@ class WallPanel : public Component, public api::CustomAPIDevice {
     if (slot < 1 || slot > SCENE_SLOT_COUNT)
       return empty;
     return this->scene_icons_[slot - 1];
-  }
-
-  // Execute a compact, runtime-editable list of Home Assistant actions.
-  // Format, one command per line or separated by semicolons:
-  //   light.turn_on light.living_room brightness_pct=40
-  //   cover.close_cover cover.living_room
-  void execute_local_actions(const std::string &actions) {
-    auto trim = [](std::string value) {
-      while (!value.empty() && std::isspace(static_cast<unsigned char>(value.front())))
-        value.erase(value.begin());
-      while (!value.empty() && std::isspace(static_cast<unsigned char>(value.back())))
-        value.pop_back();
-      return value;
-    };
-
-    size_t start = 0;
-    while (start < actions.size()) {
-      size_t end = actions.find_first_of(";\n", start);
-      if (end == std::string::npos)
-        end = actions.size();
-
-      std::string command = trim(actions.substr(start, end - start));
-      start = end + 1;
-      if (command.empty())
-        continue;
-
-      size_t cursor = 0;
-      auto next_token = [&command, &cursor]() -> std::string {
-        while (cursor < command.size() && std::isspace(static_cast<unsigned char>(command[cursor])))
-          cursor++;
-        if (cursor >= command.size())
-          return {};
-        const size_t token_start = cursor;
-        while (cursor < command.size() && !std::isspace(static_cast<unsigned char>(command[cursor])))
-          cursor++;
-        return command.substr(token_start, cursor - token_start);
-      };
-
-      const std::string service = next_token();
-      if (service.empty() || service.find('.') == std::string::npos)
-        continue;
-
-      std::map<std::string, std::string> data;
-      bool entity_assigned = false;
-      while (true) {
-        const std::string token = next_token();
-        if (token.empty())
-          break;
-        const size_t separator = token.find('=');
-        if (separator != std::string::npos) {
-          if (separator > 0 && separator + 1 < token.size())
-            data[token.substr(0, separator)] = token.substr(separator + 1);
-        } else if (!entity_assigned) {
-          data["entity_id"] = token;
-          entity_assigned = true;
-        }
-      }
-
-      this->call_homeassistant_service_checked_(service, data);
-    }
   }
 
   bool has_action_permission_warning() const { return this->action_permission_warning_; }
