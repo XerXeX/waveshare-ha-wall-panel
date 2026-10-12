@@ -6,6 +6,7 @@ esphome:
       then:
         - lambda: |-
             id(wall_panel_language).publish_state(id(wall_panel_controller).get_language_option());
+            id(wall_panel_rotation).publish_state(id(wall_panel_controller).get_display_rotation_option());
 
 select:
   - platform: template
@@ -19,6 +20,21 @@ select:
     set_action:
       - lambda: |-
           id(wall_panel_controller).set_language(x);
+
+  - platform: template
+    id: wall_panel_rotation
+    name: "Display Rotation"
+    entity_category: config
+    optimistic: true
+    restore_value: false
+    initial_option: "0°"
+    options: ["0°", "90°", "180°", "270°"]
+    set_action:
+      - lambda: |-
+          id(wall_panel_controller).set_display_rotation(std::atoi(x.c_str()));
+      - lvgl.display.set_rotation:
+          lvgl_id: wall_panel_lvgl
+          rotation: !lambda return std::atoi(x.c_str());
 
 font:
   - file: "https://raw.githubusercontent.com/XerXeX/waveshare-ha-wall-panel/main/assets/fonts/Roboto-Regular.ttf"
@@ -113,10 +129,158 @@ image:
 # raises this overlay so the user knows exactly which permission needs enabling.
 lvgl:
   id: wall_panel_lvgl
+  rotation: 0
   on_boot:
     - lvgl.widget.hide: ha_action_permission_overlay
+    - lvgl.display.set_rotation:
+        rotation: !lambda return id(wall_panel_controller).get_display_rotation();
   top_layer:
     widgets:
+      - obj:
+          id: bottom_nav
+          x: 0
+          y: 390
+          width: 480
+          height: 90
+          bg_color: 0x101216
+          bg_opa: 100%
+          border_width: 0
+          radius: 0
+          clickable: false
+          widgets:
+            - button:
+                id: nav_light_button
+                x: 16
+                y: 8
+                width: 96
+                height: 72
+                bg_color: 0x343A44
+                radius: 18
+                border_width: 0
+                clickable: false
+                on_click:
+                  - script.execute: ui_click
+                  - lvgl.page.show: lights_page
+                  - lambda: |-
+                      lv_obj_clear_flag(id(nav_light_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_add_flag(id(nav_blinds_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_add_flag(id(nav_audio_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_add_flag(id(nav_scenes_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_set_style_bg_color(id(nav_light_button), lv_color_hex(0x343A44), LV_PART_MAIN);
+                      lv_obj_set_style_bg_color(id(nav_blinds_button), lv_color_hex(0x181B20), LV_PART_MAIN);
+                      lv_obj_set_style_bg_color(id(nav_audio_button), lv_color_hex(0x181B20), LV_PART_MAIN);
+                      lv_obj_set_style_bg_color(id(nav_scenes_button), lv_color_hex(0x181B20), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_light_icon), lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_blinds_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_audio_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_scenes_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                widgets:
+                  - image:
+                      id: nav_light_icon
+                      src: nav_light
+                      align: CENTER
+                      image_recolor: 0xFFFFFF
+                      image_recolor_opa: 100%
+
+            - button:
+                id: nav_blinds_button
+                x: 128
+                y: 8
+                width: 96
+                height: 72
+                bg_color: 0x181B20
+                radius: 18
+                border_width: 0
+                on_click:
+                  - script.execute: ui_click
+                  - lvgl.page.show: blinds_page
+                  - lambda: |-
+                      lv_obj_add_flag(id(nav_light_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_clear_flag(id(nav_blinds_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_add_flag(id(nav_audio_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_add_flag(id(nav_scenes_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_set_style_bg_color(id(nav_light_button), lv_color_hex(0x181B20), LV_PART_MAIN);
+                      lv_obj_set_style_bg_color(id(nav_blinds_button), lv_color_hex(0x343A44), LV_PART_MAIN);
+                      lv_obj_set_style_bg_color(id(nav_audio_button), lv_color_hex(0x181B20), LV_PART_MAIN);
+                      lv_obj_set_style_bg_color(id(nav_scenes_button), lv_color_hex(0x181B20), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_light_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_blinds_icon), lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_audio_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_scenes_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                widgets:
+                  - image:
+                      id: nav_blinds_icon
+                      src: nav_blinds
+                      align: CENTER
+                      image_recolor: 0x858B94
+                      image_recolor_opa: 100%
+
+            - button:
+                id: nav_audio_button
+                x: 240
+                y: 8
+                width: 96
+                height: 72
+                bg_color: 0x181B20
+                radius: 18
+                border_width: 0
+                on_click:
+                  - script.execute: ui_click
+                  - lvgl.page.show: audio_page
+                  - lambda: |-
+                      lv_obj_add_flag(id(nav_light_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_add_flag(id(nav_blinds_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_clear_flag(id(nav_audio_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_add_flag(id(nav_scenes_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_set_style_bg_color(id(nav_light_button), lv_color_hex(0x181B20), LV_PART_MAIN);
+                      lv_obj_set_style_bg_color(id(nav_blinds_button), lv_color_hex(0x181B20), LV_PART_MAIN);
+                      lv_obj_set_style_bg_color(id(nav_audio_button), lv_color_hex(0x343A44), LV_PART_MAIN);
+                      lv_obj_set_style_bg_color(id(nav_scenes_button), lv_color_hex(0x181B20), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_light_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_blinds_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_audio_icon), lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_scenes_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                widgets:
+                  - image:
+                      id: nav_audio_icon
+                      src: nav_audio
+                      align: CENTER
+                      image_recolor: 0x858B94
+                      image_recolor_opa: 100%
+
+            - button:
+                id: nav_scenes_button
+                x: 352
+                y: 8
+                width: 96
+                height: 72
+                bg_color: 0x181B20
+                radius: 18
+                border_width: 0
+                on_click:
+                  - script.execute: ui_click
+                  - lvgl.page.show: scenes_page
+                  - lambda: |-
+                      lv_obj_add_flag(id(nav_light_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_add_flag(id(nav_blinds_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_add_flag(id(nav_audio_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_clear_flag(id(nav_scenes_button), LV_OBJ_FLAG_CLICKABLE);
+                      lv_obj_set_style_bg_color(id(nav_light_button), lv_color_hex(0x181B20), LV_PART_MAIN);
+                      lv_obj_set_style_bg_color(id(nav_blinds_button), lv_color_hex(0x181B20), LV_PART_MAIN);
+                      lv_obj_set_style_bg_color(id(nav_audio_button), lv_color_hex(0x181B20), LV_PART_MAIN);
+                      lv_obj_set_style_bg_color(id(nav_scenes_button), lv_color_hex(0x343A44), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_light_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_blinds_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_audio_icon), lv_color_hex(0x858B94), LV_PART_MAIN);
+                      lv_obj_set_style_image_recolor(id(nav_scenes_icon), lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+                widgets:
+                  - image:
+                      id: nav_scenes_icon
+                      src: nav_scenes
+                      align: CENTER
+                      image_recolor: 0x858B94
+                      image_recolor_opa: 100%
+
       - obj:
           id: ha_action_permission_overlay
           x: 20
@@ -174,6 +338,9 @@ interval:
             id(ha_action_permission_body),
             id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::ACTION_PERMISSION_MESSAGE)
           );
+          lv_label_set_text(id(blinds_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::BLINDS));
+          lv_label_set_text(id(audio_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::AUDIO));
+          lv_label_set_text(id(scenes_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::SCENES));
       - if:
           condition:
             lambda: return id(wall_panel_controller).has_action_permission_warning();
