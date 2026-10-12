@@ -206,6 +206,7 @@ lvgl:
           bg_opa: 100%
           border_width: 0
           radius: 0
+          pad_all: 0
           clickable: true
           scrollable: false
           scrollbar_mode: "OFF"
@@ -215,12 +216,13 @@ lvgl:
           widgets:
             - obj:
                 id: screensaver_digital
-                x: 0
+                x: -40
                 y: 0
                 width: 480
                 height: 480
                 bg_opa: TRANSP
                 border_width: 0
+                pad_all: 0
                 clickable: false
                 scrollable: false
                 scrollbar_mode: "OFF"
@@ -228,7 +230,6 @@ lvgl:
                   - label:
                       id: screensaver_digital_time
                       align: CENTER
-                      x: -6
                       y: -35
                       text: "--:--"
                       text_font: screensaver_clock_font
@@ -252,6 +253,7 @@ lvgl:
                 height: 480
                 bg_opa: TRANSP
                 border_width: 0
+                pad_all: 0
                 clickable: false
                 scrollable: false
                 scrollbar_mode: "OFF"
