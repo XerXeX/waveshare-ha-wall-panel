@@ -57,7 +57,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_cover_name(1, x);
-
   - platform: template
     id: cover_slot1_entity
     name: "Blinds · Slot 1 · 2 Entity"
@@ -70,7 +69,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_cover_entity(1, x);
-
   - platform: template
     id: cover_slot2_name
     name: "Blinds · Slot 2 · 1 Name"
@@ -83,7 +81,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_cover_name(2, x);
-
   - platform: template
     id: cover_slot2_entity
     name: "Blinds · Slot 2 · 2 Entity"
@@ -96,7 +93,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_cover_entity(2, x);
-
   - platform: template
     id: cover_slot3_name
     name: "Blinds · Slot 3 · 1 Name"
@@ -109,7 +105,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_cover_name(3, x);
-
   - platform: template
     id: cover_slot3_entity
     name: "Blinds · Slot 3 · 2 Entity"
@@ -122,7 +117,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_cover_entity(3, x);
-
   - platform: template
     id: cover_slot4_name
     name: "Blinds · Slot 4 · 1 Name"
@@ -135,7 +129,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_cover_name(4, x);
-
   - platform: template
     id: cover_slot4_entity
     name: "Blinds · Slot 4 · 2 Entity"
@@ -148,7 +141,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_cover_entity(4, x);
-
 lvgl:
   id: wall_panel_lvgl
   pages:
@@ -162,7 +154,6 @@ lvgl:
             text: "Blinds"
             text_font: ui_font_34
             text_color: 0xFFFFFF
-
         - obj:
             id: cover_slot1_card
             x: 20
@@ -188,13 +179,19 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_cover_slot(1);
                         id(active_cover_slot) = 1;
                         id(cover_position_dirty) = false;
-                        lv_label_set_text(id(cover_detail_name), slot.name.c_str());
+                        const char *current_name = lv_label_get_text(id(cover_detail_name));
+                        if (current_name == nullptr || std::strcmp(current_name, slot.name.c_str()) != 0)
+                          lv_label_set_text(id(cover_detail_name), slot.name.c_str());
                         char text[16];
                         snprintf(text, sizeof(text), "%d%%", slot.position_pct);
-                        lv_label_set_text(id(cover_detail_percent), text);
-                        id(cover_slider_syncing) = true;
-                        lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
-                        id(cover_slider_syncing) = false;
+                        const char *current_text = lv_label_get_text(id(cover_detail_percent));
+                        if (current_text == nullptr || std::strcmp(current_text, text) != 0)
+                          lv_label_set_text(id(cover_detail_percent), text);
+                        if (lv_slider_get_value(id(cover_detail_slider)) != slot.position_pct) {
+                          id(cover_slider_syncing) = true;
+                          lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
+                          id(cover_slider_syncing) = false;
+                        }
                     - lvgl.page.show: cover_detail_page
             widgets:
               - label:
@@ -315,7 +312,6 @@ lvgl:
                         text: "DOWN"
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
-
         - obj:
             id: cover_slot2_card
             x: 250
@@ -341,13 +337,19 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_cover_slot(2);
                         id(active_cover_slot) = 2;
                         id(cover_position_dirty) = false;
-                        lv_label_set_text(id(cover_detail_name), slot.name.c_str());
+                        const char *current_name = lv_label_get_text(id(cover_detail_name));
+                        if (current_name == nullptr || std::strcmp(current_name, slot.name.c_str()) != 0)
+                          lv_label_set_text(id(cover_detail_name), slot.name.c_str());
                         char text[16];
                         snprintf(text, sizeof(text), "%d%%", slot.position_pct);
-                        lv_label_set_text(id(cover_detail_percent), text);
-                        id(cover_slider_syncing) = true;
-                        lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
-                        id(cover_slider_syncing) = false;
+                        const char *current_text = lv_label_get_text(id(cover_detail_percent));
+                        if (current_text == nullptr || std::strcmp(current_text, text) != 0)
+                          lv_label_set_text(id(cover_detail_percent), text);
+                        if (lv_slider_get_value(id(cover_detail_slider)) != slot.position_pct) {
+                          id(cover_slider_syncing) = true;
+                          lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
+                          id(cover_slider_syncing) = false;
+                        }
                     - lvgl.page.show: cover_detail_page
             widgets:
               - label:
@@ -468,7 +470,6 @@ lvgl:
                         text: "DOWN"
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
-
         - obj:
             id: cover_slot3_card
             x: 20
@@ -494,13 +495,19 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_cover_slot(3);
                         id(active_cover_slot) = 3;
                         id(cover_position_dirty) = false;
-                        lv_label_set_text(id(cover_detail_name), slot.name.c_str());
+                        const char *current_name = lv_label_get_text(id(cover_detail_name));
+                        if (current_name == nullptr || std::strcmp(current_name, slot.name.c_str()) != 0)
+                          lv_label_set_text(id(cover_detail_name), slot.name.c_str());
                         char text[16];
                         snprintf(text, sizeof(text), "%d%%", slot.position_pct);
-                        lv_label_set_text(id(cover_detail_percent), text);
-                        id(cover_slider_syncing) = true;
-                        lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
-                        id(cover_slider_syncing) = false;
+                        const char *current_text = lv_label_get_text(id(cover_detail_percent));
+                        if (current_text == nullptr || std::strcmp(current_text, text) != 0)
+                          lv_label_set_text(id(cover_detail_percent), text);
+                        if (lv_slider_get_value(id(cover_detail_slider)) != slot.position_pct) {
+                          id(cover_slider_syncing) = true;
+                          lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
+                          id(cover_slider_syncing) = false;
+                        }
                     - lvgl.page.show: cover_detail_page
             widgets:
               - label:
@@ -621,7 +628,6 @@ lvgl:
                         text: "DOWN"
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
-
         - obj:
             id: cover_slot4_card
             x: 250
@@ -647,13 +653,19 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_cover_slot(4);
                         id(active_cover_slot) = 4;
                         id(cover_position_dirty) = false;
-                        lv_label_set_text(id(cover_detail_name), slot.name.c_str());
+                        const char *current_name = lv_label_get_text(id(cover_detail_name));
+                        if (current_name == nullptr || std::strcmp(current_name, slot.name.c_str()) != 0)
+                          lv_label_set_text(id(cover_detail_name), slot.name.c_str());
                         char text[16];
                         snprintf(text, sizeof(text), "%d%%", slot.position_pct);
-                        lv_label_set_text(id(cover_detail_percent), text);
-                        id(cover_slider_syncing) = true;
-                        lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
-                        id(cover_slider_syncing) = false;
+                        const char *current_text = lv_label_get_text(id(cover_detail_percent));
+                        if (current_text == nullptr || std::strcmp(current_text, text) != 0)
+                          lv_label_set_text(id(cover_detail_percent), text);
+                        if (lv_slider_get_value(id(cover_detail_slider)) != slot.position_pct) {
+                          id(cover_slider_syncing) = true;
+                          lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
+                          id(cover_slider_syncing) = false;
+                        }
                     - lvgl.page.show: cover_detail_page
             widgets:
               - label:
@@ -774,7 +786,6 @@ lvgl:
                         text: "DOWN"
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
-
     - id: cover_detail_page
       bg_color: 0x101216
       widgets:
@@ -799,7 +810,6 @@ lvgl:
                   text: "‹"
                   text_font: ui_font_34
                   text_color: 0xFFFFFF
-
         - label:
             id: cover_detail_name
             x: 104
@@ -807,7 +817,6 @@ lvgl:
             text: "Blind"
             text_font: ui_font_28
             text_color: 0xFFFFFF
-
         - label:
             id: cover_detail_percent
             align: CENTER
@@ -815,7 +824,6 @@ lvgl:
             text: "--%"
             text_font: ui_font_34
             text_color: 0xFFFFFF
-
         - slider:
             id: cover_detail_slider
             x: 40
@@ -834,14 +842,15 @@ lvgl:
               - lambda: |-
                   char text[16];
                   snprintf(text, sizeof(text), "%d%%", (int) x);
-                  lv_label_set_text(id(cover_detail_percent), text);
+                  const char *current = lv_label_get_text(id(cover_detail_percent));
+                  if (current == nullptr || std::strcmp(current, text) != 0)
+                    lv_label_set_text(id(cover_detail_percent), text);
             on_change:
               - lambda: |-
                   if (id(cover_slider_syncing))
                     return;
                   id(pending_cover_position) = (int) x;
                   id(cover_position_dirty) = true;
-
         - button:
             id: cover_detail_open_button
             x: 40
@@ -863,7 +872,6 @@ lvgl:
                   text: "UP"
                   text_font: ui_font_18
                   text_color: 0xFFFFFF
-
         - button:
             id: cover_detail_stop_button
             x: 180
@@ -884,7 +892,6 @@ lvgl:
                   text: "STOP"
                   text_font: ui_font_18
                   text_color: 0xFFFFFF
-
         - button:
             id: cover_detail_close_button
             x: 320
@@ -906,16 +913,37 @@ lvgl:
                   text: "DOWN"
                   text_font: ui_font_18
                   text_color: 0xFFFFFF
-
 interval:
   - interval: 250ms
     then:
       - lambda: |-
           auto &panel = *id(wall_panel_controller);
           const bool da = std::string(panel.get_language_option()) == "Danish";
-          lv_label_set_text(id(blinds_page_title), panel.tr(esphome::wall_panel::TranslationKey::BLINDS));
-          lv_label_set_text(id(cover_detail_open_label), da ? "OP" : "UP");
-          lv_label_set_text(id(cover_detail_close_label), da ? "NED" : "DOWN");
+
+          auto set_text_if_changed = [](lv_obj_t *label, const char *text) {
+            const char *current = lv_label_get_text(label);
+            if (current == nullptr || std::strcmp(current, text) != 0)
+              lv_label_set_text(label, text);
+          };
+          auto set_hidden_if_changed = [](lv_obj_t *obj, bool hidden) {
+            const bool current = lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN);
+            if (current == hidden)
+              return;
+            if (hidden)
+              lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
+            else
+              lv_obj_clear_flag(obj, LV_OBJ_FLAG_HIDDEN);
+          };
+          auto set_geometry_if_changed = [](lv_obj_t *obj, int x, int y, int width) {
+            if (lv_obj_get_x(obj) != x || lv_obj_get_y(obj) != y)
+              lv_obj_set_pos(obj, x, y);
+            if (lv_obj_get_width(obj) != width)
+              lv_obj_set_width(obj, width);
+          };
+
+          set_text_if_changed(id(blinds_page_title), panel.tr(esphome::wall_panel::TranslationKey::BLINDS));
+          set_text_if_changed(id(cover_detail_open_label), da ? "OP" : "UP");
+          set_text_if_changed(id(cover_detail_close_label), da ? "NED" : "DOWN");
 
           lv_obj_t *cards[4] = {
             id(cover_slot1_card), id(cover_slot2_card), id(cover_slot3_card), id(cover_slot4_card)
@@ -944,6 +972,14 @@ interval:
           lv_obj_t *p100_labels[4] = {
             id(cover_slot1_p100_label), id(cover_slot2_p100_label), id(cover_slot3_p100_label), id(cover_slot4_p100_label)
           };
+          lv_obj_t *name_labels[4] = {
+            id(cover_slot1_name_label), id(cover_slot2_name_label),
+            id(cover_slot3_name_label), id(cover_slot4_name_label)
+          };
+          lv_obj_t *state_labels[4] = {
+            id(cover_slot1_state_label), id(cover_slot2_state_label),
+            id(cover_slot3_state_label), id(cover_slot4_state_label)
+          };
           const esphome::wall_panel::CoverSlotState *slots[4] = {
             &panel.get_cover_slot(1), &panel.get_cover_slot(2),
             &panel.get_cover_slot(3), &panel.get_cover_slot(4)
@@ -952,6 +988,7 @@ interval:
           int visible_indices[4];
           int visible_count = 0;
           for (int i = 0; i < 4; i++) {
+            set_hidden_if_changed(cards[i], !slots[i]->configured);
             if (slots[i]->configured)
               visible_indices[visible_count++] = i;
           }
@@ -961,110 +998,89 @@ interval:
             const bool full_width = visible_count <= 2;
             const bool positioned = slots[i]->has_position;
 
-            if (full_width) {
-              lv_obj_set_pos(cards[i], 20, 72 + rank * 150);
-              lv_obj_set_width(cards[i], 440);
-            } else {
-              lv_obj_set_pos(cards[i], rank % 2 == 0 ? 20 : 250, rank < 2 ? 72 : 222);
-              lv_obj_set_width(cards[i], 210);
-            }
+            if (full_width)
+              set_geometry_if_changed(cards[i], 20, 72 + rank * 150, 440);
+            else
+              set_geometry_if_changed(cards[i], rank % 2 == 0 ? 20 : 250, rank < 2 ? 72 : 222, 210);
 
             if (positioned) {
-              lv_label_set_text(p0_labels[i], "0%");
-              lv_label_set_text(p50_labels[i], "50%");
-              lv_label_set_text(p100_labels[i], "100%");
+              set_text_if_changed(p0_labels[i], "0%");
+              set_text_if_changed(p50_labels[i], "50%");
+              set_text_if_changed(p100_labels[i], "100%");
+
+              set_hidden_if_changed(p25[i], !full_width);
+              set_hidden_if_changed(p75[i], !full_width);
 
               if (full_width) {
-                lv_obj_clear_flag(p25[i], LV_OBJ_FLAG_HIDDEN);
-                lv_obj_clear_flag(p75[i], LV_OBJ_FLAG_HIDDEN);
-
-                lv_obj_set_pos(p0[i], 14, 82);   lv_obj_set_width(p0[i], 76);
-                lv_obj_set_pos(p25[i], 98, 82);  lv_obj_set_width(p25[i], 76);
-                lv_obj_set_pos(p50[i], 182, 82); lv_obj_set_width(p50[i], 76);
-                lv_obj_set_pos(p75[i], 266, 82); lv_obj_set_width(p75[i], 76);
-                lv_obj_set_pos(p100[i], 350, 82); lv_obj_set_width(p100[i], 76);
+                set_geometry_if_changed(p0[i], 14, 82, 76);
+                set_geometry_if_changed(p25[i], 98, 82, 76);
+                set_geometry_if_changed(p50[i], 182, 82, 76);
+                set_geometry_if_changed(p75[i], 266, 82, 76);
+                set_geometry_if_changed(p100[i], 350, 82, 76);
               } else {
-                lv_obj_add_flag(p25[i], LV_OBJ_FLAG_HIDDEN);
-                lv_obj_add_flag(p75[i], LV_OBJ_FLAG_HIDDEN);
-
-                lv_obj_set_pos(p0[i], 10, 82);   lv_obj_set_width(p0[i], 58);
-                lv_obj_set_pos(p50[i], 76, 82);  lv_obj_set_width(p50[i], 58);
-                lv_obj_set_pos(p100[i], 142, 82); lv_obj_set_width(p100[i], 58);
+                set_geometry_if_changed(p0[i], 10, 82, 58);
+                set_geometry_if_changed(p50[i], 76, 82, 58);
+                set_geometry_if_changed(p100[i], 142, 82, 58);
               }
             } else {
-              lv_obj_add_flag(p25[i], LV_OBJ_FLAG_HIDDEN);
-              lv_obj_add_flag(p75[i], LV_OBJ_FLAG_HIDDEN);
-              lv_label_set_text(p0_labels[i], da ? "OP" : "UP");
-              lv_label_set_text(p50_labels[i], "STOP");
-              lv_label_set_text(p100_labels[i], da ? "NED" : "DOWN");
+              set_hidden_if_changed(p25[i], true);
+              set_hidden_if_changed(p75[i], true);
+              set_text_if_changed(p0_labels[i], da ? "OP" : "UP");
+              set_text_if_changed(p50_labels[i], "STOP");
+              set_text_if_changed(p100_labels[i], da ? "NED" : "DOWN");
 
               if (full_width) {
-                lv_obj_set_pos(p0[i], 14, 82);   lv_obj_set_width(p0[i], 132);
-                lv_obj_set_pos(p50[i], 154, 82); lv_obj_set_width(p50[i], 132);
-                lv_obj_set_pos(p100[i], 294, 82); lv_obj_set_width(p100[i], 132);
+                set_geometry_if_changed(p0[i], 14, 82, 132);
+                set_geometry_if_changed(p50[i], 154, 82, 132);
+                set_geometry_if_changed(p100[i], 294, 82, 132);
               } else {
-                lv_obj_set_pos(p0[i], 10, 82);   lv_obj_set_width(p0[i], 58);
-                lv_obj_set_pos(p50[i], 76, 82);  lv_obj_set_width(p50[i], 58);
-                lv_obj_set_pos(p100[i], 142, 82); lv_obj_set_width(p100[i], 58);
+                set_geometry_if_changed(p0[i], 10, 82, 58);
+                set_geometry_if_changed(p50[i], 76, 82, 58);
+                set_geometry_if_changed(p100[i], 142, 82, 58);
               }
             }
+
+            set_text_if_changed(name_labels[i], slots[i]->name.c_str());
+
+            char state_text[48];
+            if (!slots[i]->available) {
+              snprintf(state_text, sizeof(state_text), "%s", da ? "Ikke tilgængelig" : "Unavailable");
+            } else if (slots[i]->state == "opening") {
+              if (slots[i]->has_position)
+                snprintf(state_text, sizeof(state_text), "%s · %d%%", da ? "Åbner" : "Opening", slots[i]->position_pct);
+              else
+                snprintf(state_text, sizeof(state_text), "%s", da ? "Åbner" : "Opening");
+            } else if (slots[i]->state == "closing") {
+              if (slots[i]->has_position)
+                snprintf(state_text, sizeof(state_text), "%s · %d%%", da ? "Lukker" : "Closing", slots[i]->position_pct);
+              else
+                snprintf(state_text, sizeof(state_text), "%s", da ? "Lukker" : "Closing");
+            } else if (slots[i]->has_position) {
+              snprintf(state_text, sizeof(state_text), "%d%%", slots[i]->position_pct);
+            } else if (slots[i]->state == "open") {
+              snprintf(state_text, sizeof(state_text), "%s", da ? "Åben" : "Open");
+            } else if (slots[i]->state == "closed") {
+              snprintf(state_text, sizeof(state_text), "%s", da ? "Lukket" : "Closed");
+            } else {
+              snprintf(state_text, sizeof(state_text), "%s", slots[i]->state.c_str());
+            }
+            set_text_if_changed(state_labels[i], state_text);
           }
-
-          auto update_card = [da](lv_obj_t *card, lv_obj_t *name_label, lv_obj_t *state_label,
-                                  const esphome::wall_panel::CoverSlotState &slot) {
-            if (!slot.configured) {
-              lv_obj_add_flag(card, LV_OBJ_FLAG_HIDDEN);
-              return;
-            }
-            lv_obj_clear_flag(card, LV_OBJ_FLAG_HIDDEN);
-            lv_label_set_text(name_label, slot.name.c_str());
-
-            if (!slot.available) {
-              lv_label_set_text(state_label, da ? "Ikke tilgængelig" : "Unavailable");
-              lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
-              return;
-            }
-
-            char text[48];
-            if (slot.state == "opening") {
-              if (slot.has_position)
-                snprintf(text, sizeof(text), "%s · %d%%", da ? "Åbner" : "Opening", slot.position_pct);
-              else
-                snprintf(text, sizeof(text), "%s", da ? "Åbner" : "Opening");
-            } else if (slot.state == "closing") {
-              if (slot.has_position)
-                snprintf(text, sizeof(text), "%s · %d%%", da ? "Lukker" : "Closing", slot.position_pct);
-              else
-                snprintf(text, sizeof(text), "%s", da ? "Lukker" : "Closing");
-            } else if (slot.has_position) {
-              snprintf(text, sizeof(text), "%d%%", slot.position_pct);
-            } else if (slot.state == "open") {
-              snprintf(text, sizeof(text), "%s", da ? "Åben" : "Open");
-            } else if (slot.state == "closed") {
-              snprintf(text, sizeof(text), "%s", da ? "Lukket" : "Closed");
-            } else {
-              snprintf(text, sizeof(text), "%s", slot.state.c_str());
-            }
-            lv_label_set_text(state_label, text);
-            lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
-          };
-
-          update_card(id(cover_slot1_card), id(cover_slot1_name_label), id(cover_slot1_state_label), panel.get_cover_slot(1));
-          update_card(id(cover_slot2_card), id(cover_slot2_name_label), id(cover_slot2_state_label), panel.get_cover_slot(2));
-          update_card(id(cover_slot3_card), id(cover_slot3_name_label), id(cover_slot3_state_label), panel.get_cover_slot(3));
-          update_card(id(cover_slot4_card), id(cover_slot4_name_label), id(cover_slot4_state_label), panel.get_cover_slot(4));
 
           if (id(active_cover_slot) >= 1 && id(active_cover_slot) <= 4 && !id(cover_position_dirty)) {
             const auto &slot = panel.get_cover_slot(id(active_cover_slot));
-            lv_label_set_text(id(cover_detail_name), slot.name.c_str());
+            set_text_if_changed(id(cover_detail_name), slot.name.c_str());
 
             if (slot.has_position) {
-              id(cover_slider_syncing) = true;
-              lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
-              id(cover_slider_syncing) = false;
+              if (lv_slider_get_value(id(cover_detail_slider)) != slot.position_pct) {
+                id(cover_slider_syncing) = true;
+                lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
+                id(cover_slider_syncing) = false;
+              }
+
               char text[16];
               snprintf(text, sizeof(text), "%d%%", slot.position_pct);
-              lv_label_set_text(id(cover_detail_percent), text);
+              set_text_if_changed(id(cover_detail_percent), text);
             }
           }
 
