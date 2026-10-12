@@ -216,7 +216,7 @@ lvgl:
           widgets:
             - obj:
                 id: screensaver_digital
-                x: -40
+                x: 0
                 y: 0
                 width: 480
                 height: 480
