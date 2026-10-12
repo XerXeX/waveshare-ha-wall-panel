@@ -178,49 +178,6 @@ font:
       - "°"
       - "æøåÆØÅéÉ"
 
-image:
-  - platform: file
-    file: mdi:lightbulb
-    id: icon_lightbulb
-    resize: 34x34
-    type: RGB565
-    transparency: alpha_channel
-
-  - platform: file
-    file: mdi:wall-sconce-flat
-    id: icon_lamp
-    resize: 34x34
-    type: RGB565
-    transparency: alpha_channel
-
-  - platform: file
-    file: mdi:lightbulb-outline
-    id: nav_light
-    resize: 42x42
-    type: RGB565
-    transparency: alpha_channel
-
-  - platform: file
-    file: mdi:window-shutter
-    id: nav_blinds
-    resize: 42x42
-    type: RGB565
-    transparency: alpha_channel
-
-  - platform: file
-    file: mdi:speaker
-    id: nav_audio
-    resize: 42x42
-    type: RGB565
-    transparency: alpha_channel
-
-  - platform: file
-    file: mdi:palette-outline
-    id: nav_scenes
-    resize: 42x42
-    type: RGB565
-    transparency: alpha_channel
-
 # Home Assistant does not send an action response when ESPHome service calls are
 # blocked by the device option. The wall_panel component detects that timeout and
 # raises this overlay so the user knows exactly which permission needs enabling.
@@ -270,7 +227,7 @@ lvgl:
                 widgets:
                   - image:
                       id: nav_light_icon
-                      src: nav_light
+                      src: icon_lightbulb_outline
                       align: CENTER
                       image_recolor: 0xFFFFFF
                       image_recolor_opa: 100%
@@ -293,7 +250,7 @@ lvgl:
                 widgets:
                   - image:
                       id: nav_blinds_icon
-                      src: nav_blinds
+                      src: icon_window_shutter
                       align: CENTER
                       image_recolor: 0x858B94
                       image_recolor_opa: 100%
@@ -316,7 +273,7 @@ lvgl:
                 widgets:
                   - image:
                       id: nav_audio_icon
-                      src: nav_audio
+                      src: icon_speaker
                       align: CENTER
                       image_recolor: 0x858B94
                       image_recolor_opa: 100%
@@ -339,7 +296,7 @@ lvgl:
                 widgets:
                   - image:
                       id: nav_scenes_icon
-                      src: nav_scenes
+                      src: icon_palette_outline
                       align: CENTER
                       image_recolor: 0x858B94
                       image_recolor_opa: 100%
