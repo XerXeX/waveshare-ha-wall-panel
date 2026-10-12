@@ -58,14 +58,6 @@ struct CoverSlotState {
   uint32_t supported_features{0};
 };
 
-struct SceneSlotState {
-  std::string entity_id;
-  std::string name;
-  std::string function{"Auto"};
-
-  bool configured{false};
-};
-
 // Legacy v1 storage. Kept only so existing entity selections can be migrated.
 struct LightEntityPreferencesV1 {
   uint8_t version{1};
@@ -84,13 +76,6 @@ struct CoverSlotPreferences {
   uint8_t version{1};
   char entity_ids[4][65]{};
   char names[4][33]{};
-};
-
-struct SceneSlotPreferences {
-  uint8_t version{1};
-  char entity_ids[4][65]{};
-  char names[4][33]{};
-  char functions[4][16]{};
 };
 
 struct LanguagePreferences {
@@ -135,23 +120,15 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void set_cover_position(uint8_t slot, int position_pct);
   const CoverSlotState &get_cover_slot(uint8_t slot) const;
 
-  void set_scene_entity(uint8_t slot, const std::string &entity_id);
-  void set_scene_name(uint8_t slot, const std::string &name);
-  void set_scene_function(uint8_t slot, const std::string &function);
-  void activate_scene_slot(uint8_t slot);
-  const SceneSlotState &get_scene_slot(uint8_t slot) const;
-
   bool has_action_permission_warning() const { return this->action_permission_warning_; }
   void dismiss_action_permission_warning();
 
  protected:
   static constexpr uint8_t LIGHT_SLOT_COUNT = 4;
   static constexpr uint8_t COVER_SLOT_COUNT = 4;
-  static constexpr uint8_t SCENE_SLOT_COUNT = 4;
   static constexpr uint32_t LEGACY_LIGHT_ENTITY_PREF_KEY = 0x57504C45U;
   static constexpr uint32_t LIGHT_SLOT_PREF_KEY = 0x57504C32U;
   static constexpr uint32_t COVER_SLOT_PREF_KEY = 0x57504331U;
-  static constexpr uint32_t SCENE_SLOT_PREF_KEY = 0x57505331U;
   static constexpr uint32_t LANGUAGE_PREF_KEY = 0x57504C4CU;
   static constexpr uint32_t DISPLAY_PREF_KEY = 0x57504452U;
 
@@ -162,10 +139,6 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   std::array<CoverSlotState, COVER_SLOT_COUNT> cover_slots_{};
   ESPPreferenceObject cover_slot_pref_;
   bool cover_slot_pref_ready_{false};
-
-  std::array<SceneSlotState, SCENE_SLOT_COUNT> scene_slots_{};
-  ESPPreferenceObject scene_slot_pref_;
-  bool scene_slot_pref_ready_{false};
 
   Language language_{Language::ENGLISH};
   ESPPreferenceObject language_pref_;
@@ -183,7 +156,6 @@ class WallPanel : public Component, public api::CustomAPIDevice {
 
   bool valid_slot_(uint8_t slot) const;
   bool valid_cover_slot_(uint8_t slot) const;
-  bool valid_scene_slot_(uint8_t slot) const;
   void load_language_();
   void save_language_();
   void load_display_rotation_();
@@ -196,9 +168,6 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void load_cover_configuration_();
   void save_cover_configuration_();
   void subscribe_cover_slot_(uint8_t slot);
-  void set_scene_defaults_();
-  void load_scene_configuration_();
-  void save_scene_configuration_();
   void refresh_ha_subscriptions_();
   void turn_entity_off_(const std::string &entity_id);
 
