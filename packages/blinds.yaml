@@ -23,6 +23,27 @@ esphome:
             id(cover_slot4_name).publish_state(slot4.name);
             id(cover_slot4_entity).publish_state(slot4.entity_id);
 
+globals:
+  - id: active_cover_slot
+    type: int
+    restore_value: false
+    initial_value: '0'
+
+  - id: pending_cover_position
+    type: int
+    restore_value: false
+    initial_value: '0'
+
+  - id: cover_position_dirty
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+
+  - id: cover_slider_syncing
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+
 text:
   - platform: template
     id: cover_slot1_name
@@ -152,8 +173,29 @@ lvgl:
             radius: 18
             border_width: 0
             pad_all: 0
+            clickable: true
             scrollable: false
             hidden: true
+            on_click:
+              - if:
+                  condition:
+                    lambda: |-
+                      const auto &slot = id(wall_panel_controller).get_cover_slot(1);
+                      return slot.configured && slot.available && slot.has_position;
+                  then:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(1);
+                        id(active_cover_slot) = 1;
+                        id(cover_position_dirty) = false;
+                        lv_label_set_text(id(cover_detail_name), slot.name.c_str());
+                        char text[16];
+                        snprintf(text, sizeof(text), "%d%%", slot.position_pct);
+                        lv_label_set_text(id(cover_detail_percent), text);
+                        id(cover_slider_syncing) = true;
+                        lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
+                        id(cover_slider_syncing) = false;
+                    - lvgl.page.show: cover_detail_page
             widgets:
               - label:
                   id: cover_slot1_name_label
@@ -170,6 +212,7 @@ lvgl:
                   text_font: ui_font_18
                   text_color: 0x858B94
               - button:
+                  id: cover_slot1_open_button
                   x: 10
                   y: 82
                   width: 58
@@ -188,6 +231,7 @@ lvgl:
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
+                  id: cover_slot1_stop_button
                   x: 76
                   y: 82
                   width: 58
@@ -205,6 +249,7 @@ lvgl:
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
+                  id: cover_slot1_close_button
                   x: 142
                   y: 82
                   width: 58
@@ -233,8 +278,29 @@ lvgl:
             radius: 18
             border_width: 0
             pad_all: 0
+            clickable: true
             scrollable: false
             hidden: true
+            on_click:
+              - if:
+                  condition:
+                    lambda: |-
+                      const auto &slot = id(wall_panel_controller).get_cover_slot(2);
+                      return slot.configured && slot.available && slot.has_position;
+                  then:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(2);
+                        id(active_cover_slot) = 2;
+                        id(cover_position_dirty) = false;
+                        lv_label_set_text(id(cover_detail_name), slot.name.c_str());
+                        char text[16];
+                        snprintf(text, sizeof(text), "%d%%", slot.position_pct);
+                        lv_label_set_text(id(cover_detail_percent), text);
+                        id(cover_slider_syncing) = true;
+                        lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
+                        id(cover_slider_syncing) = false;
+                    - lvgl.page.show: cover_detail_page
             widgets:
               - label:
                   id: cover_slot2_name_label
@@ -251,6 +317,7 @@ lvgl:
                   text_font: ui_font_18
                   text_color: 0x858B94
               - button:
+                  id: cover_slot2_open_button
                   x: 10
                   y: 82
                   width: 58
@@ -269,6 +336,7 @@ lvgl:
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
+                  id: cover_slot2_stop_button
                   x: 76
                   y: 82
                   width: 58
@@ -286,6 +354,7 @@ lvgl:
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
+                  id: cover_slot2_close_button
                   x: 142
                   y: 82
                   width: 58
@@ -314,8 +383,29 @@ lvgl:
             radius: 18
             border_width: 0
             pad_all: 0
+            clickable: true
             scrollable: false
             hidden: true
+            on_click:
+              - if:
+                  condition:
+                    lambda: |-
+                      const auto &slot = id(wall_panel_controller).get_cover_slot(3);
+                      return slot.configured && slot.available && slot.has_position;
+                  then:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(3);
+                        id(active_cover_slot) = 3;
+                        id(cover_position_dirty) = false;
+                        lv_label_set_text(id(cover_detail_name), slot.name.c_str());
+                        char text[16];
+                        snprintf(text, sizeof(text), "%d%%", slot.position_pct);
+                        lv_label_set_text(id(cover_detail_percent), text);
+                        id(cover_slider_syncing) = true;
+                        lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
+                        id(cover_slider_syncing) = false;
+                    - lvgl.page.show: cover_detail_page
             widgets:
               - label:
                   id: cover_slot3_name_label
@@ -332,6 +422,7 @@ lvgl:
                   text_font: ui_font_18
                   text_color: 0x858B94
               - button:
+                  id: cover_slot3_open_button
                   x: 10
                   y: 82
                   width: 58
@@ -350,6 +441,7 @@ lvgl:
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
+                  id: cover_slot3_stop_button
                   x: 76
                   y: 82
                   width: 58
@@ -367,6 +459,7 @@ lvgl:
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
+                  id: cover_slot3_close_button
                   x: 142
                   y: 82
                   width: 58
@@ -395,8 +488,29 @@ lvgl:
             radius: 18
             border_width: 0
             pad_all: 0
+            clickable: true
             scrollable: false
             hidden: true
+            on_click:
+              - if:
+                  condition:
+                    lambda: |-
+                      const auto &slot = id(wall_panel_controller).get_cover_slot(4);
+                      return slot.configured && slot.available && slot.has_position;
+                  then:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(4);
+                        id(active_cover_slot) = 4;
+                        id(cover_position_dirty) = false;
+                        lv_label_set_text(id(cover_detail_name), slot.name.c_str());
+                        char text[16];
+                        snprintf(text, sizeof(text), "%d%%", slot.position_pct);
+                        lv_label_set_text(id(cover_detail_percent), text);
+                        id(cover_slider_syncing) = true;
+                        lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
+                        id(cover_slider_syncing) = false;
+                    - lvgl.page.show: cover_detail_page
             widgets:
               - label:
                   id: cover_slot4_name_label
@@ -413,6 +527,7 @@ lvgl:
                   text_font: ui_font_18
                   text_color: 0x858B94
               - button:
+                  id: cover_slot4_open_button
                   x: 10
                   y: 82
                   width: 58
@@ -431,6 +546,7 @@ lvgl:
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
+                  id: cover_slot4_stop_button
                   x: 76
                   y: 82
                   width: 58
@@ -448,6 +564,7 @@ lvgl:
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
+                  id: cover_slot4_close_button
                   x: 142
                   y: 82
                   width: 58
@@ -466,6 +583,138 @@ lvgl:
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
 
+    - id: cover_detail_page
+      bg_color: 0x101216
+      widgets:
+        - button:
+            id: cover_detail_back
+            x: 20
+            y: 18
+            width: 64
+            height: 52
+            bg_color: 0x181B20
+            radius: 16
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: |-
+                  id(active_cover_slot) = 0;
+                  id(cover_position_dirty) = false;
+              - lvgl.page.show: blinds_page
+            widgets:
+              - label:
+                  align: CENTER
+                  text: "‹"
+                  text_font: ui_font_34
+                  text_color: 0xFFFFFF
+
+        - label:
+            id: cover_detail_name
+            x: 104
+            y: 26
+            text: "Blind"
+            text_font: ui_font_28
+            text_color: 0xFFFFFF
+
+        - label:
+            id: cover_detail_percent
+            align: CENTER
+            y: -80
+            text: "--%"
+            text_font: ui_font_34
+            text_color: 0xFFFFFF
+
+        - slider:
+            id: cover_detail_slider
+            x: 40
+            y: 230
+            width: 400
+            height: 42
+            min_value: 0
+            max_value: 100
+            value: 50
+            bg_color: 0x343A44
+            indicator:
+              bg_color: 0x858B94
+            knob:
+              bg_color: 0xFFFFFF
+            on_value:
+              - lambda: |-
+                  char text[16];
+                  snprintf(text, sizeof(text), "%d%%", (int) x);
+                  lv_label_set_text(id(cover_detail_percent), text);
+            on_change:
+              - lambda: |-
+                  if (id(cover_slider_syncing))
+                    return;
+                  id(pending_cover_position) = (int) x;
+                  id(cover_position_dirty) = true;
+
+        - button:
+            id: cover_detail_open_button
+            x: 40
+            y: 305
+            width: 120
+            height: 52
+            bg_color: 0x343A44
+            radius: 14
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: |-
+                  if (id(active_cover_slot) >= 1 && id(active_cover_slot) <= 4)
+                    id(wall_panel_controller).open_cover(id(active_cover_slot));
+            widgets:
+              - label:
+                  id: cover_detail_open_label
+                  align: CENTER
+                  text: "UP"
+                  text_font: ui_font_18
+                  text_color: 0xFFFFFF
+
+        - button:
+            id: cover_detail_stop_button
+            x: 180
+            y: 305
+            width: 120
+            height: 52
+            bg_color: 0x343A44
+            radius: 14
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: |-
+                  if (id(active_cover_slot) >= 1 && id(active_cover_slot) <= 4)
+                    id(wall_panel_controller).stop_cover(id(active_cover_slot));
+            widgets:
+              - label:
+                  align: CENTER
+                  text: "STOP"
+                  text_font: ui_font_18
+                  text_color: 0xFFFFFF
+
+        - button:
+            id: cover_detail_close_button
+            x: 320
+            y: 305
+            width: 120
+            height: 52
+            bg_color: 0x343A44
+            radius: 14
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: |-
+                  if (id(active_cover_slot) >= 1 && id(active_cover_slot) <= 4)
+                    id(wall_panel_controller).close_cover(id(active_cover_slot));
+            widgets:
+              - label:
+                  id: cover_detail_close_label
+                  align: CENTER
+                  text: "DOWN"
+                  text_font: ui_font_18
+                  text_color: 0xFFFFFF
+
 interval:
   - interval: 250ms
     then:
@@ -482,6 +731,61 @@ interval:
           lv_label_set_text(id(cover_slot2_close_label), da ? "NED" : "DOWN");
           lv_label_set_text(id(cover_slot3_close_label), da ? "NED" : "DOWN");
           lv_label_set_text(id(cover_slot4_close_label), da ? "NED" : "DOWN");
+          lv_label_set_text(id(cover_detail_open_label), da ? "OP" : "UP");
+          lv_label_set_text(id(cover_detail_close_label), da ? "NED" : "DOWN");
+
+          lv_obj_t *cards[4] = {
+            id(cover_slot1_card), id(cover_slot2_card), id(cover_slot3_card), id(cover_slot4_card)
+          };
+          lv_obj_t *open_buttons[4] = {
+            id(cover_slot1_open_button), id(cover_slot2_open_button),
+            id(cover_slot3_open_button), id(cover_slot4_open_button)
+          };
+          lv_obj_t *stop_buttons[4] = {
+            id(cover_slot1_stop_button), id(cover_slot2_stop_button),
+            id(cover_slot3_stop_button), id(cover_slot4_stop_button)
+          };
+          lv_obj_t *close_buttons[4] = {
+            id(cover_slot1_close_button), id(cover_slot2_close_button),
+            id(cover_slot3_close_button), id(cover_slot4_close_button)
+          };
+          const esphome::wall_panel::CoverSlotState *slots[4] = {
+            &panel.get_cover_slot(1), &panel.get_cover_slot(2),
+            &panel.get_cover_slot(3), &panel.get_cover_slot(4)
+          };
+
+          int visible_indices[4];
+          int visible_count = 0;
+          for (int i = 0; i < 4; i++) {
+            if (slots[i]->configured)
+              visible_indices[visible_count++] = i;
+          }
+
+          for (int rank = 0; rank < visible_count; rank++) {
+            const int i = visible_indices[rank];
+
+            if (visible_count <= 2) {
+              lv_obj_set_pos(cards[i], 20, 72 + rank * 150);
+              lv_obj_set_width(cards[i], 440);
+
+              lv_obj_set_pos(open_buttons[i], 14, 82);
+              lv_obj_set_width(open_buttons[i], 132);
+              lv_obj_set_pos(stop_buttons[i], 154, 82);
+              lv_obj_set_width(stop_buttons[i], 132);
+              lv_obj_set_pos(close_buttons[i], 294, 82);
+              lv_obj_set_width(close_buttons[i], 132);
+            } else {
+              lv_obj_set_pos(cards[i], rank % 2 == 0 ? 20 : 250, rank < 2 ? 72 : 222);
+              lv_obj_set_width(cards[i], 210);
+
+              lv_obj_set_pos(open_buttons[i], 10, 82);
+              lv_obj_set_width(open_buttons[i], 58);
+              lv_obj_set_pos(stop_buttons[i], 76, 82);
+              lv_obj_set_width(stop_buttons[i], 58);
+              lv_obj_set_pos(close_buttons[i], 142, 82);
+              lv_obj_set_width(close_buttons[i], 58);
+            }
+          }
 
           auto update_card = [da](lv_obj_t *card, lv_obj_t *name_label, lv_obj_t *state_label,
                                   const esphome::wall_panel::CoverSlotState &slot) {
@@ -500,9 +804,15 @@ interval:
 
             char text[48];
             if (slot.state == "opening") {
-              snprintf(text, sizeof(text), "%s", da ? "Åbner" : "Opening");
+              if (slot.has_position)
+                snprintf(text, sizeof(text), "%s · %d%%", da ? "Åbner" : "Opening", slot.position_pct);
+              else
+                snprintf(text, sizeof(text), "%s", da ? "Åbner" : "Opening");
             } else if (slot.state == "closing") {
-              snprintf(text, sizeof(text), "%s", da ? "Lukker" : "Closing");
+              if (slot.has_position)
+                snprintf(text, sizeof(text), "%s · %d%%", da ? "Lukker" : "Closing", slot.position_pct);
+              else
+                snprintf(text, sizeof(text), "%s", da ? "Lukker" : "Closing");
             } else if (slot.has_position) {
               snprintf(text, sizeof(text), "%d%%", slot.position_pct);
             } else if (slot.state == "open") {
@@ -520,3 +830,27 @@ interval:
           update_card(id(cover_slot2_card), id(cover_slot2_name_label), id(cover_slot2_state_label), panel.get_cover_slot(2));
           update_card(id(cover_slot3_card), id(cover_slot3_name_label), id(cover_slot3_state_label), panel.get_cover_slot(3));
           update_card(id(cover_slot4_card), id(cover_slot4_name_label), id(cover_slot4_state_label), panel.get_cover_slot(4));
+
+          if (id(active_cover_slot) >= 1 && id(active_cover_slot) <= 4 && !id(cover_position_dirty)) {
+            const auto &slot = panel.get_cover_slot(id(active_cover_slot));
+            lv_label_set_text(id(cover_detail_name), slot.name.c_str());
+
+            if (slot.has_position) {
+              id(cover_slider_syncing) = true;
+              lv_slider_set_value(id(cover_detail_slider), slot.position_pct, LV_ANIM_OFF);
+              id(cover_slider_syncing) = false;
+              char text[16];
+              snprintf(text, sizeof(text), "%d%%", slot.position_pct);
+              lv_label_set_text(id(cover_detail_percent), text);
+            }
+          }
+
+  - interval: 750ms
+    then:
+      - if:
+          condition:
+            lambda: return id(cover_position_dirty) && id(active_cover_slot) >= 1 && id(active_cover_slot) <= 4;
+          then:
+            - lambda: |-
+                id(wall_panel_controller).set_cover_position(id(active_cover_slot), id(pending_cover_position));
+                id(cover_position_dirty) = false;
