@@ -46,6 +46,7 @@ packages:
     refresh: 5min
     files:
       - packages/hardware.yaml
+      - packages/icons.yaml
       - packages/ui.yaml
       - packages/lights.yaml
       - packages/blinds.yaml
