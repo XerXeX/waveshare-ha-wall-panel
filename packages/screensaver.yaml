@@ -267,6 +267,9 @@ lvgl:
                       y: -28
                       bg_opa: TRANSP
                       border_width: 0
+                      clickable: false
+                      scrollable: false
+                      scrollbar_mode: "OFF"
                       text_color: 0x858B94
                       text_font: ui_font_18
                       indicator:
