@@ -92,28 +92,28 @@ text:
     device_id: lights_device
 
   # Blinds
-  - id: !extend blind_slot1_name
+  - id: !extend cover_slot1_name
     name: "Slot 1 · Name"
     device_id: blinds_device
-  - id: !extend blind_slot1_entity
+  - id: !extend cover_slot1_entity
     name: "Slot 1 · Entity"
     device_id: blinds_device
-  - id: !extend blind_slot2_name
+  - id: !extend cover_slot2_name
     name: "Slot 2 · Name"
     device_id: blinds_device
-  - id: !extend blind_slot2_entity
+  - id: !extend cover_slot2_entity
     name: "Slot 2 · Entity"
     device_id: blinds_device
-  - id: !extend blind_slot3_name
+  - id: !extend cover_slot3_name
     name: "Slot 3 · Name"
     device_id: blinds_device
-  - id: !extend blind_slot3_entity
+  - id: !extend cover_slot3_entity
     name: "Slot 3 · Entity"
     device_id: blinds_device
-  - id: !extend blind_slot4_name
+  - id: !extend cover_slot4_name
     name: "Slot 4 · Name"
     device_id: blinds_device
-  - id: !extend blind_slot4_entity
+  - id: !extend cover_slot4_entity
     name: "Slot 4 · Entity"
     device_id: blinds_device
 
