@@ -20,6 +20,10 @@ void WallPanel::setup() {
   this->language_pref_ready_ = true;
   this->load_language_();
 
+  this->display_pref_ = global_preferences->make_preference<DisplayPreferences>(DISPLAY_PREF_KEY, true);
+  this->display_pref_ready_ = true;
+  this->load_display_rotation_();
+
   this->set_light_defaults_();
   this->light_slot_pref_ = global_preferences->make_preference<LightSlotPreferences>(LIGHT_SLOT_PREF_KEY, true);
   this->light_slot_pref_ready_ = true;
@@ -77,6 +81,62 @@ void WallPanel::set_language(const std::string &language) {
 
 const char *WallPanel::get_language_option() const {
   return this->language_ == Language::DANISH ? "Danish" : "English";
+}
+
+void WallPanel::load_display_rotation_() {
+  DisplayPreferences prefs{};
+  if (this->display_pref_.load(&prefs) && prefs.version == 1 &&
+      (prefs.rotation == 0 || prefs.rotation == 90 || prefs.rotation == 180 || prefs.rotation == 270)) {
+    this->display_rotation_ = prefs.rotation;
+    ESP_LOGI(TAG, "Loaded display rotation: %d degrees", this->display_rotation_);
+    return;
+  }
+
+  this->display_rotation_ = 0;
+  this->save_display_rotation_();
+  ESP_LOGI(TAG, "No persisted display rotation found; using 0 degrees");
+}
+
+void WallPanel::save_display_rotation_() {
+  if (!this->display_pref_ready_)
+    return;
+
+  DisplayPreferences prefs{};
+  prefs.version = 1;
+  prefs.rotation = static_cast<uint16_t>(this->display_rotation_);
+  if (!this->display_pref_.save(&prefs))
+    ESP_LOGW(TAG, "Failed to persist display rotation");
+}
+
+void WallPanel::set_display_rotation(int rotation) {
+  rotation %= 360;
+  if (rotation < 0)
+    rotation += 360;
+
+  if (rotation != 0 && rotation != 90 && rotation != 180 && rotation != 270) {
+    ESP_LOGW(TAG, "Ignoring invalid display rotation: %d", rotation);
+    return;
+  }
+
+  if (this->display_rotation_ == rotation)
+    return;
+
+  this->display_rotation_ = rotation;
+  this->save_display_rotation_();
+  ESP_LOGI(TAG, "Display rotation changed to %d degrees", this->display_rotation_);
+}
+
+const char *WallPanel::get_display_rotation_option() const {
+  switch (this->display_rotation_) {
+    case 90:
+      return "90°";
+    case 180:
+      return "180°";
+    case 270:
+      return "270°";
+    default:
+      return "0°";
+  }
 }
 
 const char *WallPanel::tr(TranslationKey key) const {
@@ -220,6 +280,7 @@ void WallPanel::save_light_configuration_() {
 void WallPanel::dump_config() {
   ESP_LOGCONFIG(TAG, "Wall Panel:");
   ESP_LOGCONFIG(TAG, "  Language: %s", this->get_language_option());
+  ESP_LOGCONFIG(TAG, "  Display rotation: %d degrees", this->display_rotation_);
   ESP_LOGCONFIG(TAG, "  Light slots: %u", LIGHT_SLOT_COUNT);
 
   for (uint8_t i = 0; i < LIGHT_SLOT_COUNT; i++) {
