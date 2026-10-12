@@ -1,1 +1,15 @@
-# Audio placeholder
+# Audio page shell
+
+lvgl:
+  id: wall_panel_lvgl
+  pages:
+    - id: audio_page
+      bg_color: 0x101216
+      widgets:
+        - label:
+            id: audio_page_title
+            x: 20
+            y: 18
+            text: "Audio"
+            text_font: ui_font_34
+            text_color: 0xFFFFFF
