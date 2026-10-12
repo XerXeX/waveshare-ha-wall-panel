@@ -212,7 +212,7 @@ lvgl:
                   text_font: ui_font_18
                   text_color: 0x858B94
               - button:
-                  id: cover_slot1_open_button
+                  id: cover_slot1_p0_button
                   x: 10
                   y: 82
                   width: 58
@@ -222,16 +222,38 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).open_cover(1);
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(1);
+                        if (slot.has_position) id(wall_panel_controller).set_cover_position(1, 0);
+                        else id(wall_panel_controller).open_cover(1);
                   widgets:
                     - label:
-                        id: cover_slot1_open_label
+                        id: cover_slot1_p0_label
                         align: CENTER
                         text: "UP"
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
-                  id: cover_slot1_stop_button
+                  id: cover_slot1_p25_button
+                  x: 94
+                  y: 82
+                  width: 76
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  hidden: true
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).set_cover_position(1, 25);
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "25%"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  id: cover_slot1_p50_button
                   x: 76
                   y: 82
                   width: 58
@@ -241,15 +263,38 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).stop_cover(1);
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(1);
+                        if (slot.has_position) id(wall_panel_controller).set_cover_position(1, 50);
+                        else id(wall_panel_controller).stop_cover(1);
                   widgets:
                     - label:
+                        id: cover_slot1_p50_label
                         align: CENTER
                         text: "STOP"
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
-                  id: cover_slot1_close_button
+                  id: cover_slot1_p75_button
+                  x: 262
+                  y: 82
+                  width: 76
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  hidden: true
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).set_cover_position(1, 75);
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "75%"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  id: cover_slot1_p100_button
                   x: 142
                   y: 82
                   width: 58
@@ -259,10 +304,13 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).close_cover(1);
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(1);
+                        if (slot.has_position) id(wall_panel_controller).set_cover_position(1, 100);
+                        else id(wall_panel_controller).close_cover(1);
                   widgets:
                     - label:
-                        id: cover_slot1_close_label
+                        id: cover_slot1_p100_label
                         align: CENTER
                         text: "DOWN"
                         text_font: ui_font_18
@@ -317,7 +365,7 @@ lvgl:
                   text_font: ui_font_18
                   text_color: 0x858B94
               - button:
-                  id: cover_slot2_open_button
+                  id: cover_slot2_p0_button
                   x: 10
                   y: 82
                   width: 58
@@ -327,16 +375,38 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).open_cover(2);
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(2);
+                        if (slot.has_position) id(wall_panel_controller).set_cover_position(2, 0);
+                        else id(wall_panel_controller).open_cover(2);
                   widgets:
                     - label:
-                        id: cover_slot2_open_label
+                        id: cover_slot2_p0_label
                         align: CENTER
                         text: "UP"
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
-                  id: cover_slot2_stop_button
+                  id: cover_slot2_p25_button
+                  x: 94
+                  y: 82
+                  width: 76
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  hidden: true
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).set_cover_position(2, 25);
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "25%"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  id: cover_slot2_p50_button
                   x: 76
                   y: 82
                   width: 58
@@ -346,15 +416,38 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).stop_cover(2);
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(2);
+                        if (slot.has_position) id(wall_panel_controller).set_cover_position(2, 50);
+                        else id(wall_panel_controller).stop_cover(2);
                   widgets:
                     - label:
+                        id: cover_slot2_p50_label
                         align: CENTER
                         text: "STOP"
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
-                  id: cover_slot2_close_button
+                  id: cover_slot2_p75_button
+                  x: 262
+                  y: 82
+                  width: 76
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  hidden: true
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).set_cover_position(2, 75);
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "75%"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  id: cover_slot2_p100_button
                   x: 142
                   y: 82
                   width: 58
@@ -364,10 +457,13 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).close_cover(2);
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(2);
+                        if (slot.has_position) id(wall_panel_controller).set_cover_position(2, 100);
+                        else id(wall_panel_controller).close_cover(2);
                   widgets:
                     - label:
-                        id: cover_slot2_close_label
+                        id: cover_slot2_p100_label
                         align: CENTER
                         text: "DOWN"
                         text_font: ui_font_18
@@ -422,7 +518,7 @@ lvgl:
                   text_font: ui_font_18
                   text_color: 0x858B94
               - button:
-                  id: cover_slot3_open_button
+                  id: cover_slot3_p0_button
                   x: 10
                   y: 82
                   width: 58
@@ -432,16 +528,38 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).open_cover(3);
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(3);
+                        if (slot.has_position) id(wall_panel_controller).set_cover_position(3, 0);
+                        else id(wall_panel_controller).open_cover(3);
                   widgets:
                     - label:
-                        id: cover_slot3_open_label
+                        id: cover_slot3_p0_label
                         align: CENTER
                         text: "UP"
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
-                  id: cover_slot3_stop_button
+                  id: cover_slot3_p25_button
+                  x: 94
+                  y: 82
+                  width: 76
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  hidden: true
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).set_cover_position(3, 25);
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "25%"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  id: cover_slot3_p50_button
                   x: 76
                   y: 82
                   width: 58
@@ -451,15 +569,38 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).stop_cover(3);
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(3);
+                        if (slot.has_position) id(wall_panel_controller).set_cover_position(3, 50);
+                        else id(wall_panel_controller).stop_cover(3);
                   widgets:
                     - label:
+                        id: cover_slot3_p50_label
                         align: CENTER
                         text: "STOP"
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
-                  id: cover_slot3_close_button
+                  id: cover_slot3_p75_button
+                  x: 262
+                  y: 82
+                  width: 76
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  hidden: true
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).set_cover_position(3, 75);
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "75%"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  id: cover_slot3_p100_button
                   x: 142
                   y: 82
                   width: 58
@@ -469,10 +610,13 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).close_cover(3);
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(3);
+                        if (slot.has_position) id(wall_panel_controller).set_cover_position(3, 100);
+                        else id(wall_panel_controller).close_cover(3);
                   widgets:
                     - label:
-                        id: cover_slot3_close_label
+                        id: cover_slot3_p100_label
                         align: CENTER
                         text: "DOWN"
                         text_font: ui_font_18
@@ -527,7 +671,7 @@ lvgl:
                   text_font: ui_font_18
                   text_color: 0x858B94
               - button:
-                  id: cover_slot4_open_button
+                  id: cover_slot4_p0_button
                   x: 10
                   y: 82
                   width: 58
@@ -537,16 +681,38 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).open_cover(4);
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(4);
+                        if (slot.has_position) id(wall_panel_controller).set_cover_position(4, 0);
+                        else id(wall_panel_controller).open_cover(4);
                   widgets:
                     - label:
-                        id: cover_slot4_open_label
+                        id: cover_slot4_p0_label
                         align: CENTER
                         text: "UP"
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
-                  id: cover_slot4_stop_button
+                  id: cover_slot4_p25_button
+                  x: 94
+                  y: 82
+                  width: 76
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  hidden: true
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).set_cover_position(4, 25);
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "25%"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  id: cover_slot4_p50_button
                   x: 76
                   y: 82
                   width: 58
@@ -556,15 +722,38 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).stop_cover(4);
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(4);
+                        if (slot.has_position) id(wall_panel_controller).set_cover_position(4, 50);
+                        else id(wall_panel_controller).stop_cover(4);
                   widgets:
                     - label:
+                        id: cover_slot4_p50_label
                         align: CENTER
                         text: "STOP"
                         text_font: ui_font_18
                         text_color: 0xFFFFFF
               - button:
-                  id: cover_slot4_close_button
+                  id: cover_slot4_p75_button
+                  x: 262
+                  y: 82
+                  width: 76
+                  height: 42
+                  bg_color: 0x343A44
+                  radius: 12
+                  border_width: 0
+                  hidden: true
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).set_cover_position(4, 75);
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "75%"
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+              - button:
+                  id: cover_slot4_p100_button
                   x: 142
                   y: 82
                   width: 58
@@ -574,10 +763,13 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).close_cover(4);
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_cover_slot(4);
+                        if (slot.has_position) id(wall_panel_controller).set_cover_position(4, 100);
+                        else id(wall_panel_controller).close_cover(4);
                   widgets:
                     - label:
-                        id: cover_slot4_close_label
+                        id: cover_slot4_p100_label
                         align: CENTER
                         text: "DOWN"
                         text_font: ui_font_18
@@ -722,32 +914,35 @@ interval:
           auto &panel = *id(wall_panel_controller);
           const bool da = std::string(panel.get_language_option()) == "Danish";
           lv_label_set_text(id(blinds_page_title), panel.tr(esphome::wall_panel::TranslationKey::BLINDS));
-
-          lv_label_set_text(id(cover_slot1_open_label), da ? "OP" : "UP");
-          lv_label_set_text(id(cover_slot2_open_label), da ? "OP" : "UP");
-          lv_label_set_text(id(cover_slot3_open_label), da ? "OP" : "UP");
-          lv_label_set_text(id(cover_slot4_open_label), da ? "OP" : "UP");
-          lv_label_set_text(id(cover_slot1_close_label), da ? "NED" : "DOWN");
-          lv_label_set_text(id(cover_slot2_close_label), da ? "NED" : "DOWN");
-          lv_label_set_text(id(cover_slot3_close_label), da ? "NED" : "DOWN");
-          lv_label_set_text(id(cover_slot4_close_label), da ? "NED" : "DOWN");
           lv_label_set_text(id(cover_detail_open_label), da ? "OP" : "UP");
           lv_label_set_text(id(cover_detail_close_label), da ? "NED" : "DOWN");
 
           lv_obj_t *cards[4] = {
             id(cover_slot1_card), id(cover_slot2_card), id(cover_slot3_card), id(cover_slot4_card)
           };
-          lv_obj_t *open_buttons[4] = {
-            id(cover_slot1_open_button), id(cover_slot2_open_button),
-            id(cover_slot3_open_button), id(cover_slot4_open_button)
+          lv_obj_t *p0[4] = {
+            id(cover_slot1_p0_button), id(cover_slot2_p0_button), id(cover_slot3_p0_button), id(cover_slot4_p0_button)
           };
-          lv_obj_t *stop_buttons[4] = {
-            id(cover_slot1_stop_button), id(cover_slot2_stop_button),
-            id(cover_slot3_stop_button), id(cover_slot4_stop_button)
+          lv_obj_t *p25[4] = {
+            id(cover_slot1_p25_button), id(cover_slot2_p25_button), id(cover_slot3_p25_button), id(cover_slot4_p25_button)
           };
-          lv_obj_t *close_buttons[4] = {
-            id(cover_slot1_close_button), id(cover_slot2_close_button),
-            id(cover_slot3_close_button), id(cover_slot4_close_button)
+          lv_obj_t *p50[4] = {
+            id(cover_slot1_p50_button), id(cover_slot2_p50_button), id(cover_slot3_p50_button), id(cover_slot4_p50_button)
+          };
+          lv_obj_t *p75[4] = {
+            id(cover_slot1_p75_button), id(cover_slot2_p75_button), id(cover_slot3_p75_button), id(cover_slot4_p75_button)
+          };
+          lv_obj_t *p100[4] = {
+            id(cover_slot1_p100_button), id(cover_slot2_p100_button), id(cover_slot3_p100_button), id(cover_slot4_p100_button)
+          };
+          lv_obj_t *p0_labels[4] = {
+            id(cover_slot1_p0_label), id(cover_slot2_p0_label), id(cover_slot3_p0_label), id(cover_slot4_p0_label)
+          };
+          lv_obj_t *p50_labels[4] = {
+            id(cover_slot1_p50_label), id(cover_slot2_p50_label), id(cover_slot3_p50_label), id(cover_slot4_p50_label)
+          };
+          lv_obj_t *p100_labels[4] = {
+            id(cover_slot1_p100_label), id(cover_slot2_p100_label), id(cover_slot3_p100_label), id(cover_slot4_p100_label)
           };
           const esphome::wall_panel::CoverSlotState *slots[4] = {
             &panel.get_cover_slot(1), &panel.get_cover_slot(2),
@@ -763,27 +958,55 @@ interval:
 
           for (int rank = 0; rank < visible_count; rank++) {
             const int i = visible_indices[rank];
+            const bool full_width = visible_count <= 2;
+            const bool positioned = slots[i]->has_position;
 
-            if (visible_count <= 2) {
+            if (full_width) {
               lv_obj_set_pos(cards[i], 20, 72 + rank * 150);
               lv_obj_set_width(cards[i], 440);
-
-              lv_obj_set_pos(open_buttons[i], 14, 82);
-              lv_obj_set_width(open_buttons[i], 132);
-              lv_obj_set_pos(stop_buttons[i], 154, 82);
-              lv_obj_set_width(stop_buttons[i], 132);
-              lv_obj_set_pos(close_buttons[i], 294, 82);
-              lv_obj_set_width(close_buttons[i], 132);
             } else {
               lv_obj_set_pos(cards[i], rank % 2 == 0 ? 20 : 250, rank < 2 ? 72 : 222);
               lv_obj_set_width(cards[i], 210);
+            }
 
-              lv_obj_set_pos(open_buttons[i], 10, 82);
-              lv_obj_set_width(open_buttons[i], 58);
-              lv_obj_set_pos(stop_buttons[i], 76, 82);
-              lv_obj_set_width(stop_buttons[i], 58);
-              lv_obj_set_pos(close_buttons[i], 142, 82);
-              lv_obj_set_width(close_buttons[i], 58);
+            if (positioned) {
+              lv_label_set_text(p0_labels[i], "0%");
+              lv_label_set_text(p50_labels[i], "50%");
+              lv_label_set_text(p100_labels[i], "100%");
+
+              if (full_width) {
+                lv_obj_clear_flag(p25[i], LV_OBJ_FLAG_HIDDEN);
+                lv_obj_clear_flag(p75[i], LV_OBJ_FLAG_HIDDEN);
+
+                lv_obj_set_pos(p0[i], 14, 82);   lv_obj_set_width(p0[i], 76);
+                lv_obj_set_pos(p25[i], 98, 82);  lv_obj_set_width(p25[i], 76);
+                lv_obj_set_pos(p50[i], 182, 82); lv_obj_set_width(p50[i], 76);
+                lv_obj_set_pos(p75[i], 266, 82); lv_obj_set_width(p75[i], 76);
+                lv_obj_set_pos(p100[i], 350, 82); lv_obj_set_width(p100[i], 76);
+              } else {
+                lv_obj_add_flag(p25[i], LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(p75[i], LV_OBJ_FLAG_HIDDEN);
+
+                lv_obj_set_pos(p0[i], 10, 82);   lv_obj_set_width(p0[i], 58);
+                lv_obj_set_pos(p50[i], 76, 82);  lv_obj_set_width(p50[i], 58);
+                lv_obj_set_pos(p100[i], 142, 82); lv_obj_set_width(p100[i], 58);
+              }
+            } else {
+              lv_obj_add_flag(p25[i], LV_OBJ_FLAG_HIDDEN);
+              lv_obj_add_flag(p75[i], LV_OBJ_FLAG_HIDDEN);
+              lv_label_set_text(p0_labels[i], da ? "OP" : "UP");
+              lv_label_set_text(p50_labels[i], "STOP");
+              lv_label_set_text(p100_labels[i], da ? "NED" : "DOWN");
+
+              if (full_width) {
+                lv_obj_set_pos(p0[i], 14, 82);   lv_obj_set_width(p0[i], 132);
+                lv_obj_set_pos(p50[i], 154, 82); lv_obj_set_width(p50[i], 132);
+                lv_obj_set_pos(p100[i], 294, 82); lv_obj_set_width(p100[i], 132);
+              } else {
+                lv_obj_set_pos(p0[i], 10, 82);   lv_obj_set_width(p0[i], 58);
+                lv_obj_set_pos(p50[i], 76, 82);  lv_obj_set_width(p50[i], 58);
+                lv_obj_set_pos(p100[i], 142, 82); lv_obj_set_width(p100[i], 58);
+              }
             }
           }
 
