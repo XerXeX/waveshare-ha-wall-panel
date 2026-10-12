@@ -83,7 +83,7 @@ image:
   - { platform: file, file: "mdi:plus", id: icon_plus, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:power", id: icon_power, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:radiator", id: icon_radiator, resize: 42x42, type: RGB565, transparency: alpha_channel }
-  - { platform: file, file: "mdi:refrigerator", id: icon_refrigerator, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:fridge", id: icon_fridge, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:robot-vacuum", id: icon_robot_vacuum, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:security", id: icon_security, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:shield-check", id: icon_shield_check, resize: 42x42, type: RGB565, transparency: alpha_channel }
