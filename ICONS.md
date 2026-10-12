@@ -33,7 +33,7 @@ All shared images are currently rendered at 42x42 using RGB565 with alpha transp
 
 ### Climate and appliances
 
-`mdi:thermometer`, `mdi:thermostat`, `mdi:radiator`, `mdi:fan`, `mdi:air-conditioner`, `mdi:water-boiler`, `mdi:refrigerator`, `mdi:microwave`, `mdi:kettle`, `mdi:stove`, `mdi:dishwasher`, `mdi:washing-machine`, `mdi:vacuum`, `mdi:robot-vacuum`, `mdi:shower`, `mdi:toilet`, `mdi:coffee`, `mdi:silverware-fork-knife`.
+`mdi:thermometer`, `mdi:thermostat`, `mdi:radiator`, `mdi:fan`, `mdi:air-conditioner`, `mdi:water-boiler`, `mdi:fridge`, `mdi:microwave`, `mdi:kettle`, `mdi:stove`, `mdi:dishwasher`, `mdi:washing-machine`, `mdi:vacuum`, `mdi:robot-vacuum`, `mdi:shower`, `mdi:toilet`, `mdi:coffee`, `mdi:silverware-fork-knife`.
 
 ### Security and sensors
 
