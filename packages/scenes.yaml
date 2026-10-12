@@ -392,7 +392,7 @@ interval:
             if (icon == "mdi:plus") return id(icon_plus);
             if (icon == "mdi:power") return id(icon_power);
             if (icon == "mdi:radiator") return id(icon_radiator);
-            if (icon == "mdi:refrigerator") return id(icon_refrigerator);
+            if (icon == "mdi:fridge") return id(icon_fridge);
             if (icon == "mdi:robot-vacuum") return id(icon_robot_vacuum);
             if (icon == "mdi:security") return id(icon_security);
             if (icon == "mdi:shield-check") return id(icon_shield_check);
