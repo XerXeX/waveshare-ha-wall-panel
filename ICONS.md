@@ -21,7 +21,7 @@ All shared images are currently rendered at 42x42 using RGB565 with alpha transp
 
 ### Home, rooms and lighting
 
-`mdi:home`, `mdi:home-outline`, `mdi:bed`, `mdi:sofa`, `mdi:door-open`, `mdi:door-closed`, `mdi:window-open`, `mdi:window-closed`, `mdi:window-shutter`, `mdi:blinds`, `mdi:garage`, `mdi:garage-open`, `mdi:lightbulb`, `mdi:lightbulb-outline`, `mdi:lightbulb-group`, `mdi:lamp`, `mdi:wall-sconce-flat`, `mdi:power`, `mdi:fire`, `mdi:fireplace`.
+`mdi:home`, `mdi:home-outline`, `mdi:bed`, `mdi:sofa`, `mdi:door-open`, `mdi:door-closed`, `mdi:window-open`, `mdi:window-closed`, `mdi:window-shutter`, `mdi:blinds`, `mdi:blinds-open`, `mdi:garage`, `mdi:garage-open`, `mdi:lightbulb`, `mdi:lightbulb-outline`, `mdi:lightbulb-group`, `mdi:lamp`, `mdi:wall-sconce-flat`, `mdi:power`, `mdi:fire`, `mdi:fireplace`.
 
 ### Scenes, media and entertainment
 
