@@ -176,6 +176,7 @@ void WallPanel::set_light_defaults_() {
     slot.is_on = false;
     slot.has_brightness = false;
     slot.brightness_pct = 0;
+    slot.reported_brightness_pct = 0;
     slot.ignore_all_off = false;
   }
   this->light_slots_[3].name = "All off";
@@ -301,6 +302,7 @@ void WallPanel::set_light_entity(uint8_t slot, const std::string &entity_id) {
   state.is_on = false;
   state.has_brightness = false;
   state.brightness_pct = 0;
+  state.reported_brightness_pct = 0;
   this->save_light_configuration_();
   if (!entity_id.empty())
     this->subscribe_light_slot_(slot);
@@ -505,6 +507,10 @@ void WallPanel::set_light_brightness(uint8_t slot, int brightness_pct) {
     brightness_pct = 0;
   if (brightness_pct > 100)
     brightness_pct = 100;
+  if (brightness_pct == 0) {
+    this->call_homeassistant_service_checked_("light.turn_off", {{"entity_id", state.entity_id}});
+    return;
+  }
   this->call_homeassistant_service_checked_(
       "light.turn_on",
       {{"entity_id", state.entity_id}, {"brightness_pct", std::to_string(brightness_pct)}, {"transition", "1"}});
@@ -563,6 +569,7 @@ void WallPanel::on_entity_state_(const std::string &entity_id, StringRef value) 
       continue;
     slot.available = state_value != "unavailable" && state_value != "unknown";
     slot.is_on = state_value == "on";
+    slot.brightness_pct = slot.is_on ? slot.reported_brightness_pct : 0;
   }
   for (auto &slot : this->cover_slots_) {
     if (slot.entity_id != entity_id)
@@ -585,9 +592,11 @@ void WallPanel::on_brightness_state_(const std::string &entity_id, StringRef val
     pct = 100;
   for (auto &slot : this->light_slots_) {
     if (slot.entity_id == entity_id) {
-      // A valid brightness value is also a useful fallback capability signal.
+      // Keep Home Assistant's last reported level so the previous dimming level is
+      // restored when the light turns on, but expose 0% to the UI while it is off.
       slot.has_brightness = true;
-      slot.brightness_pct = pct;
+      slot.reported_brightness_pct = pct;
+      slot.brightness_pct = slot.is_on ? pct : 0;
     }
   }
 }
