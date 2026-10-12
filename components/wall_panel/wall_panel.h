@@ -175,6 +175,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
 
   void on_entity_state_(const std::string &entity_id, StringRef value);
   void on_brightness_state_(const std::string &entity_id, StringRef value);
+  void on_light_supported_color_modes_state_(const std::string &entity_id, StringRef value);
   void on_cover_position_state_(const std::string &entity_id, StringRef value);
   void on_cover_supported_features_state_(const std::string &entity_id, StringRef value);
 };
