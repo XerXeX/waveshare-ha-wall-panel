@@ -81,6 +81,20 @@ script:
           then:
             - lvgl.page.show: scenes_page
       - lambda: |-
+          // Drop any gesture/press ownership left behind by the previous page.
+          // Without this, LVGL can occasionally keep one of the old page widgets
+          // associated with the touch device, which makes long-press handling on
+          // the newly shown page unreliable until another gesture clears it.
+          lv_indev_reset(nullptr, nullptr);
+
+          if (page == 1) {
+            lv_obj_t *light_cards[4] = {
+              id(light_slot1_card), id(light_slot2_card), id(light_slot3_card), id(light_slot4_card)
+            };
+            for (int i = 0; i < 4; i++)
+              lv_obj_clear_state(light_cards[i], LV_STATE_PRESSED | LV_STATE_FOCUSED);
+          }
+
           if (remember && page >= 1 && page <= 4)
             id(wall_panel_last_user_page) = page;
 
@@ -92,6 +106,7 @@ script:
           };
 
           for (int i = 0; i < 4; i++) {
+            lv_obj_clear_state(buttons[i], LV_STATE_PRESSED | LV_STATE_FOCUSED);
             const bool active = page == i + 1;
             if (active)
               lv_obj_clear_flag(buttons[i], LV_OBJ_FLAG_CLICKABLE);
