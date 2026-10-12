@@ -41,6 +41,7 @@ struct LightSlotState {
 
   bool has_brightness{false};
   int brightness_pct{0};
+  int reported_brightness_pct{0};
 
   bool ignore_all_off{false};
 };
