@@ -7,8 +7,6 @@
 #   - Ignore All Off
 #
 # The wall_panel component is the source of truth for the full slot configuration.
-# All four settings are persisted independently of their Home Assistant display names,
-# so renaming or reordering config entities does not reset the panel configuration.
 
 esphome:
   on_boot:
@@ -571,6 +569,36 @@ interval:
       - lambda: |-
           auto &panel = *id(wall_panel_controller);
           lv_label_set_text(id(lights_page_title), panel.tr(esphome::wall_panel::TranslationKey::LIGHTS));
+
+          auto slot_visible = [](const esphome::wall_panel::LightSlotState &slot) {
+            return slot.function != "Hidden" && (slot.function == "All off" || slot.configured);
+          };
+
+          lv_obj_t *cards[4] = {
+            id(light_slot1_card), id(light_slot2_card), id(light_slot3_card), id(light_slot4_card)
+          };
+          const esphome::wall_panel::LightSlotState *slots[4] = {
+            &panel.get_light_slot(1), &panel.get_light_slot(2),
+            &panel.get_light_slot(3), &panel.get_light_slot(4)
+          };
+
+          int visible_indices[4];
+          int visible_count = 0;
+          for (int i = 0; i < 4; i++) {
+            if (slot_visible(*slots[i]))
+              visible_indices[visible_count++] = i;
+          }
+
+          for (int rank = 0; rank < visible_count; rank++) {
+            const int i = visible_indices[rank];
+            if (visible_count <= 2) {
+              lv_obj_set_pos(cards[i], 20, 72 + rank * 150);
+              lv_obj_set_width(cards[i], 440);
+            } else {
+              lv_obj_set_pos(cards[i], rank % 2 == 0 ? 20 : 250, rank < 2 ? 72 : 222);
+              lv_obj_set_width(cards[i], 210);
+            }
+          }
 
           auto update_card = [&panel](lv_obj_t *card, lv_obj_t *icon, lv_obj_t *name_label, lv_obj_t *state_label,
                                      const esphome::wall_panel::LightSlotState &slot) {
