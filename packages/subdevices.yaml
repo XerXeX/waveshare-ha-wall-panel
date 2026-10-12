@@ -29,6 +29,9 @@ select:
   - id: !extend wall_panel_rotation
     device_id: settings_device
 
+  - id: !extend wall_panel_default_page
+    device_id: settings_device
+
   - id: !extend wall_panel_clock_style
     device_id: settings_device
 
