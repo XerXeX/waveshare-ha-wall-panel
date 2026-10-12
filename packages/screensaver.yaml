@@ -228,6 +228,7 @@ lvgl:
                   - label:
                       id: screensaver_digital_time
                       align: CENTER
+                      x: -6
                       y: -35
                       text: "--:--"
                       text_font: screensaver_clock_font
