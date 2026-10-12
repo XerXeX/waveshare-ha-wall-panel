@@ -207,12 +207,10 @@ lvgl:
           border_width: 0
           radius: 0
           pad_all: 0
-          clickable: true
+          clickable: false
           scrollable: false
           scrollbar_mode: "OFF"
           hidden: true
-          on_release:
-            - script.execute: screensaver_hide
           widgets:
             - obj:
                 id: screensaver_digital
@@ -339,6 +337,24 @@ lvgl:
                       text_align: CENTER
                       text_font: ui_font_22
                       text_color: 0x858B94
+
+            # This transparent object is deliberately the last child so it sits
+            # above every clock widget and catches the wake-up touch everywhere.
+            - obj:
+                id: screensaver_touch_catcher
+                x: 0
+                y: 0
+                width: 480
+                height: 480
+                bg_opa: TRANSP
+                border_width: 0
+                radius: 0
+                pad_all: 0
+                clickable: true
+                scrollable: false
+                scrollbar_mode: "OFF"
+                on_release:
+                  - script.execute: screensaver_hide
 
 interval:
   - interval: 1s
