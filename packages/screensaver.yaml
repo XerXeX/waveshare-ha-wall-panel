@@ -207,6 +207,8 @@ lvgl:
           border_width: 0
           radius: 0
           clickable: true
+          scrollable: false
+          scrollbar_mode: "OFF"
           hidden: true
           on_release:
             - script.execute: screensaver_hide
@@ -220,6 +222,8 @@ lvgl:
                 bg_opa: TRANSP
                 border_width: 0
                 clickable: false
+                scrollable: false
+                scrollbar_mode: "OFF"
                 widgets:
                   - label:
                       id: screensaver_digital_time
@@ -248,6 +252,8 @@ lvgl:
                 bg_opa: TRANSP
                 border_width: 0
                 clickable: false
+                scrollable: false
+                scrollbar_mode: "OFF"
                 hidden: true
                 widgets:
                   - meter:
