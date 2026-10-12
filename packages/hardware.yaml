@@ -4,11 +4,23 @@ wall_panel:
   id: wall_panel_controller
 
 external_components:
+  # Keep the newer MIPI reset handling used by the ST7701S panel.
   - source: github://pr#17646
     components:
       - mipi
-      - mipi_rgb
     refresh: 1h
+
+  # Experimental MIPI RGB driver with configurable DMA bounce buffers.
+  # Keep force_restart enabled for this first test so bounce-buffer size is
+  # the only scanout behaviour we change.
+  - source:
+      type: git
+      url: https://github.com/aclight/esphome-mipi-rgb.git
+      ref: esphome-2026.7.4-r1
+      path: components
+    components:
+      - mipi_rgb
+    refresh: 0s
 
 i2c:
   - id: touch_i2c
@@ -33,6 +45,8 @@ display:
     id: lcd
     auto_clear_enabled: false
     update_interval: never
+    bounce_buffer_lines: 20
+    force_restart: true
 
 touchscreen:
   - platform: gt911
