@@ -72,7 +72,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_light_name(1, x);
-
   - platform: template
     id: light_slot1_entity
     name: "Lights · Slot 1 · 2 Entity"
@@ -85,7 +84,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_light_entity(1, x);
-
   - platform: template
     id: light_slot2_name
     name: "Lights · Slot 2 · 1 Name"
@@ -98,7 +96,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_light_name(2, x);
-
   - platform: template
     id: light_slot2_entity
     name: "Lights · Slot 2 · 2 Entity"
@@ -111,7 +108,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_light_entity(2, x);
-
   - platform: template
     id: light_slot3_name
     name: "Lights · Slot 3 · 1 Name"
@@ -124,7 +120,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_light_name(3, x);
-
   - platform: template
     id: light_slot3_entity
     name: "Lights · Slot 3 · 2 Entity"
@@ -137,7 +132,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_light_entity(3, x);
-
   - platform: template
     id: light_slot4_name
     name: "Lights · Slot 4 · 1 Name"
@@ -150,7 +144,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_light_name(4, x);
-
   - platform: template
     id: light_slot4_entity
     name: "Lights · Slot 4 · 2 Entity"
@@ -163,7 +156,6 @@ text:
     mode: text
     set_action:
       - lambda: id(wall_panel_controller).set_light_entity(4, x);
-
 select:
   - platform: template
     id: light_slot1_function
@@ -175,7 +167,6 @@ select:
     options: ["Auto", "All off", "Hidden"]
     set_action:
       - lambda: id(wall_panel_controller).set_light_function(1, x);
-
   - platform: template
     id: light_slot2_function
     name: "Lights · Slot 2 · 3 Function"
@@ -186,7 +177,6 @@ select:
     options: ["Auto", "All off", "Hidden"]
     set_action:
       - lambda: id(wall_panel_controller).set_light_function(2, x);
-
   - platform: template
     id: light_slot3_function
     name: "Lights · Slot 3 · 3 Function"
@@ -197,7 +187,6 @@ select:
     options: ["Auto", "All off", "Hidden"]
     set_action:
       - lambda: id(wall_panel_controller).set_light_function(3, x);
-
   - platform: template
     id: light_slot4_function
     name: "Lights · Slot 4 · 3 Function"
@@ -208,7 +197,6 @@ select:
     options: ["Auto", "All off", "Hidden"]
     set_action:
       - lambda: id(wall_panel_controller).set_light_function(4, x);
-
 switch:
   - platform: template
     id: light_slot1_ignore_all_off
@@ -219,7 +207,6 @@ switch:
       - lambda: id(wall_panel_controller).set_ignore_all_off(1, true);
     turn_off_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(1, false);
-
   - platform: template
     id: light_slot2_ignore_all_off
     name: "Lights · Slot 2 · 4 Ignore All Off"
@@ -229,7 +216,6 @@ switch:
       - lambda: id(wall_panel_controller).set_ignore_all_off(2, true);
     turn_off_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(2, false);
-
   - platform: template
     id: light_slot3_ignore_all_off
     name: "Lights · Slot 3 · 4 Ignore All Off"
@@ -239,7 +225,6 @@ switch:
       - lambda: id(wall_panel_controller).set_ignore_all_off(3, true);
     turn_off_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(3, false);
-
   - platform: template
     id: light_slot4_ignore_all_off
     name: "Lights · Slot 4 · 4 Ignore All Off"
@@ -249,7 +234,6 @@ switch:
       - lambda: id(wall_panel_controller).set_ignore_all_off(4, true);
     turn_off_action:
       - lambda: id(wall_panel_controller).set_ignore_all_off(4, false);
-
 lvgl:
   id: wall_panel_lvgl
   displays: lcd
@@ -267,7 +251,6 @@ lvgl:
             text: "Lights"
             text_font: ui_font_34
             text_color: 0xFFFFFF
-
         - button:
             id: light_slot1_card
             x: 20
@@ -292,15 +275,20 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_light_slot(1);
                         id(active_light_slot) = 1;
                         id(light_brightness_dirty) = false;
-                        lv_label_set_text(id(light_detail_name), slot.name.empty()
+                        const char *name = slot.name.empty()
                           ? id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::LIGHT)
-                          : slot.name.c_str());
+                          : slot.name.c_str();
+                        if (std::strcmp(lv_label_get_text(id(light_detail_name)), name) != 0)
+                          lv_label_set_text(id(light_detail_name), name);
                         char text[16];
                         snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
-                        lv_label_set_text(id(light_detail_percent), text);
-                        id(light_slider_syncing) = true;
-                        lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
-                        id(light_slider_syncing) = false;
+                        if (std::strcmp(lv_label_get_text(id(light_detail_percent)), text) != 0)
+                          lv_label_set_text(id(light_detail_percent), text);
+                        if (lv_slider_get_value(id(light_detail_slider)) != slot.brightness_pct) {
+                          id(light_slider_syncing) = true;
+                          lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
+                          id(light_slider_syncing) = false;
+                        }
                     - lvgl.page.show: light_detail_page
             widgets:
               - image:
@@ -322,7 +310,6 @@ lvgl:
                   text: "--"
                   text_font: ui_font_18
                   text_color: 0x858B94
-
         - button:
             id: light_slot2_card
             x: 250
@@ -347,15 +334,20 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_light_slot(2);
                         id(active_light_slot) = 2;
                         id(light_brightness_dirty) = false;
-                        lv_label_set_text(id(light_detail_name), slot.name.empty()
+                        const char *name = slot.name.empty()
                           ? id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::LIGHT)
-                          : slot.name.c_str());
+                          : slot.name.c_str();
+                        if (std::strcmp(lv_label_get_text(id(light_detail_name)), name) != 0)
+                          lv_label_set_text(id(light_detail_name), name);
                         char text[16];
                         snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
-                        lv_label_set_text(id(light_detail_percent), text);
-                        id(light_slider_syncing) = true;
-                        lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
-                        id(light_slider_syncing) = false;
+                        if (std::strcmp(lv_label_get_text(id(light_detail_percent)), text) != 0)
+                          lv_label_set_text(id(light_detail_percent), text);
+                        if (lv_slider_get_value(id(light_detail_slider)) != slot.brightness_pct) {
+                          id(light_slider_syncing) = true;
+                          lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
+                          id(light_slider_syncing) = false;
+                        }
                     - lvgl.page.show: light_detail_page
             widgets:
               - image:
@@ -377,7 +369,6 @@ lvgl:
                   text: "--"
                   text_font: ui_font_18
                   text_color: 0x858B94
-
         - button:
             id: light_slot3_card
             x: 20
@@ -402,15 +393,20 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_light_slot(3);
                         id(active_light_slot) = 3;
                         id(light_brightness_dirty) = false;
-                        lv_label_set_text(id(light_detail_name), slot.name.empty()
+                        const char *name = slot.name.empty()
                           ? id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::LIGHT)
-                          : slot.name.c_str());
+                          : slot.name.c_str();
+                        if (std::strcmp(lv_label_get_text(id(light_detail_name)), name) != 0)
+                          lv_label_set_text(id(light_detail_name), name);
                         char text[16];
                         snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
-                        lv_label_set_text(id(light_detail_percent), text);
-                        id(light_slider_syncing) = true;
-                        lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
-                        id(light_slider_syncing) = false;
+                        if (std::strcmp(lv_label_get_text(id(light_detail_percent)), text) != 0)
+                          lv_label_set_text(id(light_detail_percent), text);
+                        if (lv_slider_get_value(id(light_detail_slider)) != slot.brightness_pct) {
+                          id(light_slider_syncing) = true;
+                          lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
+                          id(light_slider_syncing) = false;
+                        }
                     - lvgl.page.show: light_detail_page
             widgets:
               - image:
@@ -432,7 +428,6 @@ lvgl:
                   text: "--"
                   text_font: ui_font_18
                   text_color: 0x858B94
-
         - button:
             id: light_slot4_card
             x: 250
@@ -457,15 +452,20 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_light_slot(4);
                         id(active_light_slot) = 4;
                         id(light_brightness_dirty) = false;
-                        lv_label_set_text(id(light_detail_name), slot.name.empty()
+                        const char *name = slot.name.empty()
                           ? id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::LIGHT)
-                          : slot.name.c_str());
+                          : slot.name.c_str();
+                        if (std::strcmp(lv_label_get_text(id(light_detail_name)), name) != 0)
+                          lv_label_set_text(id(light_detail_name), name);
                         char text[16];
                         snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
-                        lv_label_set_text(id(light_detail_percent), text);
-                        id(light_slider_syncing) = true;
-                        lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
-                        id(light_slider_syncing) = false;
+                        if (std::strcmp(lv_label_get_text(id(light_detail_percent)), text) != 0)
+                          lv_label_set_text(id(light_detail_percent), text);
+                        if (lv_slider_get_value(id(light_detail_slider)) != slot.brightness_pct) {
+                          id(light_slider_syncing) = true;
+                          lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
+                          id(light_slider_syncing) = false;
+                        }
                     - lvgl.page.show: light_detail_page
             widgets:
               - image:
@@ -487,7 +487,6 @@ lvgl:
                   text: "All lights"
                   text_font: ui_font_18
                   text_color: 0x858B94
-
     - id: light_detail_page
       bg_color: 0x101216
       widgets:
@@ -512,7 +511,6 @@ lvgl:
                   text: "‹"
                   text_font: ui_font_34
                   text_color: 0xFFFFFF
-
         - label:
             id: light_detail_name
             x: 104
@@ -520,7 +518,6 @@ lvgl:
             text: "Light"
             text_font: ui_font_28
             text_color: 0xFFFFFF
-
         - image:
             id: light_detail_icon
             src: icon_lightbulb
@@ -528,7 +525,6 @@ lvgl:
             y: -95
             image_recolor: 0xFFB300
             image_recolor_opa: 100%
-
         - label:
             id: light_detail_percent
             align: CENTER
@@ -536,7 +532,6 @@ lvgl:
             text: "--%"
             text_font: ui_font_34
             text_color: 0xFFFFFF
-
         - slider:
             id: light_detail_slider
             x: 40
@@ -555,20 +550,43 @@ lvgl:
               - lambda: |-
                   char text[16];
                   snprintf(text, sizeof(text), "%d%%", (int) x);
-                  lv_label_set_text(id(light_detail_percent), text);
+                  const char *current = lv_label_get_text(id(light_detail_percent));
+                  if (current == nullptr || std::strcmp(current, text) != 0)
+                    lv_label_set_text(id(light_detail_percent), text);
             on_change:
               - lambda: |-
                   if (id(light_slider_syncing))
                     return;
                   id(pending_light_brightness) = (int) x;
                   id(light_brightness_dirty) = true;
-
 interval:
   - interval: 250ms
     then:
       - lambda: |-
           auto &panel = *id(wall_panel_controller);
-          lv_label_set_text(id(lights_page_title), panel.tr(esphome::wall_panel::TranslationKey::LIGHTS));
+
+          auto set_text_if_changed = [](lv_obj_t *label, const char *text) {
+            const char *current = lv_label_get_text(label);
+            if (current == nullptr || std::strcmp(current, text) != 0)
+              lv_label_set_text(label, text);
+          };
+          auto set_hidden_if_changed = [](lv_obj_t *obj, bool hidden) {
+            const bool current = lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN);
+            if (current == hidden)
+              return;
+            if (hidden)
+              lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
+            else
+              lv_obj_clear_flag(obj, LV_OBJ_FLAG_HIDDEN);
+          };
+          auto set_geometry_if_changed = [](lv_obj_t *obj, int x, int y, int width) {
+            if (lv_obj_get_x(obj) != x || lv_obj_get_y(obj) != y)
+              lv_obj_set_pos(obj, x, y);
+            if (lv_obj_get_width(obj) != width)
+              lv_obj_set_width(obj, width);
+          };
+
+          set_text_if_changed(id(lights_page_title), panel.tr(esphome::wall_panel::TranslationKey::LIGHTS));
 
           auto slot_visible = [](const esphome::wall_panel::LightSlotState &slot) {
             return slot.function != "Hidden" && (slot.function == "All off" || slot.configured);
@@ -576,6 +594,17 @@ interval:
 
           lv_obj_t *cards[4] = {
             id(light_slot1_card), id(light_slot2_card), id(light_slot3_card), id(light_slot4_card)
+          };
+          lv_obj_t *icons[4] = {
+            id(light_slot1_icon), id(light_slot2_icon), id(light_slot3_icon), id(light_slot4_icon)
+          };
+          lv_obj_t *name_labels[4] = {
+            id(light_slot1_name_label), id(light_slot2_name_label),
+            id(light_slot3_name_label), id(light_slot4_name_label)
+          };
+          lv_obj_t *state_labels[4] = {
+            id(light_slot1_state_label), id(light_slot2_state_label),
+            id(light_slot3_state_label), id(light_slot4_state_label)
           };
           const esphome::wall_panel::LightSlotState *slots[4] = {
             &panel.get_light_slot(1), &panel.get_light_slot(2),
@@ -585,98 +614,100 @@ interval:
           int visible_indices[4];
           int visible_count = 0;
           for (int i = 0; i < 4; i++) {
-            if (slot_visible(*slots[i]))
+            const bool visible = slot_visible(*slots[i]);
+            set_hidden_if_changed(cards[i], !visible);
+            if (visible)
               visible_indices[visible_count++] = i;
           }
 
           for (int rank = 0; rank < visible_count; rank++) {
             const int i = visible_indices[rank];
-            if (visible_count <= 2) {
-              lv_obj_set_pos(cards[i], 20, 72 + rank * 150);
-              lv_obj_set_width(cards[i], 440);
+            if (visible_count <= 2)
+              set_geometry_if_changed(cards[i], 20, 72 + rank * 150, 440);
+            else
+              set_geometry_if_changed(cards[i], rank % 2 == 0 ? 20 : 250, rank < 2 ? 72 : 222, 210);
+          }
+
+          static int last_visual[4] = {-1, -1, -1, -1};
+          for (int i = 0; i < 4; i++) {
+            const auto &slot = *slots[i];
+            if (!slot_visible(slot))
+              continue;
+
+            const bool all_off = slot.function == "All off";
+            const char *name = slot.name.empty()
+              ? (all_off ? panel.tr(esphome::wall_panel::TranslationKey::ALL_OFF)
+                         : panel.tr(esphome::wall_panel::TranslationKey::LIGHT))
+              : slot.name.c_str();
+            set_text_if_changed(name_labels[i], name);
+
+            int visual = 0;
+            const char *state_text = "";
+            char brightness_text[16];
+
+            if (all_off) {
+              visual = 0;
+              state_text = panel.tr(esphome::wall_panel::TranslationKey::ALL_LIGHTS);
+            } else if (!slot.available) {
+              visual = 1;
+              state_text = panel.tr(esphome::wall_panel::TranslationKey::UNAVAILABLE);
+            } else if (slot.is_on) {
+              visual = 2;
+              if (slot.has_brightness) {
+                snprintf(brightness_text, sizeof(brightness_text), "%d%%", slot.brightness_pct);
+                state_text = brightness_text;
+              } else {
+                state_text = panel.tr(esphome::wall_panel::TranslationKey::ON);
+              }
             } else {
-              lv_obj_set_pos(cards[i], rank % 2 == 0 ? 20 : 250, rank < 2 ? 72 : 222);
-              lv_obj_set_width(cards[i], 210);
+              visual = 3;
+              state_text = panel.tr(esphome::wall_panel::TranslationKey::OFF);
+            }
+
+            set_text_if_changed(state_labels[i], state_text);
+
+            if (last_visual[i] != visual) {
+              last_visual[i] = visual;
+              lv_obj_set_style_image_recolor_opa(icons[i], LV_OPA_COVER, LV_PART_MAIN);
+              if (visual == 2) {
+                lv_obj_set_style_bg_color(cards[i], lv_color_hex(0x343A44), LV_PART_MAIN);
+                lv_obj_set_style_image_recolor(icons[i], lv_color_hex(0xFFB300), LV_PART_MAIN);
+                lv_obj_set_style_text_color(state_labels[i], lv_color_hex(0xFFB300), LV_PART_MAIN);
+              } else {
+                lv_obj_set_style_bg_color(cards[i], lv_color_hex(0x181B20), LV_PART_MAIN);
+                lv_obj_set_style_image_recolor(
+                  icons[i], lv_color_hex(visual == 1 ? 0x555A62 : 0x858B94), LV_PART_MAIN);
+                lv_obj_set_style_text_color(state_labels[i], lv_color_hex(0x858B94), LV_PART_MAIN);
+              }
             }
           }
 
-          auto update_card = [&panel](lv_obj_t *card, lv_obj_t *icon, lv_obj_t *name_label, lv_obj_t *state_label,
-                                     const esphome::wall_panel::LightSlotState &slot) {
-            const bool all_off = slot.function == "All off";
-            const bool hidden = slot.function == "Hidden" || (slot.function == "Auto" && !slot.configured);
-
-            if (hidden) {
-              lv_obj_add_flag(card, LV_OBJ_FLAG_HIDDEN);
-              return;
-            }
-            lv_obj_clear_flag(card, LV_OBJ_FLAG_HIDDEN);
-
-            lv_label_set_text(name_label, slot.name.empty()
-              ? (all_off ? panel.tr(esphome::wall_panel::TranslationKey::ALL_OFF)
-                         : panel.tr(esphome::wall_panel::TranslationKey::LIGHT))
-              : slot.name.c_str());
-            lv_obj_set_style_image_recolor_opa(icon, LV_OPA_COVER, LV_PART_MAIN);
-
-            if (all_off) {
-              lv_obj_set_style_bg_color(card, lv_color_hex(0x181B20), LV_PART_MAIN);
-              lv_obj_set_style_image_recolor(icon, lv_color_hex(0x858B94), LV_PART_MAIN);
-              lv_label_set_text(state_label, panel.tr(esphome::wall_panel::TranslationKey::ALL_LIGHTS));
-              lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
-              return;
-            }
-
-            if (!slot.available) {
-              lv_obj_set_style_bg_color(card, lv_color_hex(0x181B20), LV_PART_MAIN);
-              lv_obj_set_style_image_recolor(icon, lv_color_hex(0x555A62), LV_PART_MAIN);
-              lv_label_set_text(state_label, panel.tr(esphome::wall_panel::TranslationKey::UNAVAILABLE));
-              lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
-              return;
-            }
-
-            if (slot.is_on) {
-              lv_obj_set_style_bg_color(card, lv_color_hex(0x343A44), LV_PART_MAIN);
-              lv_obj_set_style_image_recolor(icon, lv_color_hex(0xFFB300), LV_PART_MAIN);
-              if (slot.has_brightness) {
-                char text[16];
-                snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
-                lv_label_set_text(state_label, text);
-              } else {
-                lv_label_set_text(state_label, panel.tr(esphome::wall_panel::TranslationKey::ON));
-              }
-              lv_obj_set_style_text_color(state_label, lv_color_hex(0xFFB300), LV_PART_MAIN);
-            } else {
-              lv_obj_set_style_bg_color(card, lv_color_hex(0x181B20), LV_PART_MAIN);
-              lv_obj_set_style_image_recolor(icon, lv_color_hex(0x858B94), LV_PART_MAIN);
-              lv_label_set_text(state_label, panel.tr(esphome::wall_panel::TranslationKey::OFF));
-              lv_obj_set_style_text_color(state_label, lv_color_hex(0x858B94), LV_PART_MAIN);
-            }
-          };
-
-          update_card(id(light_slot1_card), id(light_slot1_icon), id(light_slot1_name_label), id(light_slot1_state_label),
-                      panel.get_light_slot(1));
-          update_card(id(light_slot2_card), id(light_slot2_icon), id(light_slot2_name_label), id(light_slot2_state_label),
-                      panel.get_light_slot(2));
-          update_card(id(light_slot3_card), id(light_slot3_icon), id(light_slot3_name_label), id(light_slot3_state_label),
-                      panel.get_light_slot(3));
-          update_card(id(light_slot4_card), id(light_slot4_icon), id(light_slot4_name_label), id(light_slot4_state_label),
-                      panel.get_light_slot(4));
-
           if (id(active_light_slot) >= 1 && id(active_light_slot) <= 4 && !id(light_brightness_dirty)) {
             const auto &slot = panel.get_light_slot(id(active_light_slot));
-            lv_label_set_text(id(light_detail_name), slot.name.empty()
+            const char *name = slot.name.empty()
               ? panel.tr(esphome::wall_panel::TranslationKey::LIGHT)
-              : slot.name.c_str());
+              : slot.name.c_str();
+            set_text_if_changed(id(light_detail_name), name);
 
             if (slot.has_brightness) {
-              id(light_slider_syncing) = true;
-              lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
-              id(light_slider_syncing) = false;
+              if (lv_slider_get_value(id(light_detail_slider)) != slot.brightness_pct) {
+                id(light_slider_syncing) = true;
+                lv_slider_set_value(id(light_detail_slider), slot.brightness_pct, LV_ANIM_OFF);
+                id(light_slider_syncing) = false;
+              }
+
               char text[16];
               snprintf(text, sizeof(text), "%d%%", slot.brightness_pct);
-              lv_label_set_text(id(light_detail_percent), text);
-              lv_obj_set_style_image_recolor(id(light_detail_icon),
-                                             lv_color_hex(slot.is_on ? 0xFFB300 : 0x858B94), LV_PART_MAIN);
-              lv_obj_set_style_image_recolor_opa(id(light_detail_icon), LV_OPA_COVER, LV_PART_MAIN);
+              set_text_if_changed(id(light_detail_percent), text);
+
+              static int last_detail_visual = -1;
+              const int detail_visual = slot.is_on ? 1 : 0;
+              if (last_detail_visual != detail_visual) {
+                last_detail_visual = detail_visual;
+                lv_obj_set_style_image_recolor(
+                  id(light_detail_icon), lv_color_hex(slot.is_on ? 0xFFB300 : 0x858B94), LV_PART_MAIN);
+                lv_obj_set_style_image_recolor_opa(id(light_detail_icon), LV_OPA_COVER, LV_PART_MAIN);
+              }
             }
           }
 
