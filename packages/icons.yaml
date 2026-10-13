@@ -19,17 +19,34 @@ image:
   - { platform: file, file: "mdi:battery", id: icon_battery, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:battery-charging", id: icon_battery_charging, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:bed", id: icon_bed, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bed-clock", id: icon_bed_clock, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bed-double", id: icon_bed_double, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bed-double-outline", id: icon_bed_double_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bed-empty", id: icon_bed_empty, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bed-king", id: icon_bed_king, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bed-king-outline", id: icon_bed_king_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bed-outline", id: icon_bed_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bed-queen", id: icon_bed_queen, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bed-queen-outline", id: icon_bed_queen_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bed-single", id: icon_bed_single, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bed-single-outline", id: icon_bed_single_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:bell", id: icon_bell, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:bell-outline", id: icon_bell_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bell-sleep", id: icon_bell_sleep, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bell-sleep-outline", id: icon_bell_sleep_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:blinds", id: icon_blinds, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:blinds-open", id: icon_blinds_open, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:bluetooth", id: icon_bluetooth, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:book-open-page-variant", id: icon_book_open_page_variant, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bunk-bed", id: icon_bunk_bed, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:bunk-bed-outline", id: icon_bunk_bed_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:camera", id: icon_camera, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:car", id: icon_car, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:car-electric", id: icon_car_electric, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:cat", id: icon_cat, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:cctv", id: icon_cctv, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:chat-sleep", id: icon_chat_sleep, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:chat-sleep-outline", id: icon_chat_sleep_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:check", id: icon_check, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:check-circle", id: icon_check_circle, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:close", id: icon_close, resize: 42x42, type: RGB565, transparency: alpha_channel }
@@ -59,6 +76,8 @@ image:
   - { platform: file, file: "mdi:leaf", id: icon_leaf, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:lightbulb", id: icon_lightbulb, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:lightbulb-group", id: icon_lightbulb_group, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:lightbulb-night", id: icon_lightbulb_night, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:lightbulb-night-outline", id: icon_lightbulb_night_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:lightbulb-outline", id: icon_lightbulb_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:lock", id: icon_lock, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:lock-open", id: icon_lock_open, resize: 42x42, type: RGB565, transparency: alpha_channel }
@@ -68,8 +87,14 @@ image:
   - { platform: file, file: "mdi:microphone-off", id: icon_microphone_off, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:microwave", id: icon_microwave, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:minus", id: icon_minus, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:moon-first-quarter", id: icon_moon_first_quarter, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:moon-full", id: icon_moon_full, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:moon-last-quarter", id: icon_moon_last_quarter, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:moon-new", id: icon_moon_new, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:moon-waning-crescent", id: icon_moon_waning_crescent, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:moon-waning-gibbous", id: icon_moon_waning_gibbous, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:moon-waxing-crescent", id: icon_moon_waxing_crescent, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:moon-waxing-gibbous", id: icon_moon_waxing_gibbous, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:motion-sensor", id: icon_motion_sensor, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:movie", id: icon_movie, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:movie-open", id: icon_movie_open, resize: 42x42, type: RGB565, transparency: alpha_channel }
@@ -83,16 +108,21 @@ image:
   - { platform: file, file: "mdi:play", id: icon_play, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:plus", id: icon_plus, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:power", id: icon_power, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:power-sleep", id: icon_power_sleep, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:radiator", id: icon_radiator, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:fridge", id: icon_fridge, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:robot-vacuum", id: icon_robot_vacuum, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:security", id: icon_security, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:shield-check", id: icon_shield_check, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:shield-home", id: icon_shield_home, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:shield-moon", id: icon_shield_moon, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:shield-moon-outline", id: icon_shield_moon_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:shower", id: icon_shower, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:silverware-fork-knife", id: icon_silverware_fork_knife, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:skip-next", id: icon_skip_next, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:skip-previous", id: icon_skip_previous, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:sleep", id: icon_sleep, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:sleep-off", id: icon_sleep_off, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:snowflake", id: icon_snowflake, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:sofa", id: icon_sofa, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:speaker", id: icon_speaker, resize: 42x42, type: RGB565, transparency: alpha_channel }
@@ -118,7 +148,11 @@ image:
   - { platform: file, file: "mdi:water-boiler", id: icon_water_boiler, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:weather-cloudy", id: icon_weather_cloudy, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:weather-lightning", id: icon_weather_lightning, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:weather-moonset", id: icon_weather_moonset, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:weather-moonset-down", id: icon_weather_moonset_down, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:weather-moonset-up", id: icon_weather_moonset_up, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:weather-night", id: icon_weather_night, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:weather-night-partly-cloudy", id: icon_weather_night_partly_cloudy, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:weather-pouring", id: icon_weather_pouring, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:weather-rainy", id: icon_weather_rainy, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:weather-snowy", id: icon_weather_snowy, resize: 42x42, type: RGB565, transparency: alpha_channel }
