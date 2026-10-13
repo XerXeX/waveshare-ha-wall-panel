@@ -23,13 +23,17 @@ All shared images are currently rendered at 42x42 using RGB565 with alpha transp
 
 `mdi:home`, `mdi:home-outline`, `mdi:bed`, `mdi:sofa`, `mdi:door-open`, `mdi:door-closed`, `mdi:window-open`, `mdi:window-closed`, `mdi:window-shutter`, `mdi:blinds`, `mdi:blinds-open`, `mdi:garage`, `mdi:garage-open`, `mdi:lightbulb`, `mdi:lightbulb-outline`, `mdi:lightbulb-group`, `mdi:lamp`, `mdi:wall-sconce-flat`, `mdi:power`, `mdi:fire`, `mdi:fireplace`.
 
+### Sleep and night
+
+`mdi:sleep`, `mdi:sleep-off`, `mdi:power-sleep`, `mdi:bell-sleep`, `mdi:bell-sleep-outline`, `mdi:chat-sleep`, `mdi:chat-sleep-outline`, `mdi:bed`, `mdi:bed-outline`, `mdi:bed-empty`, `mdi:bed-clock`, `mdi:bed-single`, `mdi:bed-single-outline`, `mdi:bed-double`, `mdi:bed-double-outline`, `mdi:bed-queen`, `mdi:bed-queen-outline`, `mdi:bed-king`, `mdi:bed-king-outline`, `mdi:bunk-bed`, `mdi:bunk-bed-outline`, `mdi:lightbulb-night`, `mdi:lightbulb-night-outline`, `mdi:weather-night`, `mdi:weather-night-partly-cloudy`, `mdi:moon-new`, `mdi:moon-full`, `mdi:moon-first-quarter`, `mdi:moon-last-quarter`, `mdi:moon-waning-crescent`, `mdi:moon-waning-gibbous`, `mdi:moon-waxing-crescent`, `mdi:moon-waxing-gibbous`, `mdi:shield-moon`, `mdi:shield-moon-outline`, `mdi:weather-moonset`, `mdi:weather-moonset-up`, `mdi:weather-moonset-down`.
+
 ### Scenes, media and entertainment
 
 `mdi:palette`, `mdi:palette-outline`, `mdi:party-popper`, `mdi:movie`, `mdi:movie-open`, `mdi:television`, `mdi:music`, `mdi:music-note`, `mdi:speaker`, `mdi:speaker-wireless`, `mdi:volume-high`, `mdi:volume-medium`, `mdi:volume-low`, `mdi:volume-off`, `mdi:microphone`, `mdi:microphone-off`, `mdi:gamepad-variant`, `mdi:play`, `mdi:pause`, `mdi:stop`, `mdi:skip-next`, `mdi:skip-previous`, `mdi:star`, `mdi:star-outline`, `mdi:heart`, `mdi:heart-outline`, `mdi:book-open-page-variant`.
 
 ### Weather and environment
 
-`mdi:weather-sunny`, `mdi:weather-night`, `mdi:weather-cloudy`, `mdi:weather-rainy`, `mdi:weather-pouring`, `mdi:weather-snowy`, `mdi:weather-lightning`, `mdi:moon-waning-crescent`, `mdi:moon-waxing-crescent`, `mdi:snowflake`, `mdi:tree`, `mdi:flower`, `mdi:leaf`, `mdi:water`.
+`mdi:weather-sunny`, `mdi:weather-night`, `mdi:weather-night-partly-cloudy`, `mdi:weather-cloudy`, `mdi:weather-rainy`, `mdi:weather-pouring`, `mdi:weather-snowy`, `mdi:weather-lightning`, `mdi:weather-moonset`, `mdi:weather-moonset-up`, `mdi:weather-moonset-down`, `mdi:moon-new`, `mdi:moon-full`, `mdi:moon-first-quarter`, `mdi:moon-last-quarter`, `mdi:moon-waning-crescent`, `mdi:moon-waning-gibbous`, `mdi:moon-waxing-crescent`, `mdi:moon-waxing-gibbous`, `mdi:snowflake`, `mdi:tree`, `mdi:flower`, `mdi:leaf`, `mdi:water`.
 
 ### Climate and appliances
 
@@ -37,7 +41,7 @@ All shared images are currently rendered at 42x42 using RGB565 with alpha transp
 
 ### Security and sensors
 
-`mdi:lock`, `mdi:lock-open`, `mdi:security`, `mdi:shield-check`, `mdi:shield-home`, `mdi:camera`, `mdi:cctv`, `mdi:motion-sensor`, `mdi:bell`, `mdi:bell-outline`, `mdi:alert`, `mdi:alert-circle`, `mdi:information`, `mdi:check`, `mdi:check-circle`, `mdi:close`, `mdi:close-circle`.
+`mdi:lock`, `mdi:lock-open`, `mdi:security`, `mdi:shield-check`, `mdi:shield-home`, `mdi:shield-moon`, `mdi:shield-moon-outline`, `mdi:camera`, `mdi:cctv`, `mdi:motion-sensor`, `mdi:bell`, `mdi:bell-outline`, `mdi:bell-sleep`, `mdi:bell-sleep-outline`, `mdi:alert`, `mdi:alert-circle`, `mdi:information`, `mdi:check`, `mdi:check-circle`, `mdi:close`, `mdi:close-circle`.
 
 ### Devices and connectivity
 
@@ -53,7 +57,9 @@ All shared images are currently rendered at 42x42 using RGB565 with alpha transp
 
 ## Scene icon inheritance
 
-Scene and script cards read the `icon` attribute from Home Assistant. If the MDI icon is present in the shared library, the matching image is shown automatically. Unknown icons fall back to `mdi:palette-outline`.
+Scene and script cards read the `icon` attribute from Home Assistant. If the MDI icon is present in the shared library and registered for runtime lookup, the matching image is shown automatically. Unknown icons fall back to `mdi:palette-outline`.
+
+The sleep/night icon set is registered in `packages/icon_registry.yaml`, so those icons work automatically on both Scene/Script cards and Home dashboard cards when Home Assistant uses the matching MDI name.
 
 ## Adding custom icons
 
