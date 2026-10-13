@@ -3,6 +3,10 @@
 # The physical wall panel stays as the parent device. Page-specific entities are
 # grouped into logical child devices so the Home Assistant device page remains
 # easy to navigate.
+#
+# Do not rename page entities to generic "Slot ..." names here. ESPHome derives
+# each entity key from its name, so duplicate names across sub-devices can collide
+# even though Home Assistant shows them under different child devices.
 
 esphome:
   on_boot:
@@ -63,32 +67,24 @@ select:
   - id: !extend wall_panel_time_format
     device_id: settings_device
 
-  # Lights - non-text settings come after Name and Entity in each slot.
+  # Lights
   - id: !extend light_slot1_function
-    name: "Slot 1 · 3 Function"
     device_id: lights_device
   - id: !extend light_slot2_function
-    name: "Slot 2 · 3 Function"
     device_id: lights_device
   - id: !extend light_slot3_function
-    name: "Slot 3 · 3 Function"
     device_id: lights_device
   - id: !extend light_slot4_function
-    name: "Slot 4 · 3 Function"
     device_id: lights_device
 
   # Scenes
   - id: !extend scene_slot1_function
-    name: "Slot 1 · 3 Function"
     device_id: scenes_device
   - id: !extend scene_slot2_function
-    name: "Slot 2 · 3 Function"
     device_id: scenes_device
   - id: !extend scene_slot3_function
-    name: "Slot 3 · 3 Function"
     device_id: scenes_device
   - id: !extend scene_slot4_function
-    name: "Slot 4 · 3 Function"
     device_id: scenes_device
 
 number:
@@ -106,130 +102,90 @@ light:
 text:
   # Home
   - id: !extend home_slot1_name
-    name: "Slot 1 · 1 Name"
     device_id: home_device
   - id: !extend home_slot1_entity
-    name: "Slot 1 · 2 Entity"
     device_id: home_device
   - id: !extend home_slot2_name
-    name: "Slot 2 · 1 Name"
     device_id: home_device
   - id: !extend home_slot2_entity
-    name: "Slot 2 · 2 Entity"
     device_id: home_device
   - id: !extend home_slot3_name
-    name: "Slot 3 · 1 Name"
     device_id: home_device
   - id: !extend home_slot3_entity
-    name: "Slot 3 · 2 Entity"
     device_id: home_device
   - id: !extend home_slot4_name
-    name: "Slot 4 · 1 Name"
     device_id: home_device
   - id: !extend home_slot4_entity
-    name: "Slot 4 · 2 Entity"
     device_id: home_device
   - id: !extend home_slot5_name
-    name: "Slot 5 · 1 Name"
     device_id: home_device
   - id: !extend home_slot5_entity
-    name: "Slot 5 · 2 Entity"
     device_id: home_device
   - id: !extend home_slot6_name
-    name: "Slot 6 · 1 Name"
     device_id: home_device
   - id: !extend home_slot6_entity
-    name: "Slot 6 · 2 Entity"
     device_id: home_device
 
   # Lights
   - id: !extend light_slot1_name
-    name: "Slot 1 · 1 Name"
     device_id: lights_device
   - id: !extend light_slot1_entity
-    name: "Slot 1 · 2 Entity"
     device_id: lights_device
   - id: !extend light_slot2_name
-    name: "Slot 2 · 1 Name"
     device_id: lights_device
   - id: !extend light_slot2_entity
-    name: "Slot 2 · 2 Entity"
     device_id: lights_device
   - id: !extend light_slot3_name
-    name: "Slot 3 · 1 Name"
     device_id: lights_device
   - id: !extend light_slot3_entity
-    name: "Slot 3 · 2 Entity"
     device_id: lights_device
   - id: !extend light_slot4_name
-    name: "Slot 4 · 1 Name"
     device_id: lights_device
   - id: !extend light_slot4_entity
-    name: "Slot 4 · 2 Entity"
     device_id: lights_device
 
   # Blinds
   - id: !extend cover_slot1_name
-    name: "Slot 1 · 1 Name"
     device_id: blinds_device
   - id: !extend cover_slot1_entity
-    name: "Slot 1 · 2 Entity"
     device_id: blinds_device
   - id: !extend cover_slot2_name
-    name: "Slot 2 · 1 Name"
     device_id: blinds_device
   - id: !extend cover_slot2_entity
-    name: "Slot 2 · 2 Entity"
     device_id: blinds_device
   - id: !extend cover_slot3_name
-    name: "Slot 3 · 1 Name"
     device_id: blinds_device
   - id: !extend cover_slot3_entity
-    name: "Slot 3 · 2 Entity"
     device_id: blinds_device
   - id: !extend cover_slot4_name
-    name: "Slot 4 · 1 Name"
     device_id: blinds_device
   - id: !extend cover_slot4_entity
-    name: "Slot 4 · 2 Entity"
     device_id: blinds_device
 
   # Scenes
   - id: !extend scene_slot1_name
-    name: "Slot 1 · 1 Name"
     device_id: scenes_device
   - id: !extend scene_slot1_entity
-    name: "Slot 1 · 2 Entity"
     device_id: scenes_device
   - id: !extend scene_slot2_name
-    name: "Slot 2 · 1 Name"
     device_id: scenes_device
   - id: !extend scene_slot2_entity
-    name: "Slot 2 · 2 Entity"
     device_id: scenes_device
   - id: !extend scene_slot3_name
-    name: "Slot 3 · 1 Name"
     device_id: scenes_device
   - id: !extend scene_slot3_entity
-    name: "Slot 3 · 2 Entity"
     device_id: scenes_device
   - id: !extend scene_slot4_name
-    name: "Slot 4 · 1 Name"
     device_id: scenes_device
   - id: !extend scene_slot4_entity
-    name: "Slot 4 · 2 Entity"
     device_id: scenes_device
 
 switch:
   - id: !extend light_slot1_ignore_all_off
-    name: "Slot 1 · 4 Ignore All Off"
     device_id: lights_device
   - id: !extend light_slot2_ignore_all_off
-    name: "Slot 2 · 4 Ignore All Off"
     device_id: lights_device
   - id: !extend light_slot3_ignore_all_off
-    name: "Slot 3 · 4 Ignore All Off"
     device_id: lights_device
   - id: !extend light_slot4_ignore_all_off
-    name: "Slot 4 · 4 Ignore All Off"
     device_id: lights_device
