@@ -59,6 +59,31 @@ struct CoverSlotState {
   uint32_t supported_features{0};
 };
 
+struct HomeSlotState {
+  std::string entity_id;
+  std::string name;
+  std::string domain;
+  std::string state;
+  std::string icon;
+  std::string unit;
+  std::string hvac_action;
+
+  bool configured{false};
+  bool available{false};
+  bool has_brightness{false};
+  bool has_position{false};
+  bool has_current_temperature{false};
+  bool has_target_temperature{false};
+  bool has_humidity{false};
+
+  int brightness_pct{0};
+  int reported_brightness_pct{0};
+  int position_pct{0};
+  float current_temperature{0.0f};
+  float target_temperature{0.0f};
+  float humidity{0.0f};
+};
+
 // Legacy v1 storage. Kept only so existing entity selections can be migrated.
 struct LightEntityPreferencesV1 {
   uint8_t version{1};
@@ -121,6 +146,18 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void set_cover_position(uint8_t slot, int position_pct);
   const CoverSlotState &get_cover_slot(uint8_t slot) const;
 
+  void set_home_entity(uint8_t slot, const std::string &entity_id);
+  void set_home_name(uint8_t slot, const std::string &name);
+  const HomeSlotState &get_home_slot(uint8_t slot) const;
+  void toggle_home_entity(uint8_t slot);
+  void activate_home_entity(uint8_t slot);
+  void set_home_light_brightness(uint8_t slot, int brightness_pct);
+  void open_home_cover(uint8_t slot);
+  void stop_home_cover(uint8_t slot);
+  void close_home_cover(uint8_t slot);
+  void set_home_cover_position(uint8_t slot, int position_pct);
+  void set_home_climate_temperature(uint8_t slot, float temperature);
+
   void register_icon(const std::string &mdi_name, image::Image *image) {
     if (mdi_name.empty() || image == nullptr)
       return;
@@ -161,6 +198,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
  protected:
   static constexpr uint8_t LIGHT_SLOT_COUNT = 4;
   static constexpr uint8_t COVER_SLOT_COUNT = 4;
+  static constexpr uint8_t HOME_SLOT_COUNT = 6;
   static constexpr uint8_t SCENE_SLOT_COUNT = 4;
   static constexpr uint32_t LEGACY_LIGHT_ENTITY_PREF_KEY = 0x57504C45U;
   static constexpr uint32_t LIGHT_SLOT_PREF_KEY = 0x57504C32U;
@@ -175,6 +213,8 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   std::array<CoverSlotState, COVER_SLOT_COUNT> cover_slots_{};
   ESPPreferenceObject cover_slot_pref_;
   bool cover_slot_pref_ready_{false};
+
+  std::array<HomeSlotState, HOME_SLOT_COUNT> home_slots_{};
 
   std::map<std::string, image::Image *> icon_registry_{};
   std::array<std::string, SCENE_SLOT_COUNT> scene_icon_entities_{};
@@ -196,6 +236,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
 
   bool valid_slot_(uint8_t slot) const;
   bool valid_cover_slot_(uint8_t slot) const;
+  bool valid_home_slot_(uint8_t slot) const;
   void load_language_();
   void save_language_();
   void load_display_rotation_();
@@ -208,6 +249,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void load_cover_configuration_();
   void save_cover_configuration_();
   void subscribe_cover_slot_(uint8_t slot);
+  void subscribe_home_slot_(uint8_t slot);
   void refresh_ha_subscriptions_();
   void turn_entity_off_(const std::string &entity_id);
 
@@ -227,6 +269,18 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void on_light_supported_color_modes_state_(const std::string &entity_id, StringRef value);
   void on_cover_position_state_(const std::string &entity_id, StringRef value);
   void on_cover_supported_features_state_(const std::string &entity_id, StringRef value);
+
+  void on_home_state_(const std::string &entity_id, StringRef value);
+  void on_home_icon_state_(const std::string &entity_id, StringRef value);
+  void on_home_unit_state_(const std::string &entity_id, StringRef value);
+  void on_home_temperature_unit_state_(const std::string &entity_id, StringRef value);
+  void on_home_brightness_state_(const std::string &entity_id, StringRef value);
+  void on_home_supported_color_modes_state_(const std::string &entity_id, StringRef value);
+  void on_home_position_state_(const std::string &entity_id, StringRef value);
+  void on_home_temperature_state_(const std::string &entity_id, StringRef value);
+  void on_home_current_temperature_state_(const std::string &entity_id, StringRef value);
+  void on_home_humidity_state_(const std::string &entity_id, StringRef value);
+  void on_home_hvac_action_state_(const std::string &entity_id, StringRef value);
 };
 
 }  // namespace wall_panel
