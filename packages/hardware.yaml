@@ -114,5 +114,5 @@ script:
     mode: restart
     then:
       - switch.turn_on: waveshare_buzzer
-      - delay: 25ms
+      - delay: 15ms
       - switch.turn_off: waveshare_buzzer
