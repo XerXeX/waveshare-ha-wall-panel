@@ -3,6 +3,7 @@
 #include "esphome/core/component.h"
 #include "esphome/core/preferences.h"
 #include "esphome/components/api/custom_api_device.h"
+#include "esphome/components/image/image.h"
 
 #include <array>
 #include <map>
@@ -120,6 +121,17 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void set_cover_position(uint8_t slot, int position_pct);
   const CoverSlotState &get_cover_slot(uint8_t slot) const;
 
+  void register_icon(const std::string &mdi_name, image::Image *image) {
+    if (mdi_name.empty() || image == nullptr)
+      return;
+    this->icon_registry_[mdi_name] = image;
+  }
+
+  image::Image *get_registered_icon(const std::string &mdi_name) const {
+    const auto it = this->icon_registry_.find(mdi_name);
+    return it == this->icon_registry_.end() ? nullptr : it->second;
+  }
+
   // Scene/script cards are configured in YAML, but the component subscribes to
   // their Home Assistant icon attribute so the UI can mirror the source entity.
   void set_scene_icon_entity(uint8_t slot, const std::string &entity_id) {
@@ -164,6 +176,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   ESPPreferenceObject cover_slot_pref_;
   bool cover_slot_pref_ready_{false};
 
+  std::map<std::string, image::Image *> icon_registry_{};
   std::array<std::string, SCENE_SLOT_COUNT> scene_icon_entities_{};
   std::array<std::string, SCENE_SLOT_COUNT> scene_icons_{};
 
