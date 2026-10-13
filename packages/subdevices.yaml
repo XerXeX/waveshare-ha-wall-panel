@@ -5,6 +5,31 @@
 # easy to navigate.
 
 esphome:
+  on_boot:
+    - priority: -90
+      then:
+        - lambda: |-
+            auto publish_name = [](auto *entity, const char *fallback) {
+              const std::string value = entity->state.empty() ? std::string(fallback) : entity->state;
+              entity->publish_state(value);
+            };
+            auto publish_entity = [](auto *entity) {
+              entity->publish_state(entity->state);
+            };
+
+            publish_name(id(home_slot1_name), "Home 1");
+            publish_entity(id(home_slot1_entity));
+            publish_name(id(home_slot2_name), "Home 2");
+            publish_entity(id(home_slot2_entity));
+            publish_name(id(home_slot3_name), "Home 3");
+            publish_entity(id(home_slot3_entity));
+            publish_name(id(home_slot4_name), "Home 4");
+            publish_entity(id(home_slot4_entity));
+            publish_name(id(home_slot5_name), "Home 5");
+            publish_entity(id(home_slot5_entity));
+            publish_name(id(home_slot6_name), "Home 6");
+            publish_entity(id(home_slot6_entity));
+
   devices:
     - id: home_device
       name: "Home"
