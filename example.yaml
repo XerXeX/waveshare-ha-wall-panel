@@ -49,6 +49,7 @@ packages:
       - packages/icons.yaml
       - packages/ui.yaml
       - packages/home.yaml
+      - packages/home_weather.yaml
       - packages/lights.yaml
       - packages/blinds.yaml
       - packages/scenes.yaml
