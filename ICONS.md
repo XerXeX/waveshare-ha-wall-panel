@@ -74,6 +74,6 @@ wall_panel:
       image_id: icon_rocket_launch
 ```
 
-The custom component resolves `image_id` during ESPHome code generation and stores the resulting image pointer in its runtime icon registry. `packages/icon_registry.yaml` then applies registered icons to Scene/Script cards whenever Home Assistant reports the matching `icon` attribute.
+The custom component resolves `image_id` during ESPHome code generation and stores the resulting image pointer in its runtime icon registry. `packages/icon_registry.yaml` applies registered icons to Scene/Script cards, while the Home dashboard reads the same registry directly for its mixed-entity cards and detail view.
 
-This means custom Scene icons no longer require editing `packages/scenes.yaml`. The image still has to be compiled into the firmware, but the mapping itself is user-configurable.
+This means custom Scene and Home icons no longer require editing packaged UI files. The image still has to be compiled into the firmware, but the mapping itself is user-configurable.
