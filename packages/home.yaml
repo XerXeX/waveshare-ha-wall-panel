@@ -1,0 +1,806 @@
+# Configurable Home dashboard
+#
+# Six slots can point at mixed Home Assistant entity domains. The component
+# subscribes dynamically to state and common attributes, while this package
+# renders domain-aware cards and a shared detail page.
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - lambda: |-
+            id(wall_panel_controller).set_home_name(1, id(home_slot1_name).state);
+            id(wall_panel_controller).set_home_entity(1, id(home_slot1_entity).state);
+            id(wall_panel_controller).set_home_name(2, id(home_slot2_name).state);
+            id(wall_panel_controller).set_home_entity(2, id(home_slot2_entity).state);
+            id(wall_panel_controller).set_home_name(3, id(home_slot3_name).state);
+            id(wall_panel_controller).set_home_entity(3, id(home_slot3_entity).state);
+            id(wall_panel_controller).set_home_name(4, id(home_slot4_name).state);
+            id(wall_panel_controller).set_home_entity(4, id(home_slot4_entity).state);
+            id(wall_panel_controller).set_home_name(5, id(home_slot5_name).state);
+            id(wall_panel_controller).set_home_entity(5, id(home_slot5_entity).state);
+            id(wall_panel_controller).set_home_name(6, id(home_slot6_name).state);
+            id(wall_panel_controller).set_home_entity(6, id(home_slot6_entity).state);
+
+globals:
+  - id: active_home_slot
+    type: int
+    restore_value: false
+    initial_value: '0'
+
+text:
+  - platform: template
+    id: home_slot1_name
+    name: "Home · Slot 1 · 1 Name"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "Home 1"
+    min_length: 0
+    max_length: 32
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_home_name(1, x);
+  - platform: template
+    id: home_slot1_entity
+    name: "Home · Slot 1 · 2 Entity"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 64
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_home_entity(1, x);
+
+  - platform: template
+    id: home_slot2_name
+    name: "Home · Slot 2 · 1 Name"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "Home 2"
+    min_length: 0
+    max_length: 32
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_home_name(2, x);
+  - platform: template
+    id: home_slot2_entity
+    name: "Home · Slot 2 · 2 Entity"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 64
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_home_entity(2, x);
+
+  - platform: template
+    id: home_slot3_name
+    name: "Home · Slot 3 · 1 Name"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "Home 3"
+    min_length: 0
+    max_length: 32
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_home_name(3, x);
+  - platform: template
+    id: home_slot3_entity
+    name: "Home · Slot 3 · 2 Entity"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 64
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_home_entity(3, x);
+
+  - platform: template
+    id: home_slot4_name
+    name: "Home · Slot 4 · 1 Name"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "Home 4"
+    min_length: 0
+    max_length: 32
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_home_name(4, x);
+  - platform: template
+    id: home_slot4_entity
+    name: "Home · Slot 4 · 2 Entity"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 64
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_home_entity(4, x);
+
+  - platform: template
+    id: home_slot5_name
+    name: "Home · Slot 5 · 1 Name"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "Home 5"
+    min_length: 0
+    max_length: 32
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_home_name(5, x);
+  - platform: template
+    id: home_slot5_entity
+    name: "Home · Slot 5 · 2 Entity"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 64
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_home_entity(5, x);
+
+  - platform: template
+    id: home_slot6_name
+    name: "Home · Slot 6 · 1 Name"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: "Home 6"
+    min_length: 0
+    max_length: 32
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_home_name(6, x);
+  - platform: template
+    id: home_slot6_entity
+    name: "Home · Slot 6 · 2 Entity"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 64
+    mode: text
+    set_action:
+      - lambda: id(wall_panel_controller).set_home_entity(6, x);
+
+script:
+  - id: home_refresh_detail
+    mode: restart
+    then:
+      - lambda: |-
+          const int active = id(active_home_slot);
+          if (active < 1 || active > 6)
+            return;
+
+          const auto &slot = id(wall_panel_controller).get_home_slot(active);
+          const bool danish = std::string(id(wall_panel_controller).get_language_option()) == "Danish";
+
+          auto set_label = [](lv_obj_t *label, const std::string &text) {
+            const char *current = lv_label_get_text(label);
+            if (current == nullptr || text != current)
+              lv_label_set_text(label, text.c_str());
+          };
+          auto set_visible = [](lv_obj_t *obj, bool visible) {
+            if (visible)
+              lv_obj_clear_flag(obj, LV_OBJ_FLAG_HIDDEN);
+            else
+              lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
+          };
+          auto default_icon = [&](const esphome::wall_panel::HomeSlotState &item) -> esphome::image::Image * {
+            if (auto *custom = id(wall_panel_controller).get_registered_icon(item.icon); custom != nullptr)
+              return custom;
+            if (item.domain == "light") return id(icon_lightbulb);
+            if (item.domain == "switch" || item.domain == "input_boolean") return id(icon_power);
+            if (item.domain == "climate") return id(icon_thermostat);
+            if (item.domain == "cover") return id(icon_blinds);
+            if (item.domain == "scene") return id(icon_palette_outline);
+            if (item.domain == "script" || item.domain == "button" || item.domain == "input_button") return id(icon_play);
+            if (item.domain == "weather") return id(icon_weather_cloudy);
+            if (item.domain == "sensor") return id(icon_thermometer);
+            if (item.domain == "binary_sensor") return id(icon_alert_circle);
+            return id(icon_home);
+          };
+
+          set_label(id(home_detail_name), slot.name.empty() ? slot.entity_id : slot.name);
+          set_label(id(home_detail_entity), slot.entity_id);
+          esphome::lvgl::lv_image_set_src(id(home_detail_icon), default_icon(slot));
+
+          set_visible(id(home_detail_toggle_button), false);
+          set_visible(id(home_detail_light_slider), false);
+          set_visible(id(home_detail_cover_controls), false);
+          set_visible(id(home_detail_cover_slider), false);
+          set_visible(id(home_detail_climate_controls), false);
+          set_visible(id(home_detail_action_button), false);
+
+          if (!slot.available) {
+            set_label(id(home_detail_value), danish ? "Ikke tilgængelig" : "Unavailable");
+            set_label(id(home_detail_secondary), "");
+            return;
+          }
+
+          std::string value = slot.state;
+          std::string secondary;
+
+          if (slot.domain == "light") {
+            value = slot.state == "on" ? (danish ? "Tændt" : "On") : (danish ? "Slukket" : "Off");
+            if (slot.has_brightness && slot.state == "on")
+              secondary = std::to_string(slot.brightness_pct) + "%";
+            set_visible(id(home_detail_toggle_button), true);
+            set_label(id(home_detail_toggle_label), slot.state == "on" ? (danish ? "Sluk" : "Turn off")
+                                                                        : (danish ? "Tænd" : "Turn on"));
+            if (slot.has_brightness) {
+              set_visible(id(home_detail_light_slider), true);
+              if (!lv_obj_has_state(id(home_detail_light_slider), LV_STATE_PRESSED) &&
+                  lv_slider_get_value(id(home_detail_light_slider)) != slot.brightness_pct)
+                lv_slider_set_value(id(home_detail_light_slider), slot.brightness_pct, LV_ANIM_OFF);
+            }
+          } else if (slot.domain == "switch" || slot.domain == "input_boolean") {
+            value = slot.state == "on" ? (danish ? "Tændt" : "On") : (danish ? "Slukket" : "Off");
+            set_visible(id(home_detail_toggle_button), true);
+            set_label(id(home_detail_toggle_label), slot.state == "on" ? (danish ? "Sluk" : "Turn off")
+                                                                        : (danish ? "Tænd" : "Turn on"));
+          } else if (slot.domain == "cover") {
+            if (slot.has_position)
+              value = std::to_string(slot.position_pct) + "%";
+            secondary = slot.state;
+            set_visible(id(home_detail_cover_controls), true);
+            if (slot.has_position) {
+              set_visible(id(home_detail_cover_slider), true);
+              if (!lv_obj_has_state(id(home_detail_cover_slider), LV_STATE_PRESSED) &&
+                  lv_slider_get_value(id(home_detail_cover_slider)) != slot.position_pct)
+                lv_slider_set_value(id(home_detail_cover_slider), slot.position_pct, LV_ANIM_OFF);
+            }
+          } else if (slot.domain == "climate") {
+            if (slot.has_current_temperature) {
+              char text[24];
+              snprintf(text, sizeof(text), "%.1f%s", slot.current_temperature, slot.unit.empty() ? "°" : slot.unit.c_str());
+              value = text;
+            }
+            secondary = slot.state;
+            if (!slot.hvac_action.empty() && slot.hvac_action != "idle")
+              secondary += " · " + slot.hvac_action;
+            set_visible(id(home_detail_climate_controls), true);
+            if (slot.has_target_temperature) {
+              char target[24];
+              snprintf(target, sizeof(target), "%.1f%s", slot.target_temperature, slot.unit.empty() ? "°" : slot.unit.c_str());
+              set_label(id(home_detail_climate_target), target);
+            } else {
+              set_label(id(home_detail_climate_target), "--");
+            }
+          } else if (slot.domain == "scene" || slot.domain == "script" || slot.domain == "button" ||
+                     slot.domain == "input_button" || slot.domain == "automation") {
+            value = slot.domain == "scene" ? (danish ? "Scene" : "Scene")
+                  : slot.domain == "script" ? "Script"
+                  : slot.domain == "automation" ? (danish ? "Automatisering" : "Automation")
+                  : (danish ? "Knap" : "Button");
+            set_visible(id(home_detail_action_button), true);
+            set_label(id(home_detail_action_label), slot.domain == "script" ? (danish ? "Kør" : "Run")
+                                                   : slot.domain == "scene" ? (danish ? "Aktivér" : "Activate")
+                                                   : slot.domain == "automation" ? (danish ? "Udløs" : "Trigger")
+                                                   : (danish ? "Tryk" : "Press"));
+          } else if (slot.domain == "weather") {
+            if (slot.has_current_temperature) {
+              char text[24];
+              snprintf(text, sizeof(text), "%.1f%s", slot.current_temperature, slot.unit.empty() ? "°" : slot.unit.c_str());
+              value = text;
+            }
+            secondary = slot.state;
+            if (slot.has_humidity) {
+              char humidity[20];
+              snprintf(humidity, sizeof(humidity), " · %.0f%%", slot.humidity);
+              secondary += humidity;
+            }
+          } else if (slot.domain == "sensor") {
+            value = slot.state + (slot.unit.empty() ? "" : " " + slot.unit);
+          } else if (slot.domain == "binary_sensor") {
+            value = slot.state == "on" ? (danish ? "Aktiv" : "On") : (danish ? "Inaktiv" : "Off");
+          } else if (!slot.unit.empty()) {
+            value = slot.state + " " + slot.unit;
+          }
+
+          set_label(id(home_detail_value), value);
+          set_label(id(home_detail_secondary), secondary);
+
+lvgl:
+  id: wall_panel_lvgl
+  pages:
+    - id: home_page
+      bg_color: 0x101216
+      widgets:
+        - label:
+            id: home_page_title
+            x: 20
+            y: 18
+            text: "Home"
+            text_font: ui_font_34
+            text_color: 0xFFFFFF
+
+        - button:
+            id: home_slot1_card
+            width: 210
+            height: 90
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(active_home_slot) = 1;
+              - script.execute: home_refresh_detail
+              - lvgl.page.show: home_detail_page
+            widgets:
+              - image:
+                  id: home_slot1_icon
+                  src: icon_home
+                  x: 14
+                  y: 24
+                  image_recolor: 0x858B94
+                  image_recolor_opa: 100%
+              - label:
+                  id: home_slot1_name_label
+                  x: 68
+                  y: 15
+                  width: 126
+                  text: "Home 1"
+                  text_font: ui_font_22
+                  text_color: 0xFFFFFF
+              - label:
+                  id: home_slot1_state_label
+                  x: 68
+                  y: 50
+                  width: 126
+                  text: "--"
+                  text_font: ui_font_18
+                  text_color: 0x858B94
+
+        - button:
+            id: home_slot2_card
+            width: 210
+            height: 90
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(active_home_slot) = 2;
+              - script.execute: home_refresh_detail
+              - lvgl.page.show: home_detail_page
+            widgets:
+              - image: { id: home_slot2_icon, src: icon_home, x: 14, y: 24, image_recolor: 0x858B94, image_recolor_opa: 100% }
+              - label: { id: home_slot2_name_label, x: 68, y: 15, width: 126, text: "Home 2", text_font: ui_font_22, text_color: 0xFFFFFF }
+              - label: { id: home_slot2_state_label, x: 68, y: 50, width: 126, text: "--", text_font: ui_font_18, text_color: 0x858B94 }
+
+        - button:
+            id: home_slot3_card
+            width: 210
+            height: 90
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(active_home_slot) = 3;
+              - script.execute: home_refresh_detail
+              - lvgl.page.show: home_detail_page
+            widgets:
+              - image: { id: home_slot3_icon, src: icon_home, x: 14, y: 24, image_recolor: 0x858B94, image_recolor_opa: 100% }
+              - label: { id: home_slot3_name_label, x: 68, y: 15, width: 126, text: "Home 3", text_font: ui_font_22, text_color: 0xFFFFFF }
+              - label: { id: home_slot3_state_label, x: 68, y: 50, width: 126, text: "--", text_font: ui_font_18, text_color: 0x858B94 }
+
+        - button:
+            id: home_slot4_card
+            width: 210
+            height: 90
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(active_home_slot) = 4;
+              - script.execute: home_refresh_detail
+              - lvgl.page.show: home_detail_page
+            widgets:
+              - image: { id: home_slot4_icon, src: icon_home, x: 14, y: 24, image_recolor: 0x858B94, image_recolor_opa: 100% }
+              - label: { id: home_slot4_name_label, x: 68, y: 15, width: 126, text: "Home 4", text_font: ui_font_22, text_color: 0xFFFFFF }
+              - label: { id: home_slot4_state_label, x: 68, y: 50, width: 126, text: "--", text_font: ui_font_18, text_color: 0x858B94 }
+
+        - button:
+            id: home_slot5_card
+            width: 210
+            height: 90
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(active_home_slot) = 5;
+              - script.execute: home_refresh_detail
+              - lvgl.page.show: home_detail_page
+            widgets:
+              - image: { id: home_slot5_icon, src: icon_home, x: 14, y: 24, image_recolor: 0x858B94, image_recolor_opa: 100% }
+              - label: { id: home_slot5_name_label, x: 68, y: 15, width: 126, text: "Home 5", text_font: ui_font_22, text_color: 0xFFFFFF }
+              - label: { id: home_slot5_state_label, x: 68, y: 50, width: 126, text: "--", text_font: ui_font_18, text_color: 0x858B94 }
+
+        - button:
+            id: home_slot6_card
+            width: 210
+            height: 90
+            bg_color: 0x181B20
+            radius: 18
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(active_home_slot) = 6;
+              - script.execute: home_refresh_detail
+              - lvgl.page.show: home_detail_page
+            widgets:
+              - image: { id: home_slot6_icon, src: icon_home, x: 14, y: 24, image_recolor: 0x858B94, image_recolor_opa: 100% }
+              - label: { id: home_slot6_name_label, x: 68, y: 15, width: 126, text: "Home 6", text_font: ui_font_22, text_color: 0xFFFFFF }
+              - label: { id: home_slot6_state_label, x: 68, y: 50, width: 126, text: "--", text_font: ui_font_18, text_color: 0x858B94 }
+
+    - id: home_detail_page
+      bg_color: 0x101216
+      widgets:
+        - button:
+            x: 20
+            y: 18
+            width: 46
+            height: 46
+            bg_color: 0x181B20
+            radius: 14
+            border_width: 0
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(active_home_slot) = 0;
+              - lvgl.page.show: home_page
+            widgets:
+              - image:
+                  src: icon_arrow_left
+                  align: CENTER
+                  image_recolor: 0xFFFFFF
+                  image_recolor_opa: 100%
+
+        - label:
+            id: home_detail_name
+            x: 82
+            y: 20
+            width: 275
+            text: "Home"
+            text_font: ui_font_34
+            text_color: 0xFFFFFF
+
+        - image:
+            id: home_detail_icon
+            src: icon_home
+            x: 24
+            y: 92
+            image_recolor: 0xFFFFFF
+            image_recolor_opa: 100%
+
+        - label:
+            id: home_detail_entity
+            x: 82
+            y: 90
+            width: 360
+            text: ""
+            text_font: ui_font_18
+            text_color: 0x858B94
+
+        - label:
+            id: home_detail_value
+            x: 82
+            y: 120
+            width: 360
+            text: "--"
+            text_font: ui_font_28
+            text_color: 0xFFFFFF
+
+        - label:
+            id: home_detail_secondary
+            x: 82
+            y: 158
+            width: 360
+            text: ""
+            text_font: ui_font_18
+            text_color: 0x858B94
+
+        - button:
+            id: home_detail_toggle_button
+            x: 20
+            y: 215
+            width: 440
+            height: 58
+            bg_color: 0x343A44
+            radius: 16
+            border_width: 0
+            hidden: true
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(wall_panel_controller).toggle_home_entity(id(active_home_slot));
+            widgets:
+              - label:
+                  id: home_detail_toggle_label
+                  align: CENTER
+                  text: "Toggle"
+                  text_font: ui_font_22
+                  text_color: 0xFFFFFF
+
+        - slider:
+            id: home_detail_light_slider
+            x: 30
+            y: 315
+            width: 420
+            min_value: 0
+            max_value: 100
+            value: 0
+            hidden: true
+            on_release:
+              - script.execute: ui_click
+              - lambda: |-
+                  id(wall_panel_controller).set_home_light_brightness(
+                    id(active_home_slot), lv_slider_get_value(id(home_detail_light_slider)));
+
+        - obj:
+            id: home_detail_cover_controls
+            x: 20
+            y: 215
+            width: 440
+            height: 64
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            hidden: true
+            widgets:
+              - button:
+                  x: 0
+                  y: 0
+                  width: 130
+                  height: 58
+                  bg_color: 0x343A44
+                  radius: 16
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).close_home_cover(id(active_home_slot));
+                  widgets:
+                    - image: { src: icon_arrow_down, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
+              - button:
+                  x: 155
+                  y: 0
+                  width: 130
+                  height: 58
+                  bg_color: 0x343A44
+                  radius: 16
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).stop_home_cover(id(active_home_slot));
+                  widgets:
+                    - image: { src: icon_stop, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
+              - button:
+                  x: 310
+                  y: 0
+                  width: 130
+                  height: 58
+                  bg_color: 0x343A44
+                  radius: 16
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: id(wall_panel_controller).open_home_cover(id(active_home_slot));
+                  widgets:
+                    - image: { src: icon_arrow_up, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
+
+        - slider:
+            id: home_detail_cover_slider
+            x: 30
+            y: 315
+            width: 420
+            min_value: 0
+            max_value: 100
+            value: 0
+            hidden: true
+            on_release:
+              - script.execute: ui_click
+              - lambda: |-
+                  id(wall_panel_controller).set_home_cover_position(
+                    id(active_home_slot), lv_slider_get_value(id(home_detail_cover_slider)));
+
+        - obj:
+            id: home_detail_climate_controls
+            x: 20
+            y: 220
+            width: 440
+            height: 100
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            hidden: true
+            widgets:
+              - button:
+                  x: 0
+                  y: 0
+                  width: 90
+                  height: 70
+                  bg_color: 0x343A44
+                  radius: 16
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_home_slot(id(active_home_slot));
+                        float target = slot.has_target_temperature ? slot.target_temperature
+                                     : slot.has_current_temperature ? slot.current_temperature : 20.0f;
+                        id(wall_panel_controller).set_home_climate_temperature(id(active_home_slot), target - 0.5f);
+                  widgets:
+                    - image: { src: icon_minus, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
+              - label:
+                  id: home_detail_climate_target
+                  x: 105
+                  y: 18
+                  width: 230
+                  text: "--"
+                  text_align: CENTER
+                  text_font: ui_font_34
+                  text_color: 0xFFFFFF
+              - button:
+                  x: 350
+                  y: 0
+                  width: 90
+                  height: 70
+                  bg_color: 0x343A44
+                  radius: 16
+                  border_width: 0
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_home_slot(id(active_home_slot));
+                        float target = slot.has_target_temperature ? slot.target_temperature
+                                     : slot.has_current_temperature ? slot.current_temperature : 20.0f;
+                        id(wall_panel_controller).set_home_climate_temperature(id(active_home_slot), target + 0.5f);
+                  widgets:
+                    - image: { src: icon_plus, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
+
+        - button:
+            id: home_detail_action_button
+            x: 20
+            y: 235
+            width: 440
+            height: 64
+            bg_color: 0x343A44
+            radius: 16
+            border_width: 0
+            hidden: true
+            on_click:
+              - script.execute: ui_click
+              - lambda: id(wall_panel_controller).activate_home_entity(id(active_home_slot));
+            widgets:
+              - label:
+                  id: home_detail_action_label
+                  align: CENTER
+                  text: "Activate"
+                  text_font: ui_font_22
+                  text_color: 0xFFFFFF
+
+interval:
+  - interval: 250ms
+    then:
+      - lambda: |-
+          lv_obj_t *cards[6] = {
+            id(home_slot1_card), id(home_slot2_card), id(home_slot3_card),
+            id(home_slot4_card), id(home_slot5_card), id(home_slot6_card)
+          };
+          lv_obj_t *icons[6] = {
+            id(home_slot1_icon), id(home_slot2_icon), id(home_slot3_icon),
+            id(home_slot4_icon), id(home_slot5_icon), id(home_slot6_icon)
+          };
+          lv_obj_t *names[6] = {
+            id(home_slot1_name_label), id(home_slot2_name_label), id(home_slot3_name_label),
+            id(home_slot4_name_label), id(home_slot5_name_label), id(home_slot6_name_label)
+          };
+          lv_obj_t *states[6] = {
+            id(home_slot1_state_label), id(home_slot2_state_label), id(home_slot3_state_label),
+            id(home_slot4_state_label), id(home_slot5_state_label), id(home_slot6_state_label)
+          };
+          static esphome::image::Image *last_icons[6] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+
+          auto set_label = [](lv_obj_t *label, const std::string &text) {
+            const char *current = lv_label_get_text(label);
+            if (current == nullptr || text != current)
+              lv_label_set_text(label, text.c_str());
+          };
+          auto default_icon = [&](const esphome::wall_panel::HomeSlotState &item) -> esphome::image::Image * {
+            if (auto *custom = id(wall_panel_controller).get_registered_icon(item.icon); custom != nullptr)
+              return custom;
+            if (item.domain == "light") return id(icon_lightbulb);
+            if (item.domain == "switch" || item.domain == "input_boolean") return id(icon_power);
+            if (item.domain == "climate") return id(icon_thermostat);
+            if (item.domain == "cover") return id(icon_blinds);
+            if (item.domain == "scene") return id(icon_palette_outline);
+            if (item.domain == "script" || item.domain == "button" || item.domain == "input_button") return id(icon_play);
+            if (item.domain == "weather") return id(icon_weather_cloudy);
+            if (item.domain == "sensor") return id(icon_thermometer);
+            if (item.domain == "binary_sensor") return id(icon_alert_circle);
+            return id(icon_home);
+          };
+
+          const bool danish = std::string(id(wall_panel_controller).get_language_option()) == "Danish";
+          set_label(id(home_page_title), danish ? "Hjem" : "Home");
+
+          int visible = 0;
+          for (int i = 0; i < 6; i++) {
+            const auto &slot = id(wall_panel_controller).get_home_slot(i + 1);
+            if (!slot.configured) {
+              lv_obj_add_flag(cards[i], LV_OBJ_FLAG_HIDDEN);
+              continue;
+            }
+
+            lv_obj_clear_flag(cards[i], LV_OBJ_FLAG_HIDDEN);
+            const int column = visible % 2;
+            const int row = visible / 2;
+            lv_obj_set_pos(cards[i], 20 + column * 230, 72 + row * 98);
+            visible++;
+
+            set_label(names[i], slot.name.empty() ? slot.entity_id : slot.name);
+
+            std::string state_text;
+            if (!slot.available) {
+              state_text = danish ? "Ikke tilgængelig" : "Unavailable";
+            } else if (slot.domain == "light" || slot.domain == "switch" || slot.domain == "input_boolean") {
+              state_text = slot.state == "on" ? (danish ? "Tændt" : "On") : (danish ? "Slukket" : "Off");
+              if (slot.domain == "light" && slot.has_brightness && slot.state == "on")
+                state_text += " · " + std::to_string(slot.brightness_pct) + "%";
+            } else if (slot.domain == "cover" && slot.has_position) {
+              state_text = std::to_string(slot.position_pct) + "%";
+            } else if (slot.domain == "climate" && slot.has_current_temperature) {
+              char text[32];
+              snprintf(text, sizeof(text), "%.1f%s", slot.current_temperature, slot.unit.empty() ? "°" : slot.unit.c_str());
+              state_text = text;
+            } else if (slot.domain == "weather" && slot.has_current_temperature) {
+              char text[32];
+              snprintf(text, sizeof(text), "%.1f%s · %s", slot.current_temperature,
+                       slot.unit.empty() ? "°" : slot.unit.c_str(), slot.state.c_str());
+              state_text = text;
+            } else if (slot.domain == "sensor") {
+              state_text = slot.state + (slot.unit.empty() ? "" : " " + slot.unit);
+            } else if (slot.domain == "binary_sensor") {
+              state_text = slot.state == "on" ? (danish ? "Aktiv" : "On") : (danish ? "Inaktiv" : "Off");
+            } else if (slot.domain == "scene") {
+              state_text = danish ? "Scene" : "Scene";
+            } else if (slot.domain == "script") {
+              state_text = "Script";
+            } else {
+              state_text = slot.state;
+            }
+            set_label(states[i], state_text);
+
+            auto *image = default_icon(slot);
+            if (last_icons[i] != image) {
+              esphome::lvgl::lv_image_set_src(icons[i], image);
+              last_icons[i] = image;
+            }
+
+            const bool active = slot.state == "on" || slot.state == "open" || slot.state == "opening";
+            lv_obj_set_style_image_recolor(icons[i], lv_color_hex(active ? 0xFFD54F : 0x858B94), LV_PART_MAIN);
+          }
+
+      - if:
+          condition:
+            lambda: return id(active_home_slot) >= 1 && id(active_home_slot) <= 6;
+          then:
+            - script.execute: home_refresh_detail
