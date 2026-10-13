@@ -1,0 +1,283 @@
+# Weather-specific detail view for Home slots
+#
+# This overlays the generic Home detail content whenever the selected slot is a
+# weather.* entity. It uses the weather entity's normal state and attributes, so
+# no extra Home Assistant helper entities are required.
+
+lvgl:
+  id: wall_panel_lvgl
+  pages:
+    - id: !extend home_detail_page
+      widgets:
+        - obj:
+            id: home_weather_detail_panel
+            x: 0
+            y: 74
+            width: 480
+            height: 316
+            bg_color: 0x101216
+            bg_opa: 100%
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollable: false
+            hidden: true
+            widgets:
+              - image:
+                  id: home_weather_detail_icon
+                  src: icon_weather_cloudy
+                  x: 28
+                  y: 22
+                  image_recolor: 0xFFFFFF
+                  image_recolor_opa: 100%
+
+              - label:
+                  id: home_weather_detail_condition
+                  x: 88
+                  y: 18
+                  width: 225
+                  text: "Weather"
+                  text_font: ui_font_28
+                  text_color: 0xFFFFFF
+
+              - label:
+                  id: home_weather_detail_temperature
+                  x: 315
+                  y: 14
+                  width: 140
+                  text: "--"
+                  text_align: RIGHT
+                  text_font: ui_font_34
+                  text_color: 0xFFFFFF
+
+              - label:
+                  id: home_weather_detail_entity
+                  x: 88
+                  y: 52
+                  width: 360
+                  text: ""
+                  text_font: ui_font_18
+                  text_color: 0x858B94
+
+              - obj:
+                  x: 20
+                  y: 92
+                  width: 440
+                  height: 58
+                  bg_color: 0x181B20
+                  radius: 16
+                  border_width: 0
+                  pad_all: 0
+                  clickable: false
+                  scrollable: false
+                  widgets:
+                    - label:
+                        id: home_weather_humidity_name
+                        x: 18
+                        y: 17
+                        text: "Humidity"
+                        text_font: ui_font_18
+                        text_color: 0xB8BDC5
+                    - label:
+                        id: home_weather_humidity_value
+                        x: 220
+                        y: 17
+                        width: 198
+                        text: "--"
+                        text_align: RIGHT
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+
+              - obj:
+                  x: 20
+                  y: 158
+                  width: 440
+                  height: 58
+                  bg_color: 0x181B20
+                  radius: 16
+                  border_width: 0
+                  pad_all: 0
+                  clickable: false
+                  scrollable: false
+                  widgets:
+                    - label:
+                        id: home_weather_pressure_name
+                        x: 18
+                        y: 17
+                        text: "Pressure"
+                        text_font: ui_font_18
+                        text_color: 0xB8BDC5
+                    - label:
+                        id: home_weather_pressure_value
+                        x: 180
+                        y: 17
+                        width: 238
+                        text: "--"
+                        text_align: RIGHT
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+
+              - obj:
+                  x: 20
+                  y: 224
+                  width: 440
+                  height: 58
+                  bg_color: 0x181B20
+                  radius: 16
+                  border_width: 0
+                  pad_all: 0
+                  clickable: false
+                  scrollable: false
+                  widgets:
+                    - label:
+                        id: home_weather_wind_name
+                        x: 18
+                        y: 17
+                        text: "Wind"
+                        text_font: ui_font_18
+                        text_color: 0xB8BDC5
+                    - label:
+                        id: home_weather_wind_value
+                        x: 150
+                        y: 17
+                        width: 268
+                        text: "--"
+                        text_align: RIGHT
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+
+interval:
+  - interval: 500ms
+    then:
+      - lambda: |-
+          const int active = id(active_home_slot);
+          const bool has_active_slot = active >= 1 && active <= 6;
+          const auto &slot = has_active_slot
+              ? id(wall_panel_controller).get_home_slot(active)
+              : id(wall_panel_controller).get_home_slot(0);
+          const bool is_weather = has_active_slot && slot.domain == "weather";
+
+          if (!is_weather) {
+            if (!lv_obj_has_flag(id(home_weather_detail_panel), LV_OBJ_FLAG_HIDDEN))
+              lv_obj_add_flag(id(home_weather_detail_panel), LV_OBJ_FLAG_HIDDEN);
+            return;
+          }
+
+          if (lv_obj_has_flag(id(home_weather_detail_panel), LV_OBJ_FLAG_HIDDEN))
+            lv_obj_clear_flag(id(home_weather_detail_panel), LV_OBJ_FLAG_HIDDEN);
+
+          const bool danish = std::string(id(wall_panel_controller).get_language_option()) == "Danish";
+
+          auto set_label = [](lv_obj_t *label, const std::string &text) {
+            const char *current = lv_label_get_text(label);
+            if (current == nullptr || text != current)
+              lv_label_set_text(label, text.c_str());
+          };
+
+          auto condition_text = [&](const std::string &condition) -> std::string {
+            if (!danish)
+              return condition;
+            if (condition == "sunny") return "Solrigt";
+            if (condition == "clear-night") return "Klar nat";
+            if (condition == "cloudy") return "Overskyet";
+            if (condition == "partlycloudy") return "Delvist skyet";
+            if (condition == "fog") return "Tåge";
+            if (condition == "hail") return "Hagl";
+            if (condition == "lightning") return "Torden";
+            if (condition == "lightning-rainy") return "Torden og regn";
+            if (condition == "pouring") return "Kraftig regn";
+            if (condition == "rainy") return "Regn";
+            if (condition == "snowy") return "Sne";
+            if (condition == "snowy-rainy") return "Slud";
+            if (condition == "windy") return "Blæsende";
+            if (condition == "windy-variant") return "Blæsende";
+            if (condition == "exceptional") return "Usædvanligt vejr";
+            return condition;
+          };
+
+          auto weather_icon = [&](const esphome::wall_panel::HomeSlotState &item) -> esphome::image::Image * {
+            if (auto *custom = id(wall_panel_controller).get_registered_icon(item.icon); custom != nullptr)
+              return custom;
+            if (item.state == "sunny") return id(icon_weather_sunny);
+            if (item.state == "clear-night") return id(icon_weather_night);
+            if (item.state == "rainy") return id(icon_weather_rainy);
+            if (item.state == "pouring") return id(icon_weather_pouring);
+            if (item.state == "snowy" || item.state == "snowy-rainy") return id(icon_weather_snowy);
+            if (item.state == "lightning" || item.state == "lightning-rainy") return id(icon_weather_lightning);
+            if (item.state == "windy" || item.state == "windy-variant") return id(icon_fan);
+            return id(icon_weather_cloudy);
+          };
+
+          static esphome::image::Image *last_image = nullptr;
+          auto *image = weather_icon(slot);
+          if (last_image != image) {
+            esphome::lvgl::lv_image_set_src(id(home_weather_detail_icon), image);
+            last_image = image;
+          }
+
+          set_label(id(home_weather_detail_condition), slot.available ? condition_text(slot.state)
+                                                                     : (danish ? "Ikke tilgængelig" : "Unavailable"));
+          set_label(id(home_weather_detail_entity), slot.entity_id);
+          set_label(id(home_weather_humidity_name), danish ? "Luftfugtighed" : "Humidity");
+          set_label(id(home_weather_pressure_name), danish ? "Lufttryk" : "Pressure");
+          set_label(id(home_weather_wind_name), danish ? "Vind" : "Wind");
+
+          if (slot.available && slot.has_current_temperature) {
+            char text[32];
+            snprintf(text, sizeof(text), "%.1f%s", slot.current_temperature,
+                     slot.unit.empty() ? "°" : slot.unit.c_str());
+            set_label(id(home_weather_detail_temperature), text);
+          } else {
+            set_label(id(home_weather_detail_temperature), "--");
+          }
+
+          if (slot.available && slot.has_humidity) {
+            char text[24];
+            snprintf(text, sizeof(text), "%.0f%%", slot.humidity);
+            set_label(id(home_weather_humidity_value), text);
+          } else {
+            set_label(id(home_weather_humidity_value), "--");
+          }
+
+          if (slot.available && slot.has_pressure) {
+            char text[40];
+            snprintf(text, sizeof(text), "%.1f%s%s", slot.pressure,
+                     slot.pressure_unit.empty() ? "" : " ", slot.pressure_unit.c_str());
+            set_label(id(home_weather_pressure_value), text);
+          } else {
+            set_label(id(home_weather_pressure_value), "--");
+          }
+
+          if (slot.available && slot.has_wind_speed) {
+            std::string direction;
+            if (!slot.wind_bearing.empty()) {
+              char *end = nullptr;
+              const float bearing = std::strtof(slot.wind_bearing.c_str(), &end);
+              if (end != slot.wind_bearing.c_str() && std::isfinite(bearing)) {
+                const char *directions_en[16] = {
+                  "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+                  "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
+                };
+                const char *directions_da[16] = {
+                  "N", "NNØ", "NØ", "ØNØ", "Ø", "ØSØ", "SØ", "SSØ",
+                  "S", "SSV", "SV", "VSV", "V", "VNV", "NV", "NNV"
+                };
+                int index = static_cast<int>(std::lround(bearing / 22.5f)) % 16;
+                if (index < 0) index += 16;
+                direction = danish ? directions_da[index] : directions_en[index];
+              } else {
+                direction = slot.wind_bearing;
+              }
+            }
+
+            char speed[32];
+            snprintf(speed, sizeof(speed), "%.1f%s%s", slot.wind_speed,
+                     slot.wind_speed_unit.empty() ? "" : " ", slot.wind_speed_unit.c_str());
+            std::string text = speed;
+            if (!direction.empty())
+              text += " · " + direction;
+            set_label(id(home_weather_wind_value), text);
+          } else {
+            set_label(id(home_weather_wind_value), "--");
+          }
