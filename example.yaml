@@ -48,9 +48,9 @@ packages:
       - packages/hardware.yaml
       - packages/icons.yaml
       - packages/ui.yaml
+      - packages/home.yaml
       - packages/lights.yaml
       - packages/blinds.yaml
-      - packages/audio.yaml
       - packages/scenes.yaml
       - packages/icon_registry.yaml
       - packages/screensaver.yaml
