@@ -1,0 +1,54 @@
+# Persistent header clock for all normal pages
+#
+# The full-screen screensaver hides this label while active. Time source and
+# time-format settings are shared with packages/screensaver.yaml.
+
+lvgl:
+  id: wall_panel_lvgl
+  top_layer:
+    widgets:
+      - label:
+          id: wall_panel_header_time
+          x: 360
+          y: 22
+          width: 100
+          text: "--:--"
+          text_align: RIGHT
+          text_font: ui_font_22
+          text_color: 0x858B94
+          clickable: false
+          scrollable: false
+
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          const bool screensaver_active = id(wall_panel_screensaver_active);
+          const bool currently_hidden = lv_obj_has_flag(id(wall_panel_header_time), LV_OBJ_FLAG_HIDDEN);
+
+          if (screensaver_active && !currently_hidden)
+            lv_obj_add_flag(id(wall_panel_header_time), LV_OBJ_FLAG_HIDDEN);
+          else if (!screensaver_active && currently_hidden)
+            lv_obj_clear_flag(id(wall_panel_header_time), LV_OBJ_FLAG_HIDDEN);
+
+          if (screensaver_active)
+            return;
+
+          auto now = id(wall_panel_time).now();
+          char text[16];
+
+          if (!now.is_valid()) {
+            snprintf(text, sizeof(text), "--:--");
+          } else if (id(wall_panel_time_format).current_option() == "12 hour") {
+            int hour = now.hour % 12;
+            if (hour == 0)
+              hour = 12;
+            snprintf(text, sizeof(text), "%d:%02d %s", hour, now.minute,
+                     now.hour < 12 ? "AM" : "PM");
+          } else {
+            snprintf(text, sizeof(text), "%02d:%02d", now.hour, now.minute);
+          }
+
+          const char *current = lv_label_get_text(id(wall_panel_header_time));
+          if (current == nullptr || std::strcmp(current, text) != 0)
+            lv_label_set_text(id(wall_panel_header_time), text);
