@@ -113,6 +113,10 @@ script:
   - id: ui_click
     mode: restart
     then:
-      - switch.turn_on: waveshare_buzzer
-      - delay: 15ms
-      - switch.turn_off: waveshare_buzzer
+      - lambda: |-
+          // Keep the audible click duration independent of whatever action
+          // follows it. A normal automation delay yields back to the main loop,
+          // so expensive LVGL/page updates can otherwise stretch the beep.
+          id(waveshare_buzzer).turn_on();
+          esphome::delay(15);
+          id(waveshare_buzzer).turn_off();
