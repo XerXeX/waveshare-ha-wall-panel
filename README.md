@@ -14,14 +14,16 @@ The project is designed as a reusable Home Assistant wall panel with runtime-con
 - `packages/blinds.yaml` – blinds controls
 - `packages/audio.yaml` – audio controls
 - `packages/scenes.yaml` – scene controls and Home Assistant icon inheritance
-- `packages/screensaver.yaml` – screensaver behavior
+- `packages/icon_registry.yaml` – applies user-registered custom icons to Scene/Script cards
+- `packages/screensaver.yaml` – screensaver behavior and shared time source
+- `packages/header_clock.yaml` – persistent clock shown on normal pages
 - `packages/subdevices.yaml` – Home Assistant sub-device organization
-- `ICONS.md` – icon naming convention and included icon list
+- `ICONS.md` – icon naming convention, included icon list and custom icon registry examples
 - `example.yaml` – top-level ESPHome example configuration
 
 ## Icons
 
-Shared images use a predictable ID derived from the MDI name. For example, `mdi:weather-night` is exposed as `icon_weather_night`. See `ICONS.md` for the complete built-in list and extension notes.
+Shared images use a predictable ID derived from the MDI name. For example, `mdi:weather-night` is exposed as `icon_weather_night`. Users can also compile their own images and register them with the custom component without editing the packaged Scene mapping. See `ICONS.md` for the complete built-in list and configuration example.
 
 ## Languages
 
