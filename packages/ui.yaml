@@ -50,8 +50,8 @@ select:
     entity_category: config
     optimistic: true
     restore_value: true
-    initial_option: "Lights"
-    options: ["None", "Lights", "Blinds", "Audio", "Scenes"]
+    initial_option: "Home"
+    options: ["None", "Home", "Lights", "Blinds", "Scenes"]
 
 script:
   - id: wall_panel_show_main_page
@@ -65,30 +65,27 @@ script:
           condition:
             lambda: return page == 1;
           then:
-            - lvgl.page.show: lights_page
+            - lvgl.page.show: home_page
       - if:
           condition:
             lambda: return page == 2;
           then:
-            - lvgl.page.show: blinds_page
+            - lvgl.page.show: lights_page
       - if:
           condition:
             lambda: return page == 3;
           then:
-            - lvgl.page.show: audio_page
+            - lvgl.page.show: blinds_page
       - if:
           condition:
             lambda: return page == 4;
           then:
             - lvgl.page.show: scenes_page
       - lambda: |-
-          // Drop any gesture/press ownership left behind by the previous page.
-          // Without this, LVGL can occasionally keep one of the old page widgets
-          // associated with the touch device, which makes long-press handling on
-          // the newly shown page unreliable until another gesture clears it.
+          // Clear any input ownership left behind by the previous page.
           lv_indev_reset(nullptr, nullptr);
 
-          if (page == 1) {
+          if (page == 2) {
             lv_obj_t *light_cards[4] = {
               id(light_slot1_card), id(light_slot2_card), id(light_slot3_card), id(light_slot4_card)
             };
@@ -102,10 +99,10 @@ script:
             id(wall_panel_last_user_page) = page;
 
           lv_obj_t *buttons[4] = {
-            id(nav_light_button), id(nav_blinds_button), id(nav_audio_button), id(nav_scenes_button)
+            id(nav_home_button), id(nav_light_button), id(nav_blinds_button), id(nav_scenes_button)
           };
           lv_obj_t *icons[4] = {
-            id(nav_light_icon), id(nav_blinds_icon), id(nav_audio_icon), id(nav_scenes_icon)
+            id(nav_home_icon), id(nav_light_icon), id(nav_blinds_icon), id(nav_scenes_icon)
           };
 
           for (int i = 0; i < 4; i++) {
@@ -127,9 +124,9 @@ script:
           id: wall_panel_show_main_page
           page: !lambda |-
             const auto option = id(wall_panel_default_page).current_option();
-            if (option == "Lights") return 1;
-            if (option == "Blinds") return 2;
-            if (option == "Audio") return 3;
+            if (option == "Home") return 1;
+            if (option == "Lights") return 2;
+            if (option == "Blinds") return 3;
             if (option == "Scenes") return 4;
             return id(wall_panel_last_user_page);
           remember: false
@@ -210,7 +207,7 @@ lvgl:
           scrollbar_mode: "OFF"
           widgets:
             - button:
-                id: nav_light_button
+                id: nav_home_button
                 x: 16
                 y: 8
                 width: 96
@@ -227,14 +224,14 @@ lvgl:
                       remember: true
                 widgets:
                   - image:
-                      id: nav_light_icon
-                      src: icon_lightbulb_outline
+                      id: nav_home_icon
+                      src: icon_home
                       align: CENTER
                       image_recolor: 0xFFFFFF
                       image_recolor_opa: 100%
 
             - button:
-                id: nav_blinds_button
+                id: nav_light_button
                 x: 128
                 y: 8
                 width: 96
@@ -250,14 +247,14 @@ lvgl:
                       remember: true
                 widgets:
                   - image:
-                      id: nav_blinds_icon
-                      src: icon_window_shutter
+                      id: nav_light_icon
+                      src: icon_lightbulb_outline
                       align: CENTER
                       image_recolor: 0x858B94
                       image_recolor_opa: 100%
 
             - button:
-                id: nav_audio_button
+                id: nav_blinds_button
                 x: 240
                 y: 8
                 width: 96
@@ -273,8 +270,8 @@ lvgl:
                       remember: true
                 widgets:
                   - image:
-                      id: nav_audio_icon
-                      src: icon_speaker
+                      id: nav_blinds_icon
+                      src: icon_blinds
                       align: CENTER
                       image_recolor: 0x858B94
                       image_recolor_opa: 100%
@@ -366,7 +363,6 @@ interval:
             id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::ACTION_PERMISSION_MESSAGE)
           );
           set_label_if_changed(id(blinds_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::BLINDS));
-          set_label_if_changed(id(audio_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::AUDIO));
           set_label_if_changed(id(scenes_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::SCENES));
       - if:
           condition:
