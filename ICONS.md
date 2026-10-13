@@ -57,4 +57,23 @@ Scene and script cards read the `icon` attribute from Home Assistant. If the MDI
 
 ## Adding custom icons
 
-Additional images can be declared in the user's own ESPHome YAML using the same naming convention. This makes them available for direct use by custom widgets. Automatic Scene icon inheritance is limited to the icons mapped by the packaged `scenes.yaml`, so a custom Scene icon also requires extending or overriding that mapping.
+Custom icons can be added entirely from the user's own ESPHome YAML. Declare the image first, then register its Home Assistant MDI name with `wall_panel.custom_icons`:
+
+```yaml
+image:
+  - platform: file
+    file: mdi:rocket-launch
+    id: icon_rocket_launch
+    resize: 42x42
+    type: RGB565
+    transparency: alpha_channel
+
+wall_panel:
+  custom_icons:
+    - mdi: mdi:rocket-launch
+      image_id: icon_rocket_launch
+```
+
+The custom component resolves `image_id` during ESPHome code generation and stores the resulting image pointer in its runtime icon registry. `packages/icon_registry.yaml` then applies registered icons to Scene/Script cards whenever Home Assistant reports the matching `icon` attribute.
+
+This means custom Scene icons no longer require editing `packages/scenes.yaml`. The image still has to be compiled into the firmware, but the mapping itself is user-configurable.
