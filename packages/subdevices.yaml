@@ -6,14 +6,14 @@
 
 esphome:
   devices:
+    - id: home_device
+      name: "Home"
+
     - id: lights_device
       name: "Lights"
 
     - id: blinds_device
       name: "Blinds"
-
-    - id: audio_device
-      name: "Audio"
 
     - id: scenes_device
       name: "Scenes"
@@ -79,6 +79,44 @@ light:
     device_id: settings_device
 
 text:
+  # Home
+  - id: !extend home_slot1_name
+    name: "Slot 1 · 1 Name"
+    device_id: home_device
+  - id: !extend home_slot1_entity
+    name: "Slot 1 · 2 Entity"
+    device_id: home_device
+  - id: !extend home_slot2_name
+    name: "Slot 2 · 1 Name"
+    device_id: home_device
+  - id: !extend home_slot2_entity
+    name: "Slot 2 · 2 Entity"
+    device_id: home_device
+  - id: !extend home_slot3_name
+    name: "Slot 3 · 1 Name"
+    device_id: home_device
+  - id: !extend home_slot3_entity
+    name: "Slot 3 · 2 Entity"
+    device_id: home_device
+  - id: !extend home_slot4_name
+    name: "Slot 4 · 1 Name"
+    device_id: home_device
+  - id: !extend home_slot4_entity
+    name: "Slot 4 · 2 Entity"
+    device_id: home_device
+  - id: !extend home_slot5_name
+    name: "Slot 5 · 1 Name"
+    device_id: home_device
+  - id: !extend home_slot5_entity
+    name: "Slot 5 · 2 Entity"
+    device_id: home_device
+  - id: !extend home_slot6_name
+    name: "Slot 6 · 1 Name"
+    device_id: home_device
+  - id: !extend home_slot6_entity
+    name: "Slot 6 · 2 Entity"
+    device_id: home_device
+
   # Lights
   - id: !extend light_slot1_name
     name: "Slot 1 · 1 Name"
