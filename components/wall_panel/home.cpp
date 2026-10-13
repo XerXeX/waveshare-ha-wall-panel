@@ -1,6 +1,8 @@
 #include "wall_panel.h"
 
+#include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <cstdlib>
 
 namespace esphome {
@@ -109,8 +111,10 @@ void WallPanel::activate_home_entity(uint8_t slot) {
     this->call_homeassistant_service_checked_("scene.turn_on", {{"entity_id", state.entity_id}});
   } else if (state.domain == "script") {
     this->call_homeassistant_service_checked_("script.turn_on", {{"entity_id", state.entity_id}});
-  } else if (state.domain == "button" || state.domain == "input_button") {
+  } else if (state.domain == "button") {
     this->call_homeassistant_service_checked_("button.press", {{"entity_id", state.entity_id}});
+  } else if (state.domain == "input_button") {
+    this->call_homeassistant_service_checked_("input_button.press", {{"entity_id", state.entity_id}});
   } else if (state.domain == "automation") {
     this->call_homeassistant_service_checked_("automation.trigger", {{"entity_id", state.entity_id}});
   }
