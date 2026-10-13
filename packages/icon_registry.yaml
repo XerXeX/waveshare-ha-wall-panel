@@ -1,8 +1,53 @@
-# Custom icon registry bridge
+# Icon registry bridge
 #
-# The wall_panel component resolves user-configured Home Assistant MDI names to
-# ESPHome image objects at code-generation time. This interval applies matching
-# registered images to Scene/Script cards without modifying packages/scenes.yaml.
+# User-configured icons are registered by wall_panel code generation. Shared icons
+# that need runtime Home/Scene lookup can also be registered here so Home Assistant
+# MDI names resolve without adding more UI-side if chains.
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - lambda: |-
+            auto &panel = id(wall_panel_controller);
+            panel.register_icon("mdi:bed", id(icon_bed));
+            panel.register_icon("mdi:bed-clock", id(icon_bed_clock));
+            panel.register_icon("mdi:bed-double", id(icon_bed_double));
+            panel.register_icon("mdi:bed-double-outline", id(icon_bed_double_outline));
+            panel.register_icon("mdi:bed-empty", id(icon_bed_empty));
+            panel.register_icon("mdi:bed-king", id(icon_bed_king));
+            panel.register_icon("mdi:bed-king-outline", id(icon_bed_king_outline));
+            panel.register_icon("mdi:bed-outline", id(icon_bed_outline));
+            panel.register_icon("mdi:bed-queen", id(icon_bed_queen));
+            panel.register_icon("mdi:bed-queen-outline", id(icon_bed_queen_outline));
+            panel.register_icon("mdi:bed-single", id(icon_bed_single));
+            panel.register_icon("mdi:bed-single-outline", id(icon_bed_single_outline));
+            panel.register_icon("mdi:bunk-bed", id(icon_bunk_bed));
+            panel.register_icon("mdi:bunk-bed-outline", id(icon_bunk_bed_outline));
+            panel.register_icon("mdi:sleep", id(icon_sleep));
+            panel.register_icon("mdi:sleep-off", id(icon_sleep_off));
+            panel.register_icon("mdi:bell-sleep", id(icon_bell_sleep));
+            panel.register_icon("mdi:bell-sleep-outline", id(icon_bell_sleep_outline));
+            panel.register_icon("mdi:chat-sleep", id(icon_chat_sleep));
+            panel.register_icon("mdi:chat-sleep-outline", id(icon_chat_sleep_outline));
+            panel.register_icon("mdi:power-sleep", id(icon_power_sleep));
+            panel.register_icon("mdi:lightbulb-night", id(icon_lightbulb_night));
+            panel.register_icon("mdi:lightbulb-night-outline", id(icon_lightbulb_night_outline));
+            panel.register_icon("mdi:moon-new", id(icon_moon_new));
+            panel.register_icon("mdi:moon-full", id(icon_moon_full));
+            panel.register_icon("mdi:moon-first-quarter", id(icon_moon_first_quarter));
+            panel.register_icon("mdi:moon-last-quarter", id(icon_moon_last_quarter));
+            panel.register_icon("mdi:moon-waning-crescent", id(icon_moon_waning_crescent));
+            panel.register_icon("mdi:moon-waning-gibbous", id(icon_moon_waning_gibbous));
+            panel.register_icon("mdi:moon-waxing-crescent", id(icon_moon_waxing_crescent));
+            panel.register_icon("mdi:moon-waxing-gibbous", id(icon_moon_waxing_gibbous));
+            panel.register_icon("mdi:shield-moon", id(icon_shield_moon));
+            panel.register_icon("mdi:shield-moon-outline", id(icon_shield_moon_outline));
+            panel.register_icon("mdi:weather-moonset", id(icon_weather_moonset));
+            panel.register_icon("mdi:weather-moonset-down", id(icon_weather_moonset_down));
+            panel.register_icon("mdi:weather-moonset-up", id(icon_weather_moonset_up));
+            panel.register_icon("mdi:weather-night", id(icon_weather_night));
+            panel.register_icon("mdi:weather-night-partly-cloudy", id(icon_weather_night_partly_cloudy));
 
 interval:
   - interval: 250ms
