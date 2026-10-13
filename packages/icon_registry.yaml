@@ -1,0 +1,32 @@
+# Custom icon registry bridge
+#
+# The wall_panel component resolves user-configured Home Assistant MDI names to
+# ESPHome image objects at code-generation time. This interval applies matching
+# registered images to Scene/Script cards without modifying packages/scenes.yaml.
+
+interval:
+  - interval: 250ms
+    then:
+      - lambda: |-
+          lv_obj_t *scene_icons[4] = {
+            id(scene_slot1_icon), id(scene_slot2_icon),
+            id(scene_slot3_icon), id(scene_slot4_icon)
+          };
+
+          static std::string last_registered_icons[4];
+
+          for (int i = 0; i < 4; i++) {
+            const std::string mdi_name = id(wall_panel_controller).get_scene_icon(i + 1);
+            auto *image = id(wall_panel_controller).get_registered_icon(mdi_name);
+
+            if (image == nullptr) {
+              last_registered_icons[i].clear();
+              continue;
+            }
+
+            if (last_registered_icons[i] == mdi_name)
+              continue;
+
+            last_registered_icons[i] = mdi_name;
+            esphome::lvgl::lv_image_set_src(scene_icons[i], image);
+          }
