@@ -60,6 +60,7 @@ script:
       page: int
       remember: bool
     then:
+      - script.wait: ui_click
       - if:
           condition:
             lambda: return page == 1;
