@@ -67,6 +67,9 @@ struct HomeSlotState {
   std::string icon;
   std::string unit;
   std::string hvac_action;
+  std::string pressure_unit;
+  std::string wind_speed_unit;
+  std::string wind_bearing;
 
   bool configured{false};
   bool available{false};
@@ -75,6 +78,8 @@ struct HomeSlotState {
   bool has_current_temperature{false};
   bool has_target_temperature{false};
   bool has_humidity{false};
+  bool has_pressure{false};
+  bool has_wind_speed{false};
 
   int brightness_pct{0};
   int reported_brightness_pct{0};
@@ -82,6 +87,8 @@ struct HomeSlotState {
   float current_temperature{0.0f};
   float target_temperature{0.0f};
   float humidity{0.0f};
+  float pressure{0.0f};
+  float wind_speed{0.0f};
 };
 
 // Legacy v1 storage. Kept only so existing entity selections can be migrated.
@@ -281,6 +288,11 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void on_home_current_temperature_state_(const std::string &entity_id, StringRef value);
   void on_home_humidity_state_(const std::string &entity_id, StringRef value);
   void on_home_hvac_action_state_(const std::string &entity_id, StringRef value);
+  void on_home_pressure_state_(const std::string &entity_id, StringRef value);
+  void on_home_pressure_unit_state_(const std::string &entity_id, StringRef value);
+  void on_home_wind_speed_state_(const std::string &entity_id, StringRef value);
+  void on_home_wind_speed_unit_state_(const std::string &entity_id, StringRef value);
+  void on_home_wind_bearing_state_(const std::string &entity_id, StringRef value);
 };
 
 }  // namespace wall_panel
