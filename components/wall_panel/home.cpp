@@ -84,6 +84,11 @@ void WallPanel::subscribe_home_slot_(uint8_t slot) {
                                       "current_temperature");
   this->subscribe_homeassistant_state(&WallPanel::on_home_humidity_state_, entity_id, "humidity");
   this->subscribe_homeassistant_state(&WallPanel::on_home_hvac_action_state_, entity_id, "hvac_action");
+  this->subscribe_homeassistant_state(&WallPanel::on_home_pressure_state_, entity_id, "pressure");
+  this->subscribe_homeassistant_state(&WallPanel::on_home_pressure_unit_state_, entity_id, "pressure_unit");
+  this->subscribe_homeassistant_state(&WallPanel::on_home_wind_speed_state_, entity_id, "wind_speed");
+  this->subscribe_homeassistant_state(&WallPanel::on_home_wind_speed_unit_state_, entity_id, "wind_speed_unit");
+  this->subscribe_homeassistant_state(&WallPanel::on_home_wind_bearing_state_, entity_id, "wind_bearing");
   this->refresh_ha_subscriptions_();
 }
 
@@ -320,6 +325,56 @@ void WallPanel::on_home_hvac_action_state_(const std::string &entity_id, StringR
   for (auto &slot : this->home_slots_) {
     if (slot.entity_id == entity_id)
       slot.hvac_action = action;
+  }
+}
+
+void WallPanel::on_home_pressure_state_(const std::string &entity_id, StringRef value) {
+  float parsed = 0.0f;
+  if (!parse_float(value, parsed))
+    return;
+
+  for (auto &slot : this->home_slots_) {
+    if (slot.entity_id == entity_id) {
+      slot.has_pressure = true;
+      slot.pressure = parsed;
+    }
+  }
+}
+
+void WallPanel::on_home_pressure_unit_state_(const std::string &entity_id, StringRef value) {
+  const std::string unit = value.str();
+  for (auto &slot : this->home_slots_) {
+    if (slot.entity_id == entity_id && !unit.empty())
+      slot.pressure_unit = unit;
+  }
+}
+
+void WallPanel::on_home_wind_speed_state_(const std::string &entity_id, StringRef value) {
+  float parsed = 0.0f;
+  if (!parse_float(value, parsed))
+    return;
+
+  for (auto &slot : this->home_slots_) {
+    if (slot.entity_id == entity_id) {
+      slot.has_wind_speed = true;
+      slot.wind_speed = parsed;
+    }
+  }
+}
+
+void WallPanel::on_home_wind_speed_unit_state_(const std::string &entity_id, StringRef value) {
+  const std::string unit = value.str();
+  for (auto &slot : this->home_slots_) {
+    if (slot.entity_id == entity_id && !unit.empty())
+      slot.wind_speed_unit = unit;
+  }
+}
+
+void WallPanel::on_home_wind_bearing_state_(const std::string &entity_id, StringRef value) {
+  const std::string bearing = value.str();
+  for (auto &slot : this->home_slots_) {
+    if (slot.entity_id == entity_id)
+      slot.wind_bearing = bearing;
   }
 }
 
