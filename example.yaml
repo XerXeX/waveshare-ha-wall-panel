@@ -52,5 +52,7 @@ packages:
       - packages/blinds.yaml
       - packages/audio.yaml
       - packages/scenes.yaml
+      - packages/icon_registry.yaml
       - packages/screensaver.yaml
+      - packages/header_clock.yaml
       - packages/subdevices.yaml
