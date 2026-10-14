@@ -112,6 +112,11 @@ image:
   - { platform: file, file: "mdi:radiator", id: icon_radiator, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:fridge", id: icon_fridge, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:robot-vacuum", id: icon_robot_vacuum, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:robot-vacuum-alert", id: icon_robot_vacuum_alert, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:robot-vacuum-off", id: icon_robot_vacuum_off, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:robot-vacuum-variant", id: icon_robot_vacuum_variant, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:robot-vacuum-variant-alert", id: icon_robot_vacuum_variant_alert, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:robot-vacuum-variant-off", id: icon_robot_vacuum_variant_off, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:security", id: icon_security, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:shield-check", id: icon_shield_check, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:shield-home", id: icon_shield_home, resize: 42x42, type: RGB565, transparency: alpha_channel }
@@ -138,6 +143,7 @@ image:
   - { platform: file, file: "mdi:toilet", id: icon_toilet, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:tree", id: icon_tree, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:vacuum", id: icon_vacuum, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:vacuum-outline", id: icon_vacuum_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:volume-high", id: icon_volume_high, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:volume-low", id: icon_volume_low, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:volume-medium", id: icon_volume_medium, resize: 42x42, type: RGB565, transparency: alpha_channel }
