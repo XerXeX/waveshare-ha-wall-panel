@@ -2,8 +2,9 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import image as image_component
 from esphome.const import CONF_ID
+from esphome.core import ID
 
-DEPENDENCIES = ["api"]
+DEPENDENCIES = ["api", "image"]
 
 CONF_CUSTOM_ICONS = "custom_icons"
 CONF_MDI = "mdi"
@@ -35,8 +36,21 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
-    # User-defined images are resolved at code-generation time and registered
-    # with their Home Assistant MDI names for runtime lookup by the UI.
+    # Shared images follow the convention:
+    #   mdi:robot-vacuum -> icon_robot_vacuum
+    # Register every compiled image using that convention automatically so
+    # Home/Scene cards can inherit Home Assistant's `icon` attribute without
+    # maintaining a second manual registry list.
+    for image_id in sorted(image_component.get_all_image_metadata()):
+        if not image_id.startswith("icon_"):
+            continue
+
+        mdi_name = "mdi:" + image_id[len("icon_") :].replace("_", "-")
+        image_var = await cg.get_variable(ID(image_id, type=image_component.Image_))
+        cg.add(var.register_icon(mdi_name, image_var))
+
+    # Explicit custom mappings are applied last, so users can override an
+    # automatically-derived MDI mapping if required.
     for icon_config in config[CONF_CUSTOM_ICONS]:
         image_var = await cg.get_variable(icon_config[CONF_IMAGE_ID])
         cg.add(var.register_icon(icon_config[CONF_MDI], image_var))
