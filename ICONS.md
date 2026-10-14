@@ -14,8 +14,19 @@ Examples:
 - `mdi:weather-night` -> `icon_weather_night`
 - `mdi:moon-waning-crescent` -> `icon_moon_waning_crescent`
 - `mdi:window-shutter` -> `icon_window_shutter`
+- `mdi:robot-vacuum` -> `icon_robot_vacuum`
 
 All shared images are currently rendered at 42x42 using RGB565 with alpha transparency.
+
+## Automatic runtime registration
+
+The `wall_panel` component automatically discovers every compiled image whose ID starts with `icon_` and registers the corresponding Material Design Icon name at code-generation time.
+
+For example, `icon_robot_vacuum` is automatically registered as `mdi:robot-vacuum`.
+
+This makes `packages/icons.yaml` the single source of truth: adding an icon there is enough for Home and Scene cards to inherit the matching `icon` attribute from Home Assistant. No second manual registry list is required.
+
+If Home Assistant supplies an icon that is not compiled into the firmware, the UI uses its normal domain/page fallback icon.
 
 ## Included icons
 
@@ -35,9 +46,9 @@ All shared images are currently rendered at 42x42 using RGB565 with alpha transp
 
 `mdi:weather-sunny`, `mdi:weather-night`, `mdi:weather-night-partly-cloudy`, `mdi:weather-cloudy`, `mdi:weather-rainy`, `mdi:weather-pouring`, `mdi:weather-snowy`, `mdi:weather-lightning`, `mdi:weather-moonset`, `mdi:weather-moonset-up`, `mdi:weather-moonset-down`, `mdi:moon-new`, `mdi:moon-full`, `mdi:moon-first-quarter`, `mdi:moon-last-quarter`, `mdi:moon-waning-crescent`, `mdi:moon-waning-gibbous`, `mdi:moon-waxing-crescent`, `mdi:moon-waxing-gibbous`, `mdi:snowflake`, `mdi:tree`, `mdi:flower`, `mdi:leaf`, `mdi:water`.
 
-### Climate and appliances
+### Climate, appliances and cleaning
 
-`mdi:thermometer`, `mdi:thermostat`, `mdi:radiator`, `mdi:fan`, `mdi:air-conditioner`, `mdi:water-boiler`, `mdi:fridge`, `mdi:microwave`, `mdi:kettle`, `mdi:stove`, `mdi:dishwasher`, `mdi:washing-machine`, `mdi:vacuum`, `mdi:robot-vacuum`, `mdi:shower`, `mdi:toilet`, `mdi:coffee`, `mdi:silverware-fork-knife`.
+`mdi:thermometer`, `mdi:thermostat`, `mdi:radiator`, `mdi:fan`, `mdi:air-conditioner`, `mdi:water-boiler`, `mdi:fridge`, `mdi:microwave`, `mdi:kettle`, `mdi:stove`, `mdi:dishwasher`, `mdi:washing-machine`, `mdi:vacuum`, `mdi:vacuum-outline`, `mdi:robot-vacuum`, `mdi:robot-vacuum-alert`, `mdi:robot-vacuum-off`, `mdi:robot-vacuum-variant`, `mdi:robot-vacuum-variant-alert`, `mdi:robot-vacuum-variant-off`, `mdi:shower`, `mdi:toilet`, `mdi:coffee`, `mdi:silverware-fork-knife`.
 
 ### Security and sensors
 
@@ -55,15 +66,15 @@ All shared images are currently rendered at 42x42 using RGB565 with alpha transp
 
 `mdi:plus`, `mdi:minus`, `mdi:menu`, `mdi:arrow-up`, `mdi:arrow-down`, `mdi:arrow-left`, `mdi:arrow-right`.
 
-## Scene icon inheritance
+## Home and Scene icon inheritance
 
-Scene and script cards read the `icon` attribute from Home Assistant. If the MDI icon is present in the shared library and registered for runtime lookup, the matching image is shown automatically. Unknown icons fall back to `mdi:palette-outline`.
+Home cards, the Home detail page, and Scene/Script cards read the `icon` attribute supplied by Home Assistant. If the matching MDI image is compiled into the shared library, the runtime registry returns that image automatically.
 
-The sleep/night icon set is registered in `packages/icon_registry.yaml`, so those icons work automatically on both Scene/Script cards and Home dashboard cards when Home Assistant uses the matching MDI name.
+Unknown icons keep the existing fallback behavior for the relevant domain or page.
 
 ## Adding custom icons
 
-Custom icons can be added entirely from the user's own ESPHome YAML. Declare the image first, then register its Home Assistant MDI name with `wall_panel.custom_icons`:
+For an icon that follows the normal naming convention, simply declare the image with an `icon_...` ID:
 
 ```yaml
 image:
@@ -73,13 +84,17 @@ image:
     resize: 42x42
     type: RGB565
     transparency: alpha_channel
+```
 
+It is automatically available as `mdi:rocket-launch`.
+
+If an image ID cannot follow the naming convention, or you intentionally want to map a different MDI name, use `wall_panel.custom_icons`:
+
+```yaml
 wall_panel:
   custom_icons:
     - mdi: mdi:rocket-launch
-      image_id: icon_rocket_launch
+      image_id: my_rocket_image
 ```
 
-The custom component resolves `image_id` during ESPHome code generation and stores the resulting image pointer in its runtime icon registry. `packages/icon_registry.yaml` applies registered icons to Scene/Script cards, while the Home dashboard reads the same registry directly for its mixed-entity cards and detail view.
-
-This means custom Scene and Home icons no longer require editing packaged UI files. The image still has to be compiled into the firmware, but the mapping itself is user-configurable.
+Explicit custom mappings are applied after the automatic registrations and can therefore override them.
