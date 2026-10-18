@@ -3,7 +3,7 @@ import esphome.config_validation as cv
 from esphome.components import select
 from esphome.const import CONF_ID
 
-from . import LANGUAGE_OPTIONS, WallPanel, wall_panel_ns
+from . import LANGUAGES, LANGUAGE_OPTIONS, WallPanel, wall_panel_ns
 
 CONF_WALL_PANEL_ID = "wall_panel_id"
 
@@ -28,3 +28,9 @@ async def to_code(config):
     await cg.register_component(var, config)
     await select.register_select(var, config, options=LANGUAGE_OPTIONS)
     cg.add(var.set_parent(parent))
+
+    # Convert every language YAML file into lookup tables in firmware.
+    for language in LANGUAGES:
+        cg.add(var.register_language(language["code"], language["name"]))
+        for key, value in language["translations"].items():
+            cg.add(var.register_translation(language["code"], key, value))
