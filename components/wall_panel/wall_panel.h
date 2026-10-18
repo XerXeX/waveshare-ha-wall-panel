@@ -4,6 +4,7 @@
 #include "esphome/core/preferences.h"
 #include "esphome/components/api/custom_api_device.h"
 #include "esphome/components/image/image.h"
+#include "esphome/components/select/select.h"
 
 #include <array>
 #include <map>
@@ -11,11 +12,6 @@
 
 namespace esphome {
 namespace wall_panel {
-
-enum class Language : uint8_t {
-  ENGLISH = 0,
-  DANISH = 1,
-};
 
 enum class TranslationKey : uint8_t {
   LIGHTS,
@@ -111,9 +107,17 @@ struct CoverSlotPreferences {
   char names[4][33]{};
 };
 
-struct LanguagePreferences {
+// Previous firmware stored the language as 0=English / 1=Danish.
+struct LanguagePreferencesV1 {
   uint8_t version{1};
-  uint8_t language{static_cast<uint8_t>(Language::ENGLISH)};
+  uint8_t language{0};
+};
+
+// Language codes are persisted rather than numeric indexes so adding/reordering
+// language files does not change the selected language.
+struct LanguagePreferences {
+  uint8_t version{2};
+  char code[16]{};
 };
 
 struct DisplayPreferences {
@@ -126,8 +130,22 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void setup() override;
   void dump_config() override;
 
+  void register_language(const std::string &code, const std::string &name) {
+    if (code.empty() || name.empty())
+      return;
+    this->language_names_[code] = name;
+  }
+
+  void register_translation(const std::string &code, const std::string &key, const std::string &value) {
+    if (code.empty() || key.empty())
+      return;
+    this->translations_[code][key] = value;
+  }
+
   void set_language(const std::string &language);
   const char *get_language_option() const;
+  const char *get_language_code() const { return this->language_code_.c_str(); }
+  const char *tr(const std::string &key) const;
   const char *tr(TranslationKey key) const;
 
   void set_display_rotation(int rotation);
@@ -210,7 +228,8 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   static constexpr uint32_t LEGACY_LIGHT_ENTITY_PREF_KEY = 0x57504C45U;
   static constexpr uint32_t LIGHT_SLOT_PREF_KEY = 0x57504C32U;
   static constexpr uint32_t COVER_SLOT_PREF_KEY = 0x57504331U;
-  static constexpr uint32_t LANGUAGE_PREF_KEY = 0x57504C4CU;
+  static constexpr uint32_t LEGACY_LANGUAGE_PREF_KEY = 0x57504C4CU;
+  static constexpr uint32_t LANGUAGE_PREF_KEY = 0x57504C4DU;
   static constexpr uint32_t DISPLAY_PREF_KEY = 0x57504452U;
 
   std::array<LightSlotState, LIGHT_SLOT_COUNT> light_slots_{};
@@ -227,7 +246,9 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   std::array<std::string, SCENE_SLOT_COUNT> scene_icon_entities_{};
   std::array<std::string, SCENE_SLOT_COUNT> scene_icons_{};
 
-  Language language_{Language::ENGLISH};
+  std::map<std::string, std::string> language_names_{};
+  std::map<std::string, std::map<std::string, std::string>> translations_{};
+  std::string language_code_{"en"};
   ESPPreferenceObject language_pref_;
   bool language_pref_ready_{false};
 
@@ -246,6 +267,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   bool valid_home_slot_(uint8_t slot) const;
   void load_language_();
   void save_language_();
+  bool has_language_(const std::string &code) const;
   void load_display_rotation_();
   void save_display_rotation_();
   void set_light_defaults_();
@@ -293,6 +315,26 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void on_home_wind_speed_state_(const std::string &entity_id, StringRef value);
   void on_home_wind_speed_unit_state_(const std::string &entity_id, StringRef value);
   void on_home_wind_bearing_state_(const std::string &entity_id, StringRef value);
+};
+
+class WallPanelLanguageSelect : public select::Select, public Component {
+ public:
+  void set_parent(WallPanel *parent) { this->parent_ = parent; }
+
+  void setup() override {
+    if (this->parent_ != nullptr)
+      this->publish_state(this->parent_->get_language_option());
+  }
+
+ protected:
+  void control(const std::string &value) override {
+    if (this->parent_ == nullptr)
+      return;
+    this->parent_->set_language(value);
+    this->publish_state(this->parent_->get_language_option());
+  }
+
+  WallPanel *parent_{nullptr};
 };
 
 }  // namespace wall_panel
