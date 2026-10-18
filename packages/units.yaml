@@ -1,0 +1,63 @@
+# Display unit preferences
+#
+# These selects control how the wall panel PRESENTS numeric values. They do not
+# change Home Assistant's unit system and they do not rewrite the source entity.
+# The raw value and source unit received from Home Assistant remain the source of
+# truth; individual UI packages convert only when formatting a value for display.
+#
+# Why keep this in a separate package?
+#   1. Unit preferences are global panel settings, not page-specific settings.
+#   2. Other pages can reuse the same entities later without inventing new ones.
+#   3. "Auto" preserves the Home Assistant-provided unit, which is the safest
+#      default and avoids surprising existing installations after an update.
+#
+# Current consumers:
+#   - packages/home.yaml: climate/weather temperatures on Home cards/details
+#   - packages/home_weather.yaml: temperature, pressure and wind speed
+#
+# Reserved for future consumers:
+#   - Distance Unit is already exposed so travel/range/odometer-style cards can
+#     use the same global preference when those domains are added.
+
+select:
+  # Temperature shown by weather and climate UI.
+  # Auto = keep the unit Home Assistant reports for the source entity.
+  - platform: template
+    id: wall_panel_temperature_unit
+    name: "Temperature Unit"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "°C", "°F"]
+
+  # General distance preference. Not every page uses distance yet, but keeping
+  # it here gives future cards one canonical setting instead of page-local ones.
+  - platform: template
+    id: wall_panel_distance_unit
+    name: "Distance Unit"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "km", "mi"]
+
+  # Wind / velocity presentation. Weather currently consumes this setting.
+  - platform: template
+    id: wall_panel_speed_unit
+    name: "Speed Unit"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "m/s", "km/h", "mph"]
+
+  # Atmospheric pressure presentation for the detailed weather card.
+  - platform: template
+    id: wall_panel_pressure_unit
+    name: "Pressure Unit"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "hPa", "inHg"]
