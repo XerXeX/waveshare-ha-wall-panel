@@ -2,6 +2,7 @@ code: da
 name: Dansk
 
 translations:
+  home: "Hjem"
   lights: "Lys"
   light: "Lys"
   blinds: "Persienner"
