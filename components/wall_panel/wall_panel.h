@@ -7,11 +7,17 @@
 #include "esphome/components/select/select.h"
 
 #include <array>
+#include <cstring>
 #include <map>
 #include <string>
 
 namespace esphome {
 namespace wall_panel {
+
+enum class Language : uint8_t {
+  ENGLISH = 0,
+  DANISH = 1,
+};
 
 enum class TranslationKey : uint8_t {
   LIGHTS,
@@ -107,17 +113,9 @@ struct CoverSlotPreferences {
   char names[4][33]{};
 };
 
-// Previous firmware stored the language as 0=English / 1=Danish.
-struct LanguagePreferencesV1 {
-  uint8_t version{1};
-  uint8_t language{0};
-};
-
-// Language codes are persisted rather than numeric indexes so adding/reordering
-// language files does not change the selected language.
 struct LanguagePreferences {
-  uint8_t version{2};
-  char code[16]{};
+  uint8_t version{1};
+  uint8_t language{static_cast<uint8_t>(Language::ENGLISH)};
 };
 
 struct DisplayPreferences {
@@ -125,27 +123,18 @@ struct DisplayPreferences {
   uint16_t rotation{0};
 };
 
+struct DynamicLanguagePreferences {
+  uint8_t version{1};
+  char code[16]{};
+};
+
 class WallPanel : public Component, public api::CustomAPIDevice {
  public:
   void setup() override;
   void dump_config() override;
 
-  void register_language(const std::string &code, const std::string &name) {
-    if (code.empty() || name.empty())
-      return;
-    this->language_names_[code] = name;
-  }
-
-  void register_translation(const std::string &code, const std::string &key, const std::string &value) {
-    if (code.empty() || key.empty())
-      return;
-    this->translations_[code][key] = value;
-  }
-
   void set_language(const std::string &language);
   const char *get_language_option() const;
-  const char *get_language_code() const { return this->language_code_.c_str(); }
-  const char *tr(const std::string &key) const;
   const char *tr(TranslationKey key) const;
 
   void set_display_rotation(int rotation);
@@ -228,8 +217,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   static constexpr uint32_t LEGACY_LIGHT_ENTITY_PREF_KEY = 0x57504C45U;
   static constexpr uint32_t LIGHT_SLOT_PREF_KEY = 0x57504C32U;
   static constexpr uint32_t COVER_SLOT_PREF_KEY = 0x57504331U;
-  static constexpr uint32_t LEGACY_LANGUAGE_PREF_KEY = 0x57504C4CU;
-  static constexpr uint32_t LANGUAGE_PREF_KEY = 0x57504C4DU;
+  static constexpr uint32_t LANGUAGE_PREF_KEY = 0x57504C4CU;
   static constexpr uint32_t DISPLAY_PREF_KEY = 0x57504452U;
 
   std::array<LightSlotState, LIGHT_SLOT_COUNT> light_slots_{};
@@ -246,9 +234,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   std::array<std::string, SCENE_SLOT_COUNT> scene_icon_entities_{};
   std::array<std::string, SCENE_SLOT_COUNT> scene_icons_{};
 
-  std::map<std::string, std::string> language_names_{};
-  std::map<std::string, std::map<std::string, std::string>> translations_{};
-  std::string language_code_{"en"};
+  Language language_{Language::ENGLISH};
   ESPPreferenceObject language_pref_;
   bool language_pref_ready_{false};
 
@@ -267,7 +253,6 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   bool valid_home_slot_(uint8_t slot) const;
   void load_language_();
   void save_language_();
-  bool has_language_(const std::string &code) const;
   void load_display_rotation_();
   void save_display_rotation_();
   void set_light_defaults_();
@@ -317,24 +302,111 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void on_home_wind_bearing_state_(const std::string &entity_id, StringRef value);
 };
 
+// The language selector owns the scalable translation system. The original
+// WallPanel English/Danish methods above are kept for backwards compatibility
+// with existing configurations while packages migrate to string translation keys.
 class WallPanelLanguageSelect : public select::Select, public Component {
  public:
   void set_parent(WallPanel *parent) { this->parent_ = parent; }
 
+  void register_language(const std::string &code, const std::string &name) {
+    if (!code.empty() && !name.empty())
+      this->language_names_[code] = name;
+  }
+
+  void register_translation(const std::string &code, const std::string &key, const std::string &value) {
+    if (!code.empty() && !key.empty())
+      this->translations_[code][key] = value;
+  }
+
+  const char *get_language_code() const { return this->language_code_.c_str(); }
+
+  const char *get_language_option() const {
+    const auto it = this->language_names_.find(this->language_code_);
+    if (it != this->language_names_.end())
+      return it->second.c_str();
+    const auto english = this->language_names_.find("en");
+    return english != this->language_names_.end() ? english->second.c_str() : "English";
+  }
+
+  const char *tr(const std::string &key) const {
+    const auto language = this->translations_.find(this->language_code_);
+    if (language != this->translations_.end()) {
+      const auto value = language->second.find(key);
+      if (value != language->second.end())
+        return value->second.c_str();
+    }
+
+    const auto english = this->translations_.find("en");
+    if (english != this->translations_.end()) {
+      const auto value = english->second.find(key);
+      if (value != english->second.end())
+        return value->second.c_str();
+    }
+    return "";
+  }
+
   void setup() override {
-    if (this->parent_ != nullptr)
-      this->publish_state(this->parent_->get_language_option());
+    this->language_pref_ = global_preferences->make_preference<DynamicLanguagePreferences>(LANGUAGE_SELECT_PREF_KEY, true);
+    this->language_pref_ready_ = true;
+
+    DynamicLanguagePreferences prefs{};
+    if (this->language_pref_.load(&prefs) && prefs.version == 1) {
+      prefs.code[15] = '\0';
+      const std::string stored = prefs.code;
+      if (this->language_names_.find(stored) != this->language_names_.end())
+        this->language_code_ = stored;
+    }
+
+    if (this->language_names_.find(this->language_code_) == this->language_names_.end())
+      this->language_code_ = "en";
+
+    this->sync_legacy_parent_();
+    this->publish_state(this->get_language_option());
   }
 
  protected:
+  static constexpr uint32_t LANGUAGE_SELECT_PREF_KEY = 0x57504C53U;
+
   void control(const std::string &value) override {
+    for (const auto &language : this->language_names_) {
+      if (language.second != value)
+        continue;
+      if (this->language_code_ != language.first) {
+        this->language_code_ = language.first;
+        this->save_language_();
+        this->sync_legacy_parent_();
+      }
+      this->publish_state(this->get_language_option());
+      return;
+    }
+  }
+
+  void save_language_() {
+    if (!this->language_pref_ready_)
+      return;
+    DynamicLanguagePreferences prefs{};
+    prefs.version = 1;
+    std::strncpy(prefs.code, this->language_code_.c_str(), sizeof(prefs.code) - 1);
+    prefs.code[sizeof(prefs.code) - 1] = '\0';
+    this->language_pref_.save(&prefs);
+  }
+
+  void sync_legacy_parent_() {
     if (this->parent_ == nullptr)
       return;
-    this->parent_->set_language(value);
-    this->publish_state(this->parent_->get_language_option());
+    if (this->language_code_ == "da")
+      this->parent_->set_language("Danish");
+    else
+      this->parent_->set_language("English");
   }
 
   WallPanel *parent_{nullptr};
+  std::map<std::string, std::string> language_names_{};
+  std::map<std::string, std::map<std::string, std::string>> translations_{};
+  std::string language_code_{"en"};
+  ESPPreferenceObject language_pref_;
+  bool language_pref_ready_{false};
 };
 
 }  // namespace wall_panel
