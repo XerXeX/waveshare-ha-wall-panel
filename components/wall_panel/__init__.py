@@ -123,5 +123,5 @@ async def to_code(config):
     # Explicit custom mappings are applied last, so users can override an
     # automatically-derived MDI mapping if required.
     for icon_config in config[CONF_CUSTOM_ICONS]:
-        image_var = await cg.get_variable(config[CONF_IMAGE_ID])
+        image_var = await cg.get_variable(icon_config[CONF_IMAGE_ID])
         cg.add(var.register_icon(icon_config[CONF_MDI], image_var))
