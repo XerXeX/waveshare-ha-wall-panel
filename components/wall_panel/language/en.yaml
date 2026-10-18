@@ -1,0 +1,51 @@
+code: en
+name: English
+
+# English is the master catalog. Every translation key used by the panel must
+# exist here. Other language files may omit keys; missing values fall back to
+# this file automatically.
+translations:
+  lights: "Lights"
+  light: "Light"
+  blinds: "Blinds"
+  audio: "Audio"
+  scenes: "Scenes"
+  scene: "Scene"
+  script: "Script"
+  automation: "Automation"
+  button: "Button"
+  all_off: "All off"
+  all_lights: "All lights"
+  unavailable: "Unavailable"
+  on: "On"
+  off: "Off"
+  active: "On"
+  inactive: "Off"
+  turn_on: "Turn on"
+  turn_off: "Turn off"
+  run: "Run"
+  activate: "Activate"
+  trigger: "Trigger"
+  press: "Press"
+  humidity: "Humidity"
+  pressure: "Pressure"
+  wind: "Wind"
+  hour_short: "h"
+  weather_sunny: "Sunny"
+  weather_clear_night: "Clear night"
+  weather_cloudy: "Cloudy"
+  weather_partlycloudy: "Partly cloudy"
+  weather_fog: "Fog"
+  weather_hail: "Hail"
+  weather_lightning: "Thunder"
+  weather_lightning_rainy: "Thunder and rain"
+  weather_pouring: "Heavy rain"
+  weather_rainy: "Rain"
+  weather_snowy: "Snow"
+  weather_snowy_rainy: "Sleet"
+  weather_windy: "Windy"
+  weather_exceptional: "Exceptional weather"
+  action_permission_message: |-
+    This panel cannot perform actions in Home Assistant.
+
+    Enable "Allow device to perform Home Assistant actions" in the ESPHome device settings.
