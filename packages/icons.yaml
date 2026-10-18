@@ -100,6 +100,7 @@ image:
   - { platform: file, file: "mdi:movie-open", id: icon_movie_open, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:music", id: icon_music, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:music-note", id: icon_music_note, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:navigation", id: icon_navigation, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:palette", id: icon_palette, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:palette-outline", id: icon_palette_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:party-popper", id: icon_party_popper, resize: 42x42, type: RGB565, transparency: alpha_channel }
