@@ -1,8 +1,27 @@
 # Weather-specific detail view for Home slots
 #
-# This overlays the generic Home detail content whenever the selected slot is a
-# weather.* entity. It uses the weather entity's normal state and attributes, so
-# no extra Home Assistant helper entities are required.
+# PURPOSE
+# -------
+# This package overlays the generic Home detail page whenever the selected Home
+# slot points at a weather.* entity. Current conditions come from the dynamic
+# Home-slot subscriptions in the wall_panel component, while the 10-hour strip is
+# fetched on demand with weather.get_forecasts.
+#
+# LOCALIZATION
+# ------------
+# User-facing words are never hardcoded in the runtime logic. They are looked up
+# through wall_panel_language.tr(...). The English strings used by the widgets
+# below are therefore kept to neutral placeholders ("", "--") so a translated
+# installation does not briefly flash English before the first refresh.
+#
+# UNITS
+# -----
+# Home Assistant remains the source of truth for both values and source units.
+# The global selects in packages/units.yaml only affect display formatting:
+#   - wall_panel_temperature_unit
+#   - wall_panel_speed_unit
+#   - wall_panel_pressure_unit
+# "Auto" means: show the value exactly in the unit Home Assistant supplied.
 
 lvgl:
   id: wall_panel_lvgl
@@ -24,6 +43,8 @@ lvgl:
             scrollable: false
             hidden: true
             widgets:
+              # Current-condition icon. The actual image is replaced at runtime
+              # from the weather state or a registered custom HA icon.
               - image:
                   id: home_weather_detail_icon
                   src: icon_weather_cloudy
@@ -32,15 +53,18 @@ lvgl:
                   image_recolor: 0xFFFFFF
                   image_recolor_opa: 100%
 
+              # Current weather condition, localized by the 500 ms refresh below.
               - label:
                   id: home_weather_detail_condition
                   x: 88
                   y: 18
                   width: 225
-                  text: "Weather"
+                  text: "--"
                   text_font: ui_font_28
                   text_color: 0xFFFFFF
-                  
+
+              # Wind bearing is a numeric degree value from Home Assistant. The
+              # MDI navigation icon points north at 0° and is rotated at runtime.
               - image:
                   id: home_weather_wind_arrow
                   x: 300
@@ -61,6 +85,7 @@ lvgl:
                   text_font: ui_font_34
                   text_color: 0xFFFFFF
 
+              # Current-condition metrics.
               - obj:
                   id: lv_obj_0
                   x: 20
@@ -77,7 +102,7 @@ lvgl:
                         id: home_weather_humidity_name
                         x: 18
                         y: 17
-                        text: "Humidity"
+                        text: ""
                         text_color: 0xB8BDC5
                         text_font: ui_font_18
                     - label:
@@ -94,7 +119,7 @@ lvgl:
                         id: home_weather_pressure_name
                         x: 18
                         y: 47
-                        text: "Pressure"
+                        text: ""
                         text_color: 0xB8BDC5
                         text_font: ui_font_18
                     - label:
@@ -111,7 +136,7 @@ lvgl:
                         id: home_weather_wind_name
                         x: 18
                         y: 77
-                        text: "Wind"
+                        text: ""
                         text_color: 0xB8BDC5
                         text_font: ui_font_18
                     - label:
@@ -124,6 +149,8 @@ lvgl:
                         text_align: RIGHT
                         text_font: ui_font_18
 
+              # Five forecast columns. We sample every second hourly forecast
+              # entry, giving +2, +4, +6, +8 and +10 hours.
               - obj:
                   id: home_weather_forecast
                   x: 20
@@ -142,7 +169,7 @@ lvgl:
                         x: 0
                         y: 4
                         width: 88
-                        text: "+2h"
+                        text: ""
                         text_align: CENTER
                         text_font: ui_font_18
                         text_color: 0x858B94
@@ -177,7 +204,7 @@ lvgl:
                         x: 88
                         y: 4
                         width: 88
-                        text: "+4h"
+                        text: ""
                         text_align: CENTER
                         text_font: ui_font_18
                         text_color: 0x858B94
@@ -212,7 +239,7 @@ lvgl:
                         x: 176
                         y: 4
                         width: 88
-                        text: "+6h"
+                        text: ""
                         text_align: CENTER
                         text_font: ui_font_18
                         text_color: 0x858B94
@@ -247,7 +274,7 @@ lvgl:
                         x: 264
                         y: 4
                         width: 88
-                        text: "+8h"
+                        text: ""
                         text_align: CENTER
                         text_font: ui_font_18
                         text_color: 0x858B94
@@ -282,7 +309,7 @@ lvgl:
                         x: 352
                         y: 4
                         width: 88
-                        text: "+10h"
+                        text: ""
                         text_align: CENTER
                         text_font: ui_font_18
                         text_color: 0x858B94
@@ -313,6 +340,9 @@ lvgl:
                         text_color: 0xB8BDC5
 
 script:
+  # Hourly forecast is intentionally fetched as a service/action response rather
+  # than subscribed as entity attributes. Modern Home Assistant weather entities
+  # expose forecast data through weather.get_forecasts.
   - id: home_weather_refresh_forecast
     mode: restart
     then:
@@ -340,6 +370,8 @@ script:
                 capture_response: true
                 on_success:
                   - lambda: |-
+                      // The action response is keyed by weather entity ID. We
+                      // only asked for one entity, so take the first object.
                       JsonObjectConst action_response = response["response"].as<JsonObjectConst>();
                       if (action_response.isNull())
                         return;
@@ -352,6 +384,8 @@ script:
                         break;
                       }
 
+                      // Ignore stale responses if the user changed Home slot
+                      // while the Home Assistant request was in flight.
                       const int active = id(active_home_slot);
                       if (active < 1 || active > 6 || response_entity.empty())
                         return;
@@ -393,23 +427,56 @@ script:
                         if (condition == "snowy" || condition == "snowy-rainy") return id(icon_weather_snowy);
                         if (condition == "lightning" || condition == "lightning-rainy") return id(icon_weather_lightning);
                         if (condition == "windy" || condition == "windy-variant") return id(icon_fan);
-                        if (condition == "partlycloudy") return id(icon_weather_cloudy);
                         return id(icon_weather_cloudy);
                       };
 
+                      // Convert a source temperature only when the user has
+                      // explicitly overridden Auto in Settings.
+                      auto temperature_for_display = [&](float value, const std::string &source_unit,
+                                                         std::string &display_unit) -> float {
+                        const std::string target = id(wall_panel_temperature_unit).current_option();
+                        const bool source_f = source_unit == "°F" || source_unit == "F";
+                        const bool source_c = source_unit == "°C" || source_unit == "C";
+
+                        if (target == "Auto") {
+                          display_unit = source_unit.empty() ? "°" : source_unit;
+                          return value;
+                        }
+                        display_unit = target;
+                        if (target == "°F" && source_c)
+                          return value * 9.0f / 5.0f + 32.0f;
+                        if (target == "°C" && source_f)
+                          return (value - 32.0f) * 5.0f / 9.0f;
+                        return value;
+                      };
+
                       auto wind_to_ms = [](float speed, const std::string &unit) -> float {
-                        if (unit == "km/h" || unit == "kmh" || unit == "kph")
-                          return speed / 3.6f;
-                        if (unit == "mph")
-                          return speed * 0.44704f;
-                        if (unit == "kn" || unit == "kt" || unit == "knot" || unit == "knots")
-                          return speed * 0.514444f;
-                        if (unit == "ft/s" || unit == "fps")
-                          return speed * 0.3048f;
+                        if (unit == "km/h" || unit == "kmh" || unit == "kph") return speed / 3.6f;
+                        if (unit == "mph") return speed * 0.44704f;
+                        if (unit == "kn" || unit == "kt" || unit == "knot" || unit == "knots") return speed * 0.514444f;
+                        if (unit == "ft/s" || unit == "fps") return speed * 0.3048f;
                         return speed;
                       };
 
+                      auto wind_for_display = [&](float value, const std::string &source_unit,
+                                                  std::string &display_unit) -> float {
+                        const std::string target = id(wall_panel_speed_unit).current_option();
+                        if (target == "Auto") {
+                          display_unit = source_unit.empty() ? "m/s" : source_unit;
+                          return value;
+                        }
+
+                        const float ms = wind_to_ms(value, source_unit);
+                        display_unit = target;
+                        if (target == "km/h") return ms * 3.6f;
+                        if (target == "mph") return ms / 0.44704f;
+                        return ms;
+                      };
+
                       for (int i = 0; i < 5; i++) {
+                        // forecast[0] is approximately the current hour. Starting
+                        // at index 1 and advancing by two gives the requested
+                        // +2/+4/+6/+8/+10-hour visual rhythm.
                         const size_t forecast_index = 1 + (i * 2);
                         if (forecast_index >= forecast.size()) {
                           esphome::lvgl::lv_image_set_src(icons[i], id(icon_weather_cloudy));
@@ -423,19 +490,22 @@ script:
                         esphome::lvgl::lv_image_set_src(icons[i], forecast_icon(condition));
 
                         if (!item["temperature"].isNull()) {
+                          std::string display_unit;
+                          const float temperature = temperature_for_display(
+                              item["temperature"].as<float>(), slot.unit, display_unit);
                           char text[24];
-                          snprintf(text, sizeof(text), "%.1f%s",
-                                   item["temperature"].as<float>(),
-                                   slot.unit.empty() ? "°" : slot.unit.c_str());
+                          snprintf(text, sizeof(text), "%.1f%s", temperature, display_unit.c_str());
                           lv_label_set_text(temps[i], text);
                         } else {
                           lv_label_set_text(temps[i], "--");
                         }
 
                         if (!item["wind_speed"].isNull()) {
-                          const float wind_ms = wind_to_ms(item["wind_speed"].as<float>(), slot.wind_speed_unit);
+                          std::string display_unit;
+                          const float wind = wind_for_display(
+                              item["wind_speed"].as<float>(), slot.wind_speed_unit, display_unit);
                           char text[24];
-                          snprintf(text, sizeof(text), "%.1f m/s", wind_ms);
+                          snprintf(text, sizeof(text), "%.1f %s", wind, display_unit.c_str());
                           lv_label_set_text(winds[i], text);
                         } else {
                           lv_label_set_text(winds[i], "--");
@@ -443,6 +513,9 @@ script:
                       }
 
 interval:
+  # Current attributes are already subscribed by the custom component, so a
+  # lightweight local refresh is enough to keep text, units and icon rotation in
+  # sync. Forecast network calls are throttled separately to every 10 minutes.
   - interval: 500ms
     then:
       - lambda: |-
@@ -462,6 +535,8 @@ interval:
           if (lv_obj_has_flag(id(home_weather_detail_panel), LV_OBJ_FLAG_HIDDEN))
             lv_obj_clear_flag(id(home_weather_detail_panel), LV_OBJ_FLAG_HIDDEN);
 
+          // Refresh forecast when entering a different weather entity and then
+          // no more than once every ten minutes while it remains selected.
           static std::string last_forecast_entity;
           static uint32_t last_forecast_refresh = 0;
           const uint32_t now = millis();
@@ -471,6 +546,8 @@ interval:
             id(home_weather_refresh_forecast).execute();
           }
 
+          // Avoid unnecessary LVGL redraws. Several labels update twice per
+          // second, but lv_label_set_text is called only if the string changed.
           auto set_label = [](lv_obj_t *label, const std::string &text) {
             const char *current = lv_label_get_text(label);
             if (current == nullptr || text != current)
@@ -509,6 +586,66 @@ interval:
             return id(icon_weather_cloudy);
           };
 
+          auto temperature_for_display = [&](float value, const std::string &source_unit,
+                                             std::string &display_unit) -> float {
+            const std::string target = id(wall_panel_temperature_unit).current_option();
+            const bool source_f = source_unit == "°F" || source_unit == "F";
+            const bool source_c = source_unit == "°C" || source_unit == "C";
+
+            if (target == "Auto") {
+              display_unit = source_unit.empty() ? "°" : source_unit;
+              return value;
+            }
+            display_unit = target;
+            if (target == "°F" && source_c) return value * 9.0f / 5.0f + 32.0f;
+            if (target == "°C" && source_f) return (value - 32.0f) * 5.0f / 9.0f;
+            return value;
+          };
+
+          auto wind_to_ms = [](float speed, const std::string &unit) -> float {
+            if (unit == "km/h" || unit == "kmh" || unit == "kph") return speed / 3.6f;
+            if (unit == "mph") return speed * 0.44704f;
+            if (unit == "kn" || unit == "kt" || unit == "knot" || unit == "knots") return speed * 0.514444f;
+            if (unit == "ft/s" || unit == "fps") return speed * 0.3048f;
+            return speed;
+          };
+
+          auto wind_for_display = [&](float value, const std::string &source_unit,
+                                      std::string &display_unit) -> float {
+            const std::string target = id(wall_panel_speed_unit).current_option();
+            if (target == "Auto") {
+              display_unit = source_unit.empty() ? "m/s" : source_unit;
+              return value;
+            }
+            const float ms = wind_to_ms(value, source_unit);
+            display_unit = target;
+            if (target == "km/h") return ms * 3.6f;
+            if (target == "mph") return ms / 0.44704f;
+            return ms;
+          };
+
+          auto pressure_to_hpa = [](float value, const std::string &unit) -> float {
+            if (unit == "Pa") return value / 100.0f;
+            if (unit == "kPa") return value * 10.0f;
+            if (unit == "inHg") return value * 33.8638867f;
+            if (unit == "psi") return value * 68.9475729f;
+            // hPa and mbar are numerically equivalent for display purposes.
+            return value;
+          };
+
+          auto pressure_for_display = [&](float value, const std::string &source_unit,
+                                          std::string &display_unit) -> float {
+            const std::string target = id(wall_panel_pressure_unit).current_option();
+            if (target == "Auto") {
+              display_unit = source_unit.empty() ? "hPa" : source_unit;
+              return value;
+            }
+            const float hpa = pressure_to_hpa(value, source_unit);
+            display_unit = target;
+            if (target == "inHg") return hpa / 33.8638867f;
+            return hpa;
+          };
+
           static esphome::image::Image *last_image = nullptr;
           auto *image = weather_icon(slot);
           if (last_image != image) {
@@ -516,6 +653,8 @@ interval:
             last_image = image;
           }
 
+          // Localized captions and forecast-hour suffixes update live when the
+          // language select changes; no reboot is needed.
           set_label(id(home_weather_detail_condition), slot.available ? condition_text(slot.state)
                                                                      : id(wall_panel_language).tr("unavailable"));
           set_label(id(home_weather_humidity_name), id(wall_panel_language).tr("humidity"));
@@ -529,24 +668,23 @@ interval:
           set_label(id(home_weather_forecast_time_4), "+8" + hour);
           set_label(id(home_weather_forecast_time_5), "+10" + hour);
 
-          if (slot.available && slot.has_wind_speed) {
-            if (!slot.wind_bearing.empty()) {
-              char *end = nullptr;
-              const float bearing = std::strtof(slot.wind_bearing.c_str(), &end);
-
-              if (end != slot.wind_bearing.c_str() && std::isfinite(bearing)) {
-                lv_image_set_rotation(
-                  id(home_weather_wind_arrow),
-                  static_cast<int32_t>(bearing * 10)
-                );
-              }
+          // Weather wind bearing is the direction the wind comes FROM. The MDI
+          // navigation image naturally gives us a simple compass-style arrow.
+          if (slot.available && slot.has_wind_speed && !slot.wind_bearing.empty()) {
+            char *end = nullptr;
+            const float bearing = std::strtof(slot.wind_bearing.c_str(), &end);
+            if (end != slot.wind_bearing.c_str() && std::isfinite(bearing)) {
+              // LVGL's C API uses tenths of a degree: 90° = 900.
+              lv_image_set_rotation(id(home_weather_wind_arrow), static_cast<int32_t>(bearing * 10));
             }
           }
 
           if (slot.available && slot.has_current_temperature) {
+            std::string display_unit;
+            const float temperature = temperature_for_display(
+                slot.current_temperature, slot.unit, display_unit);
             char text[32];
-            snprintf(text, sizeof(text), "%.1f%s", slot.current_temperature,
-                     slot.unit.empty() ? "°" : slot.unit.c_str());
+            snprintf(text, sizeof(text), "%.1f%s", temperature, display_unit.c_str());
             set_label(id(home_weather_detail_temperature), text);
           } else {
             set_label(id(home_weather_detail_temperature), "--");
@@ -561,29 +699,20 @@ interval:
           }
 
           if (slot.available && slot.has_pressure) {
+            std::string display_unit;
+            const float pressure = pressure_for_display(slot.pressure, slot.pressure_unit, display_unit);
             char text[40];
-            snprintf(text, sizeof(text), "%.1f%s%s", slot.pressure,
-                     slot.pressure_unit.empty() ? "" : " ", slot.pressure_unit.c_str());
+            snprintf(text, sizeof(text), "%.1f %s", pressure, display_unit.c_str());
             set_label(id(home_weather_pressure_value), text);
           } else {
             set_label(id(home_weather_pressure_value), "--");
           }
 
           if (slot.available && slot.has_wind_speed) {
-            auto wind_to_ms = [](float speed, const std::string &unit) -> float {
-              if (unit == "km/h" || unit == "kmh" || unit == "kph")
-                return speed / 3.6f;
-              if (unit == "mph")
-                return speed * 0.44704f;
-              if (unit == "kn" || unit == "kt" || unit == "knot" || unit == "knots")
-                return speed * 0.514444f;
-              if (unit == "ft/s" || unit == "fps")
-                return speed * 0.3048f;
-              return speed;
-            };
-
+            std::string display_unit;
+            const float wind = wind_for_display(slot.wind_speed, slot.wind_speed_unit, display_unit);
             char text[32];
-            snprintf(text, sizeof(text), "%.1f m/s", wind_to_ms(slot.wind_speed, slot.wind_speed_unit));
+            snprintf(text, sizeof(text), "%.1f %s", wind, display_unit.c_str());
             set_label(id(home_weather_wind_value), text);
           } else {
             set_label(id(home_weather_wind_value), "--");
