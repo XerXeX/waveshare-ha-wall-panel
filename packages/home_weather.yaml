@@ -45,6 +45,7 @@ lvgl:
                   id: home_weather_wind_arrow
                   x: 300
                   y: 20
+                  src: icon_navigation
                   rotation: 0
                   antialias: true
 
