@@ -275,9 +275,7 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_light_slot(1);
                         id(active_light_slot) = 1;
                         id(light_brightness_dirty) = false;
-                        const char *name = slot.name.empty()
-                          ? id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::LIGHT)
-                          : slot.name.c_str();
+                        const char *name = slot.name.empty() ? id(wall_panel_language).tr("light") : slot.name.c_str();
                         if (std::strcmp(lv_label_get_text(id(light_detail_name)), name) != 0)
                           lv_label_set_text(id(light_detail_name), name);
                         char text[16];
@@ -334,9 +332,7 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_light_slot(2);
                         id(active_light_slot) = 2;
                         id(light_brightness_dirty) = false;
-                        const char *name = slot.name.empty()
-                          ? id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::LIGHT)
-                          : slot.name.c_str();
+                        const char *name = slot.name.empty() ? id(wall_panel_language).tr("light") : slot.name.c_str();
                         if (std::strcmp(lv_label_get_text(id(light_detail_name)), name) != 0)
                           lv_label_set_text(id(light_detail_name), name);
                         char text[16];
@@ -393,9 +389,7 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_light_slot(3);
                         id(active_light_slot) = 3;
                         id(light_brightness_dirty) = false;
-                        const char *name = slot.name.empty()
-                          ? id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::LIGHT)
-                          : slot.name.c_str();
+                        const char *name = slot.name.empty() ? id(wall_panel_language).tr("light") : slot.name.c_str();
                         if (std::strcmp(lv_label_get_text(id(light_detail_name)), name) != 0)
                           lv_label_set_text(id(light_detail_name), name);
                         char text[16];
@@ -452,9 +446,7 @@ lvgl:
                         const auto &slot = id(wall_panel_controller).get_light_slot(4);
                         id(active_light_slot) = 4;
                         id(light_brightness_dirty) = false;
-                        const char *name = slot.name.empty()
-                          ? id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::LIGHT)
-                          : slot.name.c_str();
+                        const char *name = slot.name.empty() ? id(wall_panel_language).tr("light") : slot.name.c_str();
                         if (std::strcmp(lv_label_get_text(id(light_detail_name)), name) != 0)
                           lv_label_set_text(id(light_detail_name), name);
                         char text[16];
@@ -586,7 +578,7 @@ interval:
               lv_obj_set_width(obj, width);
           };
 
-          set_text_if_changed(id(lights_page_title), panel.tr(esphome::wall_panel::TranslationKey::LIGHTS));
+          set_text_if_changed(id(lights_page_title), id(wall_panel_language).tr("lights"));
 
           auto slot_visible = [](const esphome::wall_panel::LightSlotState &slot) {
             return slot.function != "Hidden" && (slot.function == "All off" || slot.configured);
@@ -636,8 +628,7 @@ interval:
 
             const bool all_off = slot.function == "All off";
             const char *name = slot.name.empty()
-              ? (all_off ? panel.tr(esphome::wall_panel::TranslationKey::ALL_OFF)
-                         : panel.tr(esphome::wall_panel::TranslationKey::LIGHT))
+              ? (all_off ? id(wall_panel_language).tr("all_off") : id(wall_panel_language).tr("light"))
               : slot.name.c_str();
             set_text_if_changed(name_labels[i], name);
 
@@ -647,21 +638,21 @@ interval:
 
             if (all_off) {
               visual = 0;
-              state_text = panel.tr(esphome::wall_panel::TranslationKey::ALL_LIGHTS);
+              state_text = id(wall_panel_language).tr("all_lights");
             } else if (!slot.available) {
               visual = 1;
-              state_text = panel.tr(esphome::wall_panel::TranslationKey::UNAVAILABLE);
+              state_text = id(wall_panel_language).tr("unavailable");
             } else if (slot.is_on) {
               visual = 2;
               if (slot.has_brightness) {
                 snprintf(brightness_text, sizeof(brightness_text), "%d%%", slot.brightness_pct);
                 state_text = brightness_text;
               } else {
-                state_text = panel.tr(esphome::wall_panel::TranslationKey::ON);
+                state_text = id(wall_panel_language).tr("on");
               }
             } else {
               visual = 3;
-              state_text = panel.tr(esphome::wall_panel::TranslationKey::OFF);
+              state_text = id(wall_panel_language).tr("off");
             }
 
             set_text_if_changed(state_labels[i], state_text);
@@ -684,9 +675,7 @@ interval:
 
           if (id(active_light_slot) >= 1 && id(active_light_slot) <= 4 && !id(light_brightness_dirty)) {
             const auto &slot = panel.get_light_slot(id(active_light_slot));
-            const char *name = slot.name.empty()
-              ? panel.tr(esphome::wall_panel::TranslationKey::LIGHT)
-              : slot.name.c_str();
+            const char *name = slot.name.empty() ? id(wall_panel_language).tr("light") : slot.name.c_str();
             set_text_if_changed(id(light_detail_name), name);
 
             if (slot.has_brightness) {
