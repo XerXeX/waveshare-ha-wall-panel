@@ -5,6 +5,7 @@ name: English
 # exist here. Other language files may omit keys; missing values fall back to
 # this file automatically.
 translations:
+  home: "Home"
   lights: "Lights"
   light: "Light"
   blinds: "Blinds"
