@@ -961,7 +961,6 @@ interval:
     then:
       - lambda: |-
           auto &panel = *id(wall_panel_controller);
-          const bool da = std::string(panel.get_language_option()) == "Danish";
 
           auto set_text_if_changed = [](lv_obj_t *label, const char *text) {
             const char *current = lv_label_get_text(label);
@@ -984,9 +983,9 @@ interval:
               lv_obj_set_width(obj, width);
           };
 
-          set_text_if_changed(id(blinds_page_title), panel.tr(esphome::wall_panel::TranslationKey::BLINDS));
-          set_text_if_changed(id(cover_detail_open_label), da ? "OP" : "UP");
-          set_text_if_changed(id(cover_detail_close_label), da ? "NED" : "DOWN");
+          set_text_if_changed(id(blinds_page_title), id(wall_panel_language).tr("blinds"));
+          set_text_if_changed(id(cover_detail_open_label), id(wall_panel_language).tr("up"));
+          set_text_if_changed(id(cover_detail_close_label), id(wall_panel_language).tr("down"));
 
           lv_obj_t *cards[4] = {
             id(cover_slot1_card), id(cover_slot2_card), id(cover_slot3_card), id(cover_slot4_card)
@@ -1083,9 +1082,9 @@ interval:
             } else {
               set_hidden_if_changed(p25[i], true);
               set_hidden_if_changed(p75[i], true);
-              set_text_if_changed(p0_labels[i], da ? "OP" : "UP");
-              set_text_if_changed(p50_labels[i], "STOP");
-              set_text_if_changed(p100_labels[i], da ? "NED" : "DOWN");
+              set_text_if_changed(p0_labels[i], id(wall_panel_language).tr("up"));
+              set_text_if_changed(p50_labels[i], id(wall_panel_language).tr("stop"));
+              set_text_if_changed(p100_labels[i], id(wall_panel_language).tr("down"));
 
               if (full_width) {
                 set_geometry_if_changed(p0[i], 14, 82, 132);
@@ -1102,23 +1101,23 @@ interval:
 
             char state_text[48];
             if (!slots[i]->available) {
-              snprintf(state_text, sizeof(state_text), "%s", da ? "Ikke tilgængelig" : "Unavailable");
+              snprintf(state_text, sizeof(state_text), "%s", id(wall_panel_language).tr("unavailable"));
             } else if (slots[i]->state == "opening") {
               if (slots[i]->has_position)
-                snprintf(state_text, sizeof(state_text), "%s · %d%%", da ? "Åbner" : "Opening", slots[i]->position_pct);
+                snprintf(state_text, sizeof(state_text), "%s · %d%%", id(wall_panel_language).tr("opening"), slots[i]->position_pct);
               else
-                snprintf(state_text, sizeof(state_text), "%s", da ? "Åbner" : "Opening");
+                snprintf(state_text, sizeof(state_text), "%s", id(wall_panel_language).tr("opening"));
             } else if (slots[i]->state == "closing") {
               if (slots[i]->has_position)
-                snprintf(state_text, sizeof(state_text), "%s · %d%%", da ? "Lukker" : "Closing", slots[i]->position_pct);
+                snprintf(state_text, sizeof(state_text), "%s · %d%%", id(wall_panel_language).tr("closing"), slots[i]->position_pct);
               else
-                snprintf(state_text, sizeof(state_text), "%s", da ? "Lukker" : "Closing");
+                snprintf(state_text, sizeof(state_text), "%s", id(wall_panel_language).tr("closing"));
             } else if (slots[i]->has_position) {
               snprintf(state_text, sizeof(state_text), "%d%%", slots[i]->position_pct);
             } else if (slots[i]->state == "open") {
-              snprintf(state_text, sizeof(state_text), "%s", da ? "Åben" : "Open");
+              snprintf(state_text, sizeof(state_text), "%s", id(wall_panel_language).tr("open"));
             } else if (slots[i]->state == "closed") {
-              snprintf(state_text, sizeof(state_text), "%s", da ? "Lukket" : "Closed");
+              snprintf(state_text, sizeof(state_text), "%s", id(wall_panel_language).tr("closed"));
             } else {
               snprintf(state_text, sizeof(state_text), "%s", slots[i]->state.c_str());
             }
