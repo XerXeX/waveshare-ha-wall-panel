@@ -462,8 +462,6 @@ interval:
           if (lv_obj_has_flag(id(home_weather_detail_panel), LV_OBJ_FLAG_HIDDEN))
             lv_obj_clear_flag(id(home_weather_detail_panel), LV_OBJ_FLAG_HIDDEN);
 
-          const bool danish = std::string(id(wall_panel_controller).get_language_option()) == "Danish";
-
           static std::string last_forecast_entity;
           static uint32_t last_forecast_refresh = 0;
           const uint32_t now = millis();
@@ -473,7 +471,6 @@ interval:
             id(home_weather_refresh_forecast).execute();
           }
 
-
           auto set_label = [](lv_obj_t *label, const std::string &text) {
             const char *current = lv_label_get_text(label);
             if (current == nullptr || text != current)
@@ -481,24 +478,22 @@ interval:
           };
 
           auto condition_text = [&](const std::string &condition) -> std::string {
-            if (!danish)
-              return condition;
-            if (condition == "sunny") return "Solrigt";
-            if (condition == "clear-night") return "Klar nat";
-            if (condition == "cloudy") return "Overskyet";
-            if (condition == "partlycloudy") return "Delvist skyet";
-            if (condition == "fog") return "Tåge";
-            if (condition == "hail") return "Hagl";
-            if (condition == "lightning") return "Torden";
-            if (condition == "lightning-rainy") return "Torden og regn";
-            if (condition == "pouring") return "Kraftig regn";
-            if (condition == "rainy") return "Regn";
-            if (condition == "snowy") return "Sne";
-            if (condition == "snowy-rainy") return "Slud";
-            if (condition == "windy") return "Blæsende";
-            if (condition == "windy-variant") return "Blæsende";
-            if (condition == "exceptional") return "Usædvanligt vejr";
-            return condition;
+            const char *key = nullptr;
+            if (condition == "sunny") key = "weather_sunny";
+            else if (condition == "clear-night") key = "weather_clear_night";
+            else if (condition == "cloudy") key = "weather_cloudy";
+            else if (condition == "partlycloudy") key = "weather_partlycloudy";
+            else if (condition == "fog") key = "weather_fog";
+            else if (condition == "hail") key = "weather_hail";
+            else if (condition == "lightning") key = "weather_lightning";
+            else if (condition == "lightning-rainy") key = "weather_lightning_rainy";
+            else if (condition == "pouring") key = "weather_pouring";
+            else if (condition == "rainy") key = "weather_rainy";
+            else if (condition == "snowy") key = "weather_snowy";
+            else if (condition == "snowy-rainy") key = "weather_snowy_rainy";
+            else if (condition == "windy" || condition == "windy-variant") key = "weather_windy";
+            else if (condition == "exceptional") key = "weather_exceptional";
+            return key == nullptr ? condition : std::string(id(wall_panel_language).tr(key));
           };
 
           auto weather_icon = [&](const esphome::wall_panel::HomeSlotState &item) -> esphome::image::Image * {
@@ -522,16 +517,17 @@ interval:
           }
 
           set_label(id(home_weather_detail_condition), slot.available ? condition_text(slot.state)
-                                                                     : (danish ? "Ikke tilgængelig" : "Unavailable"));
-                                                                     
-          set_label(id(home_weather_humidity_name), danish ? "Luftfugtighed" : "Humidity");
-          set_label(id(home_weather_pressure_name), danish ? "Lufttryk" : "Pressure");
-          set_label(id(home_weather_wind_name), danish ? "Vind" : "Wind");
-          set_label(id(home_weather_forecast_time_1), danish ? "+2t" : "+2h");
-          set_label(id(home_weather_forecast_time_2), danish ? "+4t" : "+4h");
-          set_label(id(home_weather_forecast_time_3), danish ? "+6t" : "+6h");
-          set_label(id(home_weather_forecast_time_4), danish ? "+8t" : "+8h");
-          set_label(id(home_weather_forecast_time_5), danish ? "+10t" : "+10h");
+                                                                     : id(wall_panel_language).tr("unavailable"));
+          set_label(id(home_weather_humidity_name), id(wall_panel_language).tr("humidity"));
+          set_label(id(home_weather_pressure_name), id(wall_panel_language).tr("pressure"));
+          set_label(id(home_weather_wind_name), id(wall_panel_language).tr("wind"));
+
+          const std::string hour = id(wall_panel_language).tr("hour_short");
+          set_label(id(home_weather_forecast_time_1), "+2" + hour);
+          set_label(id(home_weather_forecast_time_2), "+4" + hour);
+          set_label(id(home_weather_forecast_time_3), "+6" + hour);
+          set_label(id(home_weather_forecast_time_4), "+8" + hour);
+          set_label(id(home_weather_forecast_time_5), "+10" + hour);
 
           if (slot.available && slot.has_wind_speed) {
             if (!slot.wind_bearing.empty()) {
