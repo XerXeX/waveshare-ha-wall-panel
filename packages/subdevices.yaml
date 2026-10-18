@@ -4,15 +4,26 @@
 # grouped into logical child devices so the Home Assistant device page remains
 # easy to navigate.
 #
+# IMPORTANT NAMING RULE
+# ---------------------
 # Do not rename page entities to generic "Slot ..." names here. ESPHome derives
 # each entity key from its name, so duplicate names across sub-devices can collide
 # even though Home Assistant shows them under different child devices.
+#
+# USER DATA RULE
+# --------------
+# Values entered into the various "... Name" text entities are user content.
+# They are deliberately NOT translated by the wall-panel language system. If the
+# user calls a card "Sofa lamp", "Roberto" or "Stue", that exact text is kept.
 
 esphome:
   on_boot:
     - priority: -90
       then:
         - lambda: |-
+            // Re-publish restored Home text entities after boot. This makes
+            // Home Assistant receive their current values immediately instead
+            // of waiting for the user to edit each field again.
             auto publish_name = [](auto *entity, const char *fallback) {
               const std::string value = entity->state.empty() ? std::string(fallback) : entity->state;
               entity->publish_state(value);
@@ -34,6 +45,8 @@ esphome:
             publish_name(id(home_slot6_name), "Home 6");
             publish_entity(id(home_slot6_entity));
 
+  # Logical Home Assistant child devices. These do not represent additional
+  # physical hardware; they only keep configuration entities grouped cleanly.
   devices:
     - id: home_device
       name: "Home"
@@ -51,7 +64,9 @@ esphome:
       name: "Settings"
 
 select:
+  # ---------------------------------------------------------------------------
   # Settings
+  # ---------------------------------------------------------------------------
   - id: !extend wall_panel_language
     device_id: settings_device
 
@@ -67,7 +82,23 @@ select:
   - id: !extend wall_panel_time_format
     device_id: settings_device
 
+  # Display-unit preferences live in packages/units.yaml. They affect only how
+  # values are rendered on the panel; Home Assistant's own units stay unchanged.
+  - id: !extend wall_panel_temperature_unit
+    device_id: settings_device
+
+  - id: !extend wall_panel_distance_unit
+    device_id: settings_device
+
+  - id: !extend wall_panel_speed_unit
+    device_id: settings_device
+
+  - id: !extend wall_panel_pressure_unit
+    device_id: settings_device
+
+  # ---------------------------------------------------------------------------
   # Lights
+  # ---------------------------------------------------------------------------
   - id: !extend light_slot1_function
     device_id: lights_device
   - id: !extend light_slot2_function
@@ -77,7 +108,9 @@ select:
   - id: !extend light_slot4_function
     device_id: lights_device
 
+  # ---------------------------------------------------------------------------
   # Scenes
+  # ---------------------------------------------------------------------------
   - id: !extend scene_slot1_function
     device_id: scenes_device
   - id: !extend scene_slot2_function
@@ -88,6 +121,7 @@ select:
     device_id: scenes_device
 
 number:
+  # Screensaver tuning belongs to the Settings child device.
   - id: !extend wall_panel_screensaver_timeout
     device_id: settings_device
 
@@ -95,12 +129,17 @@ number:
     device_id: settings_device
 
 light:
+  # The physical LCD backlight is exposed as a settings control rather than as a
+  # room light, hence it is grouped under Settings.
   - id: !extend lcd_backlight
     name: "Backlight"
     device_id: settings_device
 
 text:
+  # ---------------------------------------------------------------------------
   # Home
+  # User-entered Name and Entity values are intentionally never translated.
+  # ---------------------------------------------------------------------------
   - id: !extend home_slot1_name
     device_id: home_device
   - id: !extend home_slot1_entity
@@ -126,7 +165,9 @@ text:
   - id: !extend home_slot6_entity
     device_id: home_device
 
+  # ---------------------------------------------------------------------------
   # Lights
+  # ---------------------------------------------------------------------------
   - id: !extend light_slot1_name
     device_id: lights_device
   - id: !extend light_slot1_entity
@@ -144,7 +185,9 @@ text:
   - id: !extend light_slot4_entity
     device_id: lights_device
 
+  # ---------------------------------------------------------------------------
   # Blinds
+  # ---------------------------------------------------------------------------
   - id: !extend cover_slot1_name
     device_id: blinds_device
   - id: !extend cover_slot1_entity
@@ -162,7 +205,9 @@ text:
   - id: !extend cover_slot4_entity
     device_id: blinds_device
 
+  # ---------------------------------------------------------------------------
   # Scenes
+  # ---------------------------------------------------------------------------
   - id: !extend scene_slot1_name
     device_id: scenes_device
   - id: !extend scene_slot1_entity
@@ -181,6 +226,7 @@ text:
     device_id: scenes_device
 
 switch:
+  # Per-light exclusion from the "All off" function.
   - id: !extend light_slot1_ignore_all_off
     device_id: lights_device
   - id: !extend light_slot2_ignore_all_off
