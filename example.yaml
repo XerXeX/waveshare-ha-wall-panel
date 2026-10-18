@@ -48,6 +48,7 @@ packages:
       - packages/hardware.yaml
       - packages/icons.yaml
       - packages/ui.yaml
+      - packages/units.yaml
       - packages/home.yaml
       - packages/home_weather.yaml
       - packages/lights.yaml
