@@ -69,6 +69,8 @@ image:
   - { platform: file, file: "mdi:heart-outline", id: icon_heart_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:home", id: icon_home, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:home-outline", id: icon_home_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:home-thermometer", id: icon_home_thermometer, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:home-thermometer-outline", id: icon_home_thermometer_outline, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:information", id: icon_information, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:kettle", id: icon_kettle, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:lamp", id: icon_lamp, resize: 42x42, type: RGB565, transparency: alpha_channel }
@@ -108,6 +110,7 @@ image:
   - { platform: file, file: "mdi:paw", id: icon_paw, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:play", id: icon_play, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:plus", id: icon_plus, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:pool-thermometer", id: icon_pool_thermometer, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:power", id: icon_power, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:power-sleep", id: icon_power_sleep, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:radiator", id: icon_radiator, resize: 42x42, type: RGB565, transparency: alpha_channel }
