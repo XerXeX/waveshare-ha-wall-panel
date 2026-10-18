@@ -54,7 +54,7 @@ def _load_languages():
                 continue
             normalized[key] = str(value)
 
-        languages.append({"code": code, "name": name, "translations": normalized})
+        languages.append({"code": code, "name": name, "translations": normalized, "file": path.name})
         seen_codes.add(code)
         seen_names.add(name)
 
@@ -63,6 +63,16 @@ def _load_languages():
         raise cv.Invalid("language/en.yaml with code 'en' is required as the fallback language")
     if not english["translations"]:
         raise cv.Invalid("language/en.yaml must contain the master translation catalog")
+
+    master_keys = set(english["translations"])
+    for language in languages:
+        if language["code"] == "en":
+            continue
+        unknown = sorted(set(language["translations"]) - master_keys)
+        if unknown:
+            raise cv.Invalid(
+                f"{language['file']}: translation key(s) not present in en.yaml: {', '.join(unknown)}"
+            )
 
     # English is always first; every other language is shown by its native name.
     # Adding another YAML file is therefore enough to add it to the selector.
@@ -113,5 +123,5 @@ async def to_code(config):
     # Explicit custom mappings are applied last, so users can override an
     # automatically-derived MDI mapping if required.
     for icon_config in config[CONF_CUSTOM_ICONS]:
-        image_var = await cg.get_variable(icon_config[CONF_IMAGE_ID])
+        image_var = await cg.get_variable(config[CONF_IMAGE_ID])
         cg.add(var.register_icon(icon_config[CONF_MDI], image_var))
