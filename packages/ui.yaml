@@ -5,7 +5,6 @@ esphome:
     - priority: -100
       then:
         - lambda: |-
-            id(wall_panel_language).publish_state(id(wall_panel_controller).get_language_option());
             id(wall_panel_rotation).publish_state(id(wall_panel_controller).get_display_rotation_option());
 
 globals:
@@ -15,17 +14,12 @@ globals:
     initial_value: '1'
 
 select:
-  - platform: template
+  # Options are generated at compile time from components/wall_panel/language/*.yaml.
+  - platform: wall_panel
     id: wall_panel_language
     name: "Language"
     entity_category: config
-    optimistic: true
-    restore_value: false
-    initial_option: "English"
-    options: ["English", "Danish"]
-    set_action:
-      - lambda: |-
-          id(wall_panel_controller).set_language(x);
+    wall_panel_id: wall_panel_controller
 
   - platform: template
     id: wall_panel_rotation
@@ -325,7 +319,7 @@ lvgl:
                 y: 78
                 width: 392
                 text: !lambda |-
-                  return std::string(id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::ACTION_PERMISSION_MESSAGE));
+                  return std::string(id(wall_panel_language).tr("action_permission_message"));
                 text_font: ui_font_18
                 text_color: 0xFFFFFF
                 long_mode: wrap
@@ -358,12 +352,9 @@ interval:
               lv_label_set_text(label, text);
           };
 
-          set_label_if_changed(
-            id(ha_action_permission_body),
-            id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::ACTION_PERMISSION_MESSAGE)
-          );
-          set_label_if_changed(id(blinds_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::BLINDS));
-          set_label_if_changed(id(scenes_page_title), id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::SCENES));
+          set_label_if_changed(id(ha_action_permission_body), id(wall_panel_language).tr("action_permission_message"));
+          set_label_if_changed(id(blinds_page_title), id(wall_panel_language).tr("blinds"));
+          set_label_if_changed(id(scenes_page_title), id(wall_panel_language).tr("scenes"));
       - if:
           condition:
             lambda: return id(wall_panel_controller).has_action_permission_warning();
