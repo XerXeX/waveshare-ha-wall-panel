@@ -98,6 +98,10 @@ select:
   # later sends a value back to Home Assistant.
   #
   # Auto = show the source unit reported by Home Assistant.
+  #
+  # Forecast values are formatted when weather.get_forecasts returns. Therefore
+  # changing temperature or speed unit while the weather page is open must also
+  # request a fresh forecast so the five small forecast labels update instantly.
 
   - platform: template
     id: wall_panel_temperature_unit
@@ -108,6 +112,8 @@ select:
     restore_value: true
     initial_option: "Auto"
     options: ["Auto", "°C", "°F"]
+    on_value:
+      - script.execute: home_weather_refresh_forecast
 
   - platform: template
     id: wall_panel_distance_unit
@@ -128,6 +134,8 @@ select:
     restore_value: true
     initial_option: "Auto"
     options: ["Auto", "m/s", "km/h", "mph"]
+    on_value:
+      - script.execute: home_weather_refresh_forecast
 
   - platform: template
     id: wall_panel_pressure_unit
