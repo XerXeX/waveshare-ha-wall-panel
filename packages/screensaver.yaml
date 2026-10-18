@@ -135,8 +135,8 @@ script:
 
           if (!now.is_valid()) {
             set_label_if_changed(id(screensaver_digital_time), "--:--");
-            set_label_if_changed(id(screensaver_digital_date), "Waiting for time...");
-            set_label_if_changed(id(screensaver_analog_date), "Waiting for time...");
+            set_label_if_changed(id(screensaver_digital_date), id(wall_panel_language).tr("waiting_for_time"));
+            set_label_if_changed(id(screensaver_analog_date), id(wall_panel_language).tr("waiting_for_time"));
             return;
           }
 
@@ -152,28 +152,21 @@ script:
           }
           set_label_if_changed(id(screensaver_digital_time), time_buffer);
 
-          const bool danish = std::string(id(wall_panel_controller).get_language_option()) == "Danish";
-          static const char *const days_en[] = {
-              "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-          static const char *const months_en[] = {
-              "January", "February", "March", "April", "May", "June",
-              "July", "August", "September", "October", "November", "December"};
-          static const char *const days_da[] = {
-              "søndag", "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag"};
-          static const char *const months_da[] = {
-              "januar", "februar", "marts", "april", "maj", "juni",
-              "juli", "august", "september", "oktober", "november", "december"};
+          static const char *const day_keys[] = {
+            "weekday_sunday", "weekday_monday", "weekday_tuesday", "weekday_wednesday",
+            "weekday_thursday", "weekday_friday", "weekday_saturday"
+          };
+          static const char *const month_keys[] = {
+            "month_january", "month_february", "month_march", "month_april", "month_may", "month_june",
+            "month_july", "month_august", "month_september", "month_october", "month_november", "month_december"
+          };
 
           const int weekday = now.day_of_week >= 1 && now.day_of_week <= 7 ? now.day_of_week - 1 : 0;
           const int month = now.month >= 1 && now.month <= 12 ? now.month - 1 : 0;
-          char date_buffer[64];
-          if (danish) {
-            snprintf(date_buffer, sizeof(date_buffer), "%s %d. %s %d",
-                     days_da[weekday], now.day_of_month, months_da[month], now.year);
-          } else {
-            snprintf(date_buffer, sizeof(date_buffer), "%s %d %s %d",
-                     days_en[weekday], now.day_of_month, months_en[month], now.year);
-          }
+          char date_buffer[96];
+          snprintf(date_buffer, sizeof(date_buffer), id(wall_panel_language).tr("date_format"),
+                   id(wall_panel_language).tr(day_keys[weekday]), now.day_of_month,
+                   id(wall_panel_language).tr(month_keys[month]), now.year);
           set_label_if_changed(id(screensaver_digital_date), date_buffer);
           set_label_if_changed(id(screensaver_analog_date), date_buffer);
 
