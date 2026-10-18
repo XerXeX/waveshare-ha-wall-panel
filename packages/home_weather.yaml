@@ -61,91 +61,66 @@ lvgl:
                   text_color: 0x858B94
 
               - obj:
+                  id: lv_obj_0
                   x: 20
                   y: 92
                   width: 440
-                  height: 58
+                  height: 100
                   bg_color: 0x181B20
-                  radius: 16
                   border_width: 0
+                  radius: 16
                   pad_all: 0
-                  clickable: false
-                  scrollable: false
                   widgets:
                     - label:
                         id: home_weather_humidity_name
                         x: 18
                         y: 17
                         text: "Humidity"
-                        text_font: ui_font_18
                         text_color: 0xB8BDC5
+                        text_font: ui_font_18
                     - label:
                         id: home_weather_humidity_value
                         x: 220
                         y: 17
                         width: 198
                         text: "--"
+                        text_color: 0xFFFFFF
                         text_align: RIGHT
                         text_font: ui_font_18
-                        text_color: 0xFFFFFF
 
-              - obj:
-                  x: 20
-                  y: 158
-                  width: 440
-                  height: 58
-                  bg_color: 0x181B20
-                  radius: 16
-                  border_width: 0
-                  pad_all: 0
-                  clickable: false
-                  scrollable: false
-                  widgets:
                     - label:
                         id: home_weather_pressure_name
                         x: 18
-                        y: 17
+                        y: 47
                         text: "Pressure"
-                        text_font: ui_font_18
                         text_color: 0xB8BDC5
+                        text_font: ui_font_18
                     - label:
                         id: home_weather_pressure_value
                         x: 180
-                        y: 17
+                        y: 47
                         width: 238
                         text: "--"
+                        text_color: 0xFFFFFF
                         text_align: RIGHT
                         text_font: ui_font_18
-                        text_color: 0xFFFFFF
-
-              - obj:
-                  x: 20
-                  y: 224
-                  width: 440
-                  height: 58
-                  bg_color: 0x181B20
-                  radius: 16
-                  border_width: 0
-                  pad_all: 0
-                  clickable: false
-                  scrollable: false
-                  widgets:
+                        
                     - label:
                         id: home_weather_wind_name
                         x: 18
-                        y: 17
+                        y: 77
                         text: "Wind"
-                        text_font: ui_font_18
                         text_color: 0xB8BDC5
+                        text_font: ui_font_18
                     - label:
                         id: home_weather_wind_value
                         x: 150
-                        y: 17
+                        y: 77
                         width: 268
                         text: "--"
+                        text_color: 0xFFFFFF
                         text_align: RIGHT
                         text_font: ui_font_18
-                        text_color: 0xFFFFFF
 
 interval:
   - interval: 500ms
