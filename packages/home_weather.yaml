@@ -362,7 +362,7 @@ script:
                 data_template:
                   entity_id: "{{ weather_entity }}"
                 variables:
-                  weather_entity: |-
+                  weather_entity: !lambda |-
                     const int active = id(active_home_slot);
                     if (active < 1 || active > 6)
                       return std::string();
