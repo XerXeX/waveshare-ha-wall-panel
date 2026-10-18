@@ -11,7 +11,9 @@ The project is designed as a reusable Home Assistant wall panel with runtime-con
 - `packages/hardware.yaml` – display, touch, backlight and board hardware
 - `packages/icons.yaml` – shared Material Design Icon image library
 - `packages/ui.yaml` – shared fonts, language selection and global UI elements
+- `packages/units.yaml` – global display-unit preferences
 - `packages/home.yaml` – mixed-entity Home dashboard with domain-aware detail controls
+- `packages/home_weather.yaml` – weather detail overlay and 10-hour forecast
 - `packages/lights.yaml` – dynamic light controls
 - `packages/blinds.yaml` – blinds controls
 - `packages/scenes.yaml` – scene controls and Home Assistant icon inheritance
@@ -20,6 +22,7 @@ The project is designed as a reusable Home Assistant wall panel with runtime-con
 - `packages/header_clock.yaml` – persistent clock shown on normal pages
 - `packages/subdevices.yaml` – Home Assistant sub-device organization
 - `ICONS.md` – icon naming convention, included icon list and custom icon registry examples
+- `DEVELOPMENT.md` – architecture, data flow, translation/unit rules and editing guide
 - `example.yaml` – top-level ESPHome example configuration
 
 ## Home dashboard
@@ -27,6 +30,21 @@ The project is designed as a reusable Home Assistant wall panel with runtime-con
 Home is the first main page and provides six configurable slots. Slots can mix Home Assistant entities such as lights, switches, climate devices, covers, scenes, scripts, weather entities, sensors and binary sensors. Cards show a compact domain-aware state and open a detail page with controls appropriate to the entity type when available.
 
 Home configuration is exposed through its own Home Assistant sub-device. Each slot has a Name and Entity setting, and empty slots are hidden automatically.
+
+Names entered by the user are treated as user data and are never translated. Changing panel language therefore changes UI words and known state labels without rewriting names such as room names, device names or scene names.
+
+## Display units
+
+The Settings sub-device exposes global display-unit preferences:
+
+- Temperature: Auto / °C / °F
+- Distance: Auto / km / mi
+- Speed: Auto / m/s / km/h / mph
+- Pressure: Auto / hPa / inHg
+
+`Auto` keeps the unit supplied by Home Assistant. Unit conversion is display-only: the source value and source unit remain unchanged for Home Assistant actions and service calls.
+
+Weather currently consumes Temperature, Speed and Pressure. Home climate/weather cards also use the Temperature preference. Distance is available as the shared preference for future distance/range cards.
 
 ## Icons
 
@@ -40,4 +58,4 @@ English (`en.yaml`) is the master catalog and fallback language. The `Language` 
 
 To add another language, copy `en.yaml`, save it with the ISO language code (for example `de.yaml` or `fi.yaml`), set its `code` and native `name`, and translate the values under `translations:`. No C++ code or hard-coded language list needs to be changed. Missing translations automatically fall back to English.
 
-See `components/wall_panel/language/README.md` for the language-pack format and font/glyph notes.
+See `components/wall_panel/language/README.md` for the language-pack format and font/glyph notes, and `DEVELOPMENT.md` for the rules that determine which strings should and should not be translated.
