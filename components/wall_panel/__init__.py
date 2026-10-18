@@ -80,8 +80,67 @@ def _load_languages():
     return languages
 
 
+def _load_shared_icons():
+    """Read packages/icons.yaml and build the runtime MDI -> image registry.
+
+    Do not rely on image_component.get_all_image_metadata() here. With remote
+    packages/external components the wall_panel codegen can run before that
+    metadata list contains the images declared by packages/icons.yaml. In that
+    case the firmware compiled the icon images correctly, but the runtime
+    registry stayed empty and Home cards fell back to domain defaults.
+
+    packages/icons.yaml is therefore the canonical registry source. Any entry
+    using an mdi:* file and an icon_* id is automatically inherited by Home
+    entities whose Home Assistant `icon` attribute matches it.
+    """
+    repo_root = Path(__file__).resolve().parents[2]
+    icons_path = repo_root / "packages" / "icons.yaml"
+
+    if not icons_path.is_file():
+        raise cv.Invalid(f"Wall panel icon catalog not found: {icons_path}")
+
+    with icons_path.open("r", encoding="utf-8") as handle:
+        data = yaml.safe_load(handle) or {}
+
+    entries = data.get("image", [])
+    if not isinstance(entries, list):
+        raise cv.Invalid("packages/icons.yaml: 'image' must be a list")
+
+    icons = []
+    seen_mdi = set()
+    seen_ids = set()
+
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+
+        mdi_name = str(entry.get("file", "")).strip()
+        image_id = str(entry.get("id", "")).strip()
+
+        # Only shared MDI assets participate in automatic entity inheritance.
+        # Other image resources may still be registered explicitly with
+        # wall_panel.custom_icons when needed.
+        if not mdi_name.startswith("mdi:") or not image_id.startswith("icon_"):
+            continue
+
+        if mdi_name in seen_mdi:
+            raise cv.Invalid(f"Duplicate shared MDI icon in packages/icons.yaml: {mdi_name}")
+        if image_id in seen_ids:
+            raise cv.Invalid(f"Duplicate shared icon id in packages/icons.yaml: {image_id}")
+
+        icons.append((mdi_name, image_id))
+        seen_mdi.add(mdi_name)
+        seen_ids.add(image_id)
+
+    if not icons:
+        raise cv.Invalid("packages/icons.yaml did not contain any shared MDI icons")
+
+    return icons
+
+
 LANGUAGES = _load_languages()
 LANGUAGE_OPTIONS = [item["name"] for item in LANGUAGES]
+SHARED_ICONS = _load_shared_icons()
 
 
 CUSTOM_ICON_SCHEMA = cv.Schema(
@@ -107,21 +166,17 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
-    # Shared images follow the convention:
-    #   mdi:robot-vacuum -> icon_robot_vacuum
-    # Register every compiled image using that convention automatically so
-    # Home/Scene cards can inherit Home Assistant's `icon` attribute without
-    # maintaining a second manual registry list.
-    for image_id in sorted(image_component.get_all_image_metadata()):
-        if not image_id.startswith("icon_"):
-            continue
-
-        mdi_name = "mdi:" + image_id[len("icon_") :].replace("_", "-")
+    # Every MDI asset declared in packages/icons.yaml is registered explicitly.
+    # This makes entity icon inheritance deterministic for every Home domain:
+    #   HA icon: mdi:robot-vacuum -> image id: icon_robot_vacuum
+    # A domain fallback is used by the UI only when the HA icon is missing or the
+    # requested MDI asset is not part of the compiled shared icon library.
+    for mdi_name, image_id in SHARED_ICONS:
         image_var = await cg.get_variable(ID(image_id, type=image_component.Image_))
         cg.add(var.register_icon(mdi_name, image_var))
 
-    # Explicit custom mappings are applied last, so users can override an
-    # automatically-derived MDI mapping if required.
+    # Explicit custom mappings are applied last, so users can override a shared
+    # MDI mapping or register an additional image outside packages/icons.yaml.
     for icon_config in config[CONF_CUSTOM_ICONS]:
         image_var = await cg.get_variable(icon_config[CONF_IMAGE_ID])
         cg.add(var.register_icon(icon_config[CONF_MDI], image_var))
