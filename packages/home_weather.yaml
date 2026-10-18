@@ -124,6 +124,324 @@ lvgl:
                         text_align: RIGHT
                         text_font: ui_font_18
 
+              - obj:
+                  id: home_weather_forecast
+                  x: 20
+                  y: 200
+                  width: 440
+                  height: 112
+                  bg_color: 0x181B20
+                  border_width: 0
+                  radius: 16
+                  pad_all: 0
+                  scrollable: false
+                  clickable: false
+                  widgets:
+                    - label:
+                        id: home_weather_forecast_time_1
+                        x: 0
+                        y: 4
+                        width: 88
+                        text: "+2h"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0x858B94
+                    - image:
+                        id: home_weather_forecast_icon_1
+                        x: 23
+                        y: 23
+                        src: icon_weather_cloudy
+                        image_recolor: 0xFFFFFF
+                        image_recolor_opa: 100%
+                    - label:
+                        id: home_weather_forecast_temp_1
+                        x: 0
+                        y: 66
+                        width: 88
+                        text: "--"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: home_weather_forecast_wind_1
+                        x: 0
+                        y: 88
+                        width: 88
+                        text: "--"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0xB8BDC5
+
+                    - label:
+                        id: home_weather_forecast_time_2
+                        x: 88
+                        y: 4
+                        width: 88
+                        text: "+4h"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0x858B94
+                    - image:
+                        id: home_weather_forecast_icon_2
+                        x: 111
+                        y: 23
+                        src: icon_weather_cloudy
+                        image_recolor: 0xFFFFFF
+                        image_recolor_opa: 100%
+                    - label:
+                        id: home_weather_forecast_temp_2
+                        x: 88
+                        y: 66
+                        width: 88
+                        text: "--"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: home_weather_forecast_wind_2
+                        x: 88
+                        y: 88
+                        width: 88
+                        text: "--"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0xB8BDC5
+
+                    - label:
+                        id: home_weather_forecast_time_3
+                        x: 176
+                        y: 4
+                        width: 88
+                        text: "+6h"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0x858B94
+                    - image:
+                        id: home_weather_forecast_icon_3
+                        x: 199
+                        y: 23
+                        src: icon_weather_cloudy
+                        image_recolor: 0xFFFFFF
+                        image_recolor_opa: 100%
+                    - label:
+                        id: home_weather_forecast_temp_3
+                        x: 176
+                        y: 66
+                        width: 88
+                        text: "--"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: home_weather_forecast_wind_3
+                        x: 176
+                        y: 88
+                        width: 88
+                        text: "--"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0xB8BDC5
+
+                    - label:
+                        id: home_weather_forecast_time_4
+                        x: 264
+                        y: 4
+                        width: 88
+                        text: "+8h"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0x858B94
+                    - image:
+                        id: home_weather_forecast_icon_4
+                        x: 287
+                        y: 23
+                        src: icon_weather_cloudy
+                        image_recolor: 0xFFFFFF
+                        image_recolor_opa: 100%
+                    - label:
+                        id: home_weather_forecast_temp_4
+                        x: 264
+                        y: 66
+                        width: 88
+                        text: "--"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: home_weather_forecast_wind_4
+                        x: 264
+                        y: 88
+                        width: 88
+                        text: "--"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0xB8BDC5
+
+                    - label:
+                        id: home_weather_forecast_time_5
+                        x: 352
+                        y: 4
+                        width: 88
+                        text: "+10h"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0x858B94
+                    - image:
+                        id: home_weather_forecast_icon_5
+                        x: 375
+                        y: 23
+                        src: icon_weather_cloudy
+                        image_recolor: 0xFFFFFF
+                        image_recolor_opa: 100%
+                    - label:
+                        id: home_weather_forecast_temp_5
+                        x: 352
+                        y: 66
+                        width: 88
+                        text: "--"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: home_weather_forecast_wind_5
+                        x: 352
+                        y: 88
+                        width: 88
+                        text: "--"
+                        text_align: CENTER
+                        text_font: ui_font_18
+                        text_color: 0xB8BDC5
+
+script:
+  - id: home_weather_refresh_forecast
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: |-
+              const int active = id(active_home_slot);
+              if (active < 1 || active > 6)
+                return false;
+              const auto &slot = id(wall_panel_controller).get_home_slot(active);
+              return slot.available && slot.domain == "weather" && !slot.entity_id.empty();
+          then:
+            - homeassistant.action:
+                action: weather.get_forecasts
+                data:
+                  type: hourly
+                data_template:
+                  entity_id: "{{ weather_entity }}"
+                variables:
+                  weather_entity: |-
+                    const int active = id(active_home_slot);
+                    if (active < 1 || active > 6)
+                      return std::string();
+                    return id(wall_panel_controller).get_home_slot(active).entity_id;
+                capture_response: true
+                on_success:
+                  - lambda: |-
+                      JsonObjectConst action_response = response["response"].as<JsonObjectConst>();
+                      if (action_response.isNull())
+                        return;
+
+                      std::string response_entity;
+                      JsonObjectConst weather_response;
+                      for (JsonPairConst pair : action_response) {
+                        response_entity = pair.key().c_str();
+                        weather_response = pair.value().as<JsonObjectConst>();
+                        break;
+                      }
+
+                      const int active = id(active_home_slot);
+                      if (active < 1 || active > 6 || response_entity.empty())
+                        return;
+                      const auto &slot = id(wall_panel_controller).get_home_slot(active);
+                      if (slot.domain != "weather" || slot.entity_id != response_entity)
+                        return;
+
+                      JsonArrayConst forecast = weather_response["forecast"].as<JsonArrayConst>();
+                      if (forecast.isNull())
+                        return;
+
+                      lv_obj_t *icons[5] = {
+                        id(home_weather_forecast_icon_1),
+                        id(home_weather_forecast_icon_2),
+                        id(home_weather_forecast_icon_3),
+                        id(home_weather_forecast_icon_4),
+                        id(home_weather_forecast_icon_5)
+                      };
+                      lv_obj_t *temps[5] = {
+                        id(home_weather_forecast_temp_1),
+                        id(home_weather_forecast_temp_2),
+                        id(home_weather_forecast_temp_3),
+                        id(home_weather_forecast_temp_4),
+                        id(home_weather_forecast_temp_5)
+                      };
+                      lv_obj_t *winds[5] = {
+                        id(home_weather_forecast_wind_1),
+                        id(home_weather_forecast_wind_2),
+                        id(home_weather_forecast_wind_3),
+                        id(home_weather_forecast_wind_4),
+                        id(home_weather_forecast_wind_5)
+                      };
+
+                      auto forecast_icon = [&](const std::string &condition) -> esphome::image::Image * {
+                        if (condition == "sunny") return id(icon_weather_sunny);
+                        if (condition == "clear-night") return id(icon_weather_night);
+                        if (condition == "rainy") return id(icon_weather_rainy);
+                        if (condition == "pouring") return id(icon_weather_pouring);
+                        if (condition == "snowy" || condition == "snowy-rainy") return id(icon_weather_snowy);
+                        if (condition == "lightning" || condition == "lightning-rainy") return id(icon_weather_lightning);
+                        if (condition == "windy" || condition == "windy-variant") return id(icon_fan);
+                        if (condition == "partlycloudy") return id(icon_weather_cloudy);
+                        return id(icon_weather_cloudy);
+                      };
+
+                      auto wind_to_ms = [](float speed, const std::string &unit) -> float {
+                        if (unit == "km/h" || unit == "kmh" || unit == "kph")
+                          return speed / 3.6f;
+                        if (unit == "mph")
+                          return speed * 0.44704f;
+                        if (unit == "kn" || unit == "kt" || unit == "knot" || unit == "knots")
+                          return speed * 0.514444f;
+                        if (unit == "ft/s" || unit == "fps")
+                          return speed * 0.3048f;
+                        return speed;
+                      };
+
+                      for (int i = 0; i < 5; i++) {
+                        const size_t forecast_index = 1 + (i * 2);
+                        if (forecast_index >= forecast.size()) {
+                          esphome::lvgl::lv_image_set_src(icons[i], id(icon_weather_cloudy));
+                          lv_label_set_text(temps[i], "--");
+                          lv_label_set_text(winds[i], "--");
+                          continue;
+                        }
+
+                        JsonObjectConst item = forecast[forecast_index].as<JsonObjectConst>();
+                        const std::string condition = item["condition"] | "";
+                        esphome::lvgl::lv_image_set_src(icons[i], forecast_icon(condition));
+
+                        if (!item["temperature"].isNull()) {
+                          char text[24];
+                          snprintf(text, sizeof(text), "%.1f%s",
+                                   item["temperature"].as<float>(),
+                                   slot.unit.empty() ? "°" : slot.unit.c_str());
+                          lv_label_set_text(temps[i], text);
+                        } else {
+                          lv_label_set_text(temps[i], "--");
+                        }
+
+                        if (!item["wind_speed"].isNull()) {
+                          const float wind_ms = wind_to_ms(item["wind_speed"].as<float>(), slot.wind_speed_unit);
+                          char text[24];
+                          snprintf(text, sizeof(text), "%.1f m/s", wind_ms);
+                          lv_label_set_text(winds[i], text);
+                        } else {
+                          lv_label_set_text(winds[i], "--");
+                        }
+                      }
+
 interval:
   - interval: 500ms
     then:
@@ -145,6 +463,16 @@ interval:
             lv_obj_clear_flag(id(home_weather_detail_panel), LV_OBJ_FLAG_HIDDEN);
 
           const bool danish = std::string(id(wall_panel_controller).get_language_option()) == "Danish";
+
+          static std::string last_forecast_entity;
+          static uint32_t last_forecast_refresh = 0;
+          const uint32_t now = millis();
+          if (slot.entity_id != last_forecast_entity || now - last_forecast_refresh >= 600000UL) {
+            last_forecast_entity = slot.entity_id;
+            last_forecast_refresh = now;
+            id(home_weather_refresh_forecast).execute();
+          }
+
 
           auto set_label = [](lv_obj_t *label, const std::string &text) {
             const char *current = lv_label_get_text(label);
@@ -199,6 +527,11 @@ interval:
           set_label(id(home_weather_humidity_name), danish ? "Luftfugtighed" : "Humidity");
           set_label(id(home_weather_pressure_name), danish ? "Lufttryk" : "Pressure");
           set_label(id(home_weather_wind_name), danish ? "Vind" : "Wind");
+          set_label(id(home_weather_forecast_time_1), danish ? "+2t" : "+2h");
+          set_label(id(home_weather_forecast_time_2), danish ? "+4t" : "+4h");
+          set_label(id(home_weather_forecast_time_3), danish ? "+6t" : "+6h");
+          set_label(id(home_weather_forecast_time_4), danish ? "+8t" : "+8h");
+          set_label(id(home_weather_forecast_time_5), danish ? "+10t" : "+10h");
 
           if (slot.available && slot.has_wind_speed) {
             if (!slot.wind_bearing.empty()) {
@@ -241,33 +574,20 @@ interval:
           }
 
           if (slot.available && slot.has_wind_speed) {
-            std::string direction;
-            if (!slot.wind_bearing.empty()) {
-              char *end = nullptr;
-              const float bearing = std::strtof(slot.wind_bearing.c_str(), &end);
-              if (end != slot.wind_bearing.c_str() && std::isfinite(bearing)) {
-                const char *directions_en[16] = {
-                  "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-                  "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
-                };
-                const char *directions_da[16] = {
-                  "N", "NNØ", "NØ", "ØNØ", "Ø", "ØSØ", "SØ", "SSØ",
-                  "S", "SSV", "SV", "VSV", "V", "VNV", "NV", "NNV"
-                };
-                int index = static_cast<int>(std::lround(bearing / 22.5f)) % 16;
-                if (index < 0) index += 16;
-                direction = danish ? directions_da[index] : directions_en[index];
-              } else {
-                direction = slot.wind_bearing;
-              }
-            }
+            auto wind_to_ms = [](float speed, const std::string &unit) -> float {
+              if (unit == "km/h" || unit == "kmh" || unit == "kph")
+                return speed / 3.6f;
+              if (unit == "mph")
+                return speed * 0.44704f;
+              if (unit == "kn" || unit == "kt" || unit == "knot" || unit == "knots")
+                return speed * 0.514444f;
+              if (unit == "ft/s" || unit == "fps")
+                return speed * 0.3048f;
+              return speed;
+            };
 
-            char speed[32];
-            snprintf(speed, sizeof(speed), "%.1f%s%s", slot.wind_speed,
-                     slot.wind_speed_unit.empty() ? "" : " ", slot.wind_speed_unit.c_str());
-            std::string text = speed;
-            if (!direction.empty())
-              text += " · " + direction;
+            char text[32];
+            snprintf(text, sizeof(text), "%.1f m/s", wind_to_ms(slot.wind_speed, slot.wind_speed_unit));
             set_label(id(home_weather_wind_value), text);
           } else {
             set_label(id(home_weather_wind_value), "--");
