@@ -44,8 +44,10 @@ lvgl:
               - image:
                   id: home_weather_wind_arrow
                   x: 300
-                  y: 20
+                  y: 18
                   src: icon_navigation
+                  image_recolor: 0xFFFFFF
+                  image_recolor_opa: 100%
                   rotation: 0
                   antialias: true
 
