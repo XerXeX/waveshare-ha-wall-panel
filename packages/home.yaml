@@ -189,7 +189,6 @@ script:
             return;
 
           const auto &slot = id(wall_panel_controller).get_home_slot(active);
-          const bool danish = std::string(id(wall_panel_controller).get_language_option()) == "Danish";
 
           auto set_label = [](lv_obj_t *label, const std::string &text) {
             const char *current = lv_label_get_text(label);
@@ -216,6 +215,24 @@ script:
             if (item.domain == "binary_sensor") return id(icon_alert_circle);
             return id(icon_home);
           };
+          auto weather_text = [&](const std::string &condition) -> std::string {
+            const char *key = nullptr;
+            if (condition == "sunny") key = "weather_sunny";
+            else if (condition == "clear-night") key = "weather_clear_night";
+            else if (condition == "cloudy") key = "weather_cloudy";
+            else if (condition == "partlycloudy") key = "weather_partlycloudy";
+            else if (condition == "fog") key = "weather_fog";
+            else if (condition == "hail") key = "weather_hail";
+            else if (condition == "lightning") key = "weather_lightning";
+            else if (condition == "lightning-rainy") key = "weather_lightning_rainy";
+            else if (condition == "pouring") key = "weather_pouring";
+            else if (condition == "rainy") key = "weather_rainy";
+            else if (condition == "snowy") key = "weather_snowy";
+            else if (condition == "snowy-rainy") key = "weather_snowy_rainy";
+            else if (condition == "windy" || condition == "windy-variant") key = "weather_windy";
+            else if (condition == "exceptional") key = "weather_exceptional";
+            return key == nullptr ? condition : std::string(id(wall_panel_language).tr(key));
+          };
 
           set_label(id(home_detail_name), slot.name.empty() ? slot.entity_id : slot.name);
           set_label(id(home_detail_entity), slot.entity_id);
@@ -229,7 +246,7 @@ script:
           set_visible(id(home_detail_action_button), false);
 
           if (!slot.available) {
-            set_label(id(home_detail_value), danish ? "Ikke tilgængelig" : "Unavailable");
+            set_label(id(home_detail_value), id(wall_panel_language).tr("unavailable"));
             set_label(id(home_detail_secondary), "");
             return;
           }
@@ -238,12 +255,11 @@ script:
           std::string secondary;
 
           if (slot.domain == "light") {
-            value = slot.state == "on" ? (danish ? "Tændt" : "On") : (danish ? "Slukket" : "Off");
+            value = id(wall_panel_language).tr(slot.state == "on" ? "on" : "off");
             if (slot.has_brightness && slot.state == "on")
               secondary = std::to_string(slot.brightness_pct) + "%";
             set_visible(id(home_detail_toggle_button), true);
-            set_label(id(home_detail_toggle_label), slot.state == "on" ? (danish ? "Sluk" : "Turn off")
-                                                                        : (danish ? "Tænd" : "Turn on"));
+            set_label(id(home_detail_toggle_label), id(wall_panel_language).tr(slot.state == "on" ? "turn_off" : "turn_on"));
             if (slot.has_brightness) {
               set_visible(id(home_detail_light_slider), true);
               if (!lv_obj_has_state(id(home_detail_light_slider), LV_STATE_PRESSED) &&
@@ -251,10 +267,9 @@ script:
                 lv_slider_set_value(id(home_detail_light_slider), slot.brightness_pct, LV_ANIM_OFF);
             }
           } else if (slot.domain == "switch" || slot.domain == "input_boolean") {
-            value = slot.state == "on" ? (danish ? "Tændt" : "On") : (danish ? "Slukket" : "Off");
+            value = id(wall_panel_language).tr(slot.state == "on" ? "on" : "off");
             set_visible(id(home_detail_toggle_button), true);
-            set_label(id(home_detail_toggle_label), slot.state == "on" ? (danish ? "Sluk" : "Turn off")
-                                                                        : (danish ? "Tænd" : "Turn on"));
+            set_label(id(home_detail_toggle_label), id(wall_panel_language).tr(slot.state == "on" ? "turn_off" : "turn_on"));
           } else if (slot.domain == "cover") {
             if (slot.has_position)
               value = std::to_string(slot.position_pct) + "%";
@@ -285,22 +300,20 @@ script:
             }
           } else if (slot.domain == "scene" || slot.domain == "script" || slot.domain == "button" ||
                      slot.domain == "input_button" || slot.domain == "automation") {
-            value = slot.domain == "scene" ? (danish ? "Scene" : "Scene")
-                  : slot.domain == "script" ? "Script"
-                  : slot.domain == "automation" ? (danish ? "Automatisering" : "Automation")
-                  : (danish ? "Knap" : "Button");
+            value = id(wall_panel_language).tr(slot.domain == "scene" ? "scene"
+                  : slot.domain == "script" ? "script"
+                  : slot.domain == "automation" ? "automation" : "button");
             set_visible(id(home_detail_action_button), true);
-            set_label(id(home_detail_action_label), slot.domain == "script" ? (danish ? "Kør" : "Run")
-                                                   : slot.domain == "scene" ? (danish ? "Aktivér" : "Activate")
-                                                   : slot.domain == "automation" ? (danish ? "Udløs" : "Trigger")
-                                                   : (danish ? "Tryk" : "Press"));
+            set_label(id(home_detail_action_label), id(wall_panel_language).tr(slot.domain == "script" ? "run"
+                                                   : slot.domain == "scene" ? "activate"
+                                                   : slot.domain == "automation" ? "trigger" : "press"));
           } else if (slot.domain == "weather") {
             if (slot.has_current_temperature) {
               char text[24];
               snprintf(text, sizeof(text), "%.1f%s", slot.current_temperature, slot.unit.empty() ? "°" : slot.unit.c_str());
               value = text;
             }
-            secondary = slot.state;
+            secondary = weather_text(slot.state);
             if (slot.has_humidity) {
               char humidity[20];
               snprintf(humidity, sizeof(humidity), " · %.0f%%", slot.humidity);
@@ -309,7 +322,7 @@ script:
           } else if (slot.domain == "sensor") {
             value = slot.state + (slot.unit.empty() ? "" : " " + slot.unit);
           } else if (slot.domain == "binary_sensor") {
-            value = slot.state == "on" ? (danish ? "Aktiv" : "On") : (danish ? "Inaktiv" : "Off");
+            value = id(wall_panel_language).tr(slot.state == "on" ? "active" : "inactive");
           } else if (!slot.unit.empty()) {
             value = slot.state + " " + slot.unit;
           }
@@ -738,9 +751,26 @@ interval:
             if (item.domain == "binary_sensor") return id(icon_alert_circle);
             return id(icon_home);
           };
+          auto weather_text = [&](const std::string &condition) -> std::string {
+            const char *key = nullptr;
+            if (condition == "sunny") key = "weather_sunny";
+            else if (condition == "clear-night") key = "weather_clear_night";
+            else if (condition == "cloudy") key = "weather_cloudy";
+            else if (condition == "partlycloudy") key = "weather_partlycloudy";
+            else if (condition == "fog") key = "weather_fog";
+            else if (condition == "hail") key = "weather_hail";
+            else if (condition == "lightning") key = "weather_lightning";
+            else if (condition == "lightning-rainy") key = "weather_lightning_rainy";
+            else if (condition == "pouring") key = "weather_pouring";
+            else if (condition == "rainy") key = "weather_rainy";
+            else if (condition == "snowy") key = "weather_snowy";
+            else if (condition == "snowy-rainy") key = "weather_snowy_rainy";
+            else if (condition == "windy" || condition == "windy-variant") key = "weather_windy";
+            else if (condition == "exceptional") key = "weather_exceptional";
+            return key == nullptr ? condition : std::string(id(wall_panel_language).tr(key));
+          };
 
-          const bool danish = std::string(id(wall_panel_controller).get_language_option()) == "Danish";
-          set_label(id(home_page_title), danish ? "Hjem" : "Home");
+          set_label(id(home_page_title), id(wall_panel_language).tr("home"));
 
           int visible = 0;
           for (int i = 0; i < 6; i++) {
@@ -760,9 +790,9 @@ interval:
 
             std::string state_text;
             if (!slot.available) {
-              state_text = danish ? "Ikke tilgængelig" : "Unavailable";
+              state_text = id(wall_panel_language).tr("unavailable");
             } else if (slot.domain == "light" || slot.domain == "switch" || slot.domain == "input_boolean") {
-              state_text = slot.state == "on" ? (danish ? "Tændt" : "On") : (danish ? "Slukket" : "Off");
+              state_text = id(wall_panel_language).tr(slot.state == "on" ? "on" : "off");
               if (slot.domain == "light" && slot.has_brightness && slot.state == "on")
                 state_text += " · " + std::to_string(slot.brightness_pct) + "%";
             } else if (slot.domain == "cover" && slot.has_position) {
@@ -773,17 +803,18 @@ interval:
               state_text = text;
             } else if (slot.domain == "weather" && slot.has_current_temperature) {
               char text[32];
+              const std::string condition = weather_text(slot.state);
               snprintf(text, sizeof(text), "%.1f%s · %s", slot.current_temperature,
-                       slot.unit.empty() ? "°" : slot.unit.c_str(), slot.state.c_str());
+                       slot.unit.empty() ? "°" : slot.unit.c_str(), condition.c_str());
               state_text = text;
             } else if (slot.domain == "sensor") {
               state_text = slot.state + (slot.unit.empty() ? "" : " " + slot.unit);
             } else if (slot.domain == "binary_sensor") {
-              state_text = slot.state == "on" ? (danish ? "Aktiv" : "On") : (danish ? "Inaktiv" : "Off");
+              state_text = id(wall_panel_language).tr(slot.state == "on" ? "active" : "inactive");
             } else if (slot.domain == "scene") {
-              state_text = danish ? "Scene" : "Scene";
+              state_text = id(wall_panel_language).tr("scene");
             } else if (slot.domain == "script") {
-              state_text = "Script";
+              state_text = id(wall_panel_language).tr("script");
             } else {
               state_text = slot.state;
             }
