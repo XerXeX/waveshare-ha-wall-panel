@@ -7,6 +7,7 @@ The project is designed as a reusable Home Assistant wall panel with runtime-con
 ## Structure
 
 - `components/wall_panel/` – custom ESPHome component and runtime logic
+- `components/wall_panel/language/` – auto-discovered translation catalogs
 - `packages/hardware.yaml` – display, touch, backlight and board hardware
 - `packages/icons.yaml` – shared Material Design Icon image library
 - `packages/ui.yaml` – shared fonts, language selection and global UI elements
@@ -33,6 +34,10 @@ Shared images use a predictable ID derived from the MDI name. For example, `mdi:
 
 ## Languages
 
-Source code, configuration entity names, comments and documentation are written in English. User-facing display text is provided through the translation layer in the `wall_panel` component.
+Source code, configuration entity names, comments and documentation are written in English. User-facing display text comes from translation catalogs in `components/wall_panel/language/`.
 
-English is the default language. Danish can be selected from the `Language` configuration entity in Home Assistant. The selected language is stored on the panel and survives reboots.
+English (`en.yaml`) is the master catalog and fallback language. The `Language` configuration entity is generated automatically from the language files present at compile time, and the selected language is stored on the panel.
+
+To add another language, copy `en.yaml`, save it with the ISO language code (for example `de.yaml` or `fi.yaml`), set its `code` and native `name`, and translate the values under `translations:`. No C++ code or hard-coded language list needs to be changed. Missing translations automatically fall back to English.
+
+See `components/wall_panel/language/README.md` for the language-pack format and font/glyph notes.
