@@ -64,9 +64,8 @@ def _load_languages():
     if not english["translations"]:
         raise cv.Invalid("language/en.yaml must contain the master translation catalog")
 
-    # Keep English first in Home Assistant, then sort the remaining languages
-    # by their native display name. Adding a new YAML file is therefore enough
-    # to add it to the language selector on the next compile.
+    # English is always first; every other language is shown by its native name.
+    # Adding another YAML file is therefore enough to add it to the selector.
     languages.sort(key=lambda item: (item["code"] != "en", item["name"].casefold()))
     return languages
 
@@ -97,13 +96,6 @@ async def to_code(config):
 
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
-
-    # Translation files are converted to firmware lookup tables at compile time.
-    # Missing keys in non-English languages intentionally fall back to English.
-    for language in LANGUAGES:
-        cg.add(var.register_language(language["code"], language["name"]))
-        for key, value in language["translations"].items():
-            cg.add(var.register_translation(language["code"], key, value))
 
     # Shared images follow the convention:
     #   mdi:robot-vacuum -> icon_robot_vacuum
