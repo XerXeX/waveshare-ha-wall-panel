@@ -1,14 +1,34 @@
 # Configurable Home dashboard
 #
-# Six slots can point at mixed Home Assistant entity domains. The component
-# subscribes dynamically to state and common attributes, while this package
-# renders domain-aware cards and a shared detail page.
+# PURPOSE
+# -------
+# Home is the mixed-entity dashboard. Six configurable slots can point at many
+# Home Assistant domains (light, switch, climate, cover, scene, script, weather,
+# sensor, binary_sensor, ...). The custom wall_panel component subscribes to the
+# selected entities and stores their latest state/attributes in HomeSlotState;
+# this file is responsible only for rendering those states and sending actions.
+#
+# USER DATA VS. TRANSLATION
+# -------------------------
+# Values entered into Home · Slot N · Name are USER DATA and are never translated.
+# A user who types "Stue", "Sofa lamp" or "Roberto" should always see exactly that
+# text. Only panel-owned UI words and well-known Home Assistant state strings are
+# passed through wall_panel_language.tr(...).
+#
+# UNITS
+# -----
+# Climate/weather temperatures respect wall_panel_temperature_unit from
+# packages/units.yaml. "Auto" keeps the source unit supplied by Home Assistant.
+# Conversion is display-only; climate service calls still use the original source
+# values stored in HomeSlotState.
 
 esphome:
   on_boot:
     - priority: -100
       then:
         - lambda: |-
+            // Push restored YAML text-entity configuration into the C++ slot
+            // model. After this, the component subscribes to the chosen HA IDs.
             id(wall_panel_controller).set_home_name(1, id(home_slot1_name).state);
             id(wall_panel_controller).set_home_entity(1, id(home_slot1_entity).state);
             id(wall_panel_controller).set_home_name(2, id(home_slot2_name).state);
@@ -23,12 +43,20 @@ esphome:
             id(wall_panel_controller).set_home_entity(6, id(home_slot6_entity).state);
 
 globals:
+  # 0 = no detail page selected. 1..6 = active Home slot.
   - id: active_home_slot
     type: int
     restore_value: false
     initial_value: '0'
 
 text:
+  # ---------------------------------------------------------------------------
+  # Slot configuration exposed to Home Assistant.
+  #
+  # The entity names below deliberately stay English. They are configuration
+  # entity identifiers in Home Assistant, not on-screen UI copy. The VALUE of a
+  # Name entity is user content and must never go through the translator.
+  # ---------------------------------------------------------------------------
   - platform: template
     id: home_slot1_name
     name: "Home · Slot 1 · 1 Name"
@@ -180,6 +208,9 @@ text:
       - lambda: id(wall_panel_controller).set_home_entity(6, x);
 
 script:
+  # Rebuild the generic detail page for the currently selected Home slot.
+  # Weather adds its own overlay in packages/home_weather.yaml, but still shares
+  # the active_home_slot selection and the generic navigation structure.
   - id: home_refresh_detail
     mode: restart
     then:
@@ -190,6 +221,7 @@ script:
 
           const auto &slot = id(wall_panel_controller).get_home_slot(active);
 
+          // Update only when text changed to reduce LVGL redraw work.
           auto set_label = [](lv_obj_t *label, const std::string &text) {
             const char *current = lv_label_get_text(label);
             if (current == nullptr || text != current)
@@ -201,6 +233,46 @@ script:
             else
               lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
           };
+
+          // Convert known HA state strings to translation keys. Unknown states
+          // intentionally fall back to the original string so custom integrations
+          // remain useful instead of displaying a blank value.
+          auto translated_state = [&](const std::string &state) -> std::string {
+            const char *key = nullptr;
+            if (state == "on") key = "on";
+            else if (state == "off") key = "off";
+            else if (state == "open") key = "open";
+            else if (state == "closed") key = "closed";
+            else if (state == "opening") key = "opening";
+            else if (state == "closing") key = "closing";
+            else if (state == "idle") key = "idle";
+            else if (state == "heat") key = "heat";
+            else if (state == "cool") key = "cool";
+            else if (state == "dry") key = "dry";
+            else if (state == "fan_only" || state == "fan-only") key = "fan_only";
+            else if (state == "heating") key = "heating";
+            else if (state == "cooling") key = "cooling";
+            else if (state == "drying") key = "drying";
+            else if (state == "fan") key = "fan";
+            return key == nullptr ? state : std::string(id(wall_panel_language).tr(key));
+          };
+
+          auto temperature_for_display = [&](float value, const std::string &source_unit,
+                                             std::string &display_unit) -> float {
+            const std::string target = id(wall_panel_temperature_unit).current_option();
+            const bool source_f = source_unit == "°F" || source_unit == "F";
+            const bool source_c = source_unit == "°C" || source_unit == "C";
+
+            if (target == "Auto") {
+              display_unit = source_unit.empty() ? "°" : source_unit;
+              return value;
+            }
+            display_unit = target;
+            if (target == "°F" && source_c) return value * 9.0f / 5.0f + 32.0f;
+            if (target == "°C" && source_f) return (value - 32.0f) * 5.0f / 9.0f;
+            return value;
+          };
+
           auto default_icon = [&](const esphome::wall_panel::HomeSlotState &item) -> esphome::image::Image * {
             if (auto *custom = id(wall_panel_controller).get_registered_icon(item.icon); custom != nullptr)
               return custom;
@@ -215,6 +287,7 @@ script:
             if (item.domain == "binary_sensor") return id(icon_alert_circle);
             return id(icon_home);
           };
+
           auto weather_text = [&](const std::string &condition) -> std::string {
             const char *key = nullptr;
             if (condition == "sunny") key = "weather_sunny";
@@ -234,10 +307,14 @@ script:
             return key == nullptr ? condition : std::string(id(wall_panel_language).tr(key));
           };
 
+          // Name and entity ID come from user configuration and must never be
+          // translated or normalized.
           set_label(id(home_detail_name), slot.name.empty() ? slot.entity_id : slot.name);
           set_label(id(home_detail_entity), slot.entity_id);
           esphome::lvgl::lv_image_set_src(id(home_detail_icon), default_icon(slot));
 
+          // Hide every domain-specific control first; the matching domain block
+          // below enables only the controls that make sense for this entity.
           set_visible(id(home_detail_toggle_button), false);
           set_visible(id(home_detail_light_slider), false);
           set_visible(id(home_detail_cover_controls), false);
@@ -273,7 +350,7 @@ script:
           } else if (slot.domain == "cover") {
             if (slot.has_position)
               value = std::to_string(slot.position_pct) + "%";
-            secondary = slot.state;
+            secondary = translated_state(slot.state);
             set_visible(id(home_detail_cover_controls), true);
             if (slot.has_position) {
               set_visible(id(home_detail_cover_slider), true);
@@ -283,17 +360,23 @@ script:
             }
           } else if (slot.domain == "climate") {
             if (slot.has_current_temperature) {
+              std::string display_unit;
+              const float display_temperature = temperature_for_display(
+                  slot.current_temperature, slot.unit, display_unit);
               char text[24];
-              snprintf(text, sizeof(text), "%.1f%s", slot.current_temperature, slot.unit.empty() ? "°" : slot.unit.c_str());
+              snprintf(text, sizeof(text), "%.1f%s", display_temperature, display_unit.c_str());
               value = text;
             }
-            secondary = slot.state;
+            secondary = translated_state(slot.state);
             if (!slot.hvac_action.empty() && slot.hvac_action != "idle")
-              secondary += " · " + slot.hvac_action;
+              secondary += " · " + translated_state(slot.hvac_action);
             set_visible(id(home_detail_climate_controls), true);
             if (slot.has_target_temperature) {
+              std::string display_unit;
+              const float display_target = temperature_for_display(
+                  slot.target_temperature, slot.unit, display_unit);
               char target[24];
-              snprintf(target, sizeof(target), "%.1f%s", slot.target_temperature, slot.unit.empty() ? "°" : slot.unit.c_str());
+              snprintf(target, sizeof(target), "%.1f%s", display_target, display_unit.c_str());
               set_label(id(home_detail_climate_target), target);
             } else {
               set_label(id(home_detail_climate_target), "--");
@@ -309,8 +392,11 @@ script:
                                                    : slot.domain == "automation" ? "trigger" : "press"));
           } else if (slot.domain == "weather") {
             if (slot.has_current_temperature) {
+              std::string display_unit;
+              const float display_temperature = temperature_for_display(
+                  slot.current_temperature, slot.unit, display_unit);
               char text[24];
-              snprintf(text, sizeof(text), "%.1f%s", slot.current_temperature, slot.unit.empty() ? "°" : slot.unit.c_str());
+              snprintf(text, sizeof(text), "%.1f%s", display_temperature, display_unit.c_str());
               value = text;
             }
             secondary = weather_text(slot.state);
@@ -320,6 +406,8 @@ script:
               secondary += humidity;
             }
           } else if (slot.domain == "sensor") {
+            // Generic sensor state is source data. Do not translate arbitrary
+            // values because integrations may use meaningful custom strings.
             value = slot.state + (slot.unit.empty() ? "" : " " + slot.unit);
           } else if (slot.domain == "binary_sensor") {
             value = id(wall_panel_language).tr(slot.state == "on" ? "active" : "inactive");
@@ -333,6 +421,9 @@ script:
 lvgl:
   id: wall_panel_lvgl
   pages:
+    # -------------------------------------------------------------------------
+    # Main Home grid
+    # -------------------------------------------------------------------------
     - id: home_page
       bg_color: 0x101216
       widgets:
@@ -340,10 +431,13 @@ lvgl:
             id: home_page_title
             x: 20
             y: 18
-            text: "Home"
+            text: ""
             text_font: ui_font_34
             text_color: 0xFFFFFF
 
+        # The six card definitions are intentionally repetitive. The interval
+        # below packs only configured cards into a 2-column grid and updates their
+        # labels/icons from HomeSlotState.
         - button:
             id: home_slot1_card
             width: 210
@@ -466,6 +560,9 @@ lvgl:
               - label: { id: home_slot6_name_label, x: 68, y: 15, width: 126, text: "Home 6", text_font: ui_font_22, text_color: 0xFFFFFF }
               - label: { id: home_slot6_state_label, x: 68, y: 50, width: 126, text: "--", text_font: ui_font_18, text_color: 0x858B94 }
 
+    # -------------------------------------------------------------------------
+    # Generic detail page
+    # -------------------------------------------------------------------------
     - id: home_detail_page
       bg_color: 0x101216
       widgets:
@@ -493,7 +590,7 @@ lvgl:
             x: 82
             y: 20
             width: 275
-            text: "Home"
+            text: ""
             text_font: ui_font_34
             text_color: 0xFFFFFF
 
@@ -549,7 +646,7 @@ lvgl:
               - label:
                   id: home_detail_toggle_label
                   align: CENTER
-                  text: "Toggle"
+                  text: ""
                   text_font: ui_font_22
                   text_color: 0xFFFFFF
 
@@ -645,6 +742,8 @@ lvgl:
             pad_all: 0
             hidden: true
             widgets:
+              # +/- operate on the SOURCE unit stored by Home Assistant. Only the
+              # displayed number is converted by the unit preference.
               - button:
                   x: 0
                   y: 0
@@ -706,11 +805,13 @@ lvgl:
               - label:
                   id: home_detail_action_label
                   align: CENTER
-                  text: "Activate"
+                  text: ""
                   text_font: ui_font_22
                   text_color: 0xFFFFFF
 
 interval:
+  # Refresh compact cards. 250 ms keeps state feedback feeling immediate while
+  # the changed-value checks avoid rewriting labels/images unnecessarily.
   - interval: 250ms
     then:
       - lambda: |-
@@ -737,6 +838,42 @@ interval:
             if (current == nullptr || text != current)
               lv_label_set_text(label, text.c_str());
           };
+
+          auto translated_state = [&](const std::string &state) -> std::string {
+            const char *key = nullptr;
+            if (state == "on") key = "on";
+            else if (state == "off") key = "off";
+            else if (state == "open") key = "open";
+            else if (state == "closed") key = "closed";
+            else if (state == "opening") key = "opening";
+            else if (state == "closing") key = "closing";
+            else if (state == "idle") key = "idle";
+            else if (state == "heat") key = "heat";
+            else if (state == "cool") key = "cool";
+            else if (state == "dry") key = "dry";
+            else if (state == "fan_only" || state == "fan-only") key = "fan_only";
+            else if (state == "heating") key = "heating";
+            else if (state == "cooling") key = "cooling";
+            else if (state == "drying") key = "drying";
+            else if (state == "fan") key = "fan";
+            return key == nullptr ? state : std::string(id(wall_panel_language).tr(key));
+          };
+
+          auto temperature_for_display = [&](float value, const std::string &source_unit,
+                                             std::string &display_unit) -> float {
+            const std::string target = id(wall_panel_temperature_unit).current_option();
+            const bool source_f = source_unit == "°F" || source_unit == "F";
+            const bool source_c = source_unit == "°C" || source_unit == "C";
+            if (target == "Auto") {
+              display_unit = source_unit.empty() ? "°" : source_unit;
+              return value;
+            }
+            display_unit = target;
+            if (target == "°F" && source_c) return value * 9.0f / 5.0f + 32.0f;
+            if (target == "°C" && source_f) return (value - 32.0f) * 5.0f / 9.0f;
+            return value;
+          };
+
           auto default_icon = [&](const esphome::wall_panel::HomeSlotState &item) -> esphome::image::Image * {
             if (auto *custom = id(wall_panel_controller).get_registered_icon(item.icon); custom != nullptr)
               return custom;
@@ -751,6 +888,7 @@ interval:
             if (item.domain == "binary_sensor") return id(icon_alert_circle);
             return id(icon_home);
           };
+
           auto weather_text = [&](const std::string &condition) -> std::string {
             const char *key = nullptr;
             if (condition == "sunny") key = "weather_sunny";
@@ -786,6 +924,7 @@ interval:
             lv_obj_set_pos(cards[i], 20 + column * 230, 72 + row * 98);
             visible++;
 
+            // Custom Name is user data; do not translate it.
             set_label(names[i], slot.name.empty() ? slot.entity_id : slot.name);
 
             std::string state_text;
@@ -795,17 +934,26 @@ interval:
               state_text = id(wall_panel_language).tr(slot.state == "on" ? "on" : "off");
               if (slot.domain == "light" && slot.has_brightness && slot.state == "on")
                 state_text += " · " + std::to_string(slot.brightness_pct) + "%";
-            } else if (slot.domain == "cover" && slot.has_position) {
-              state_text = std::to_string(slot.position_pct) + "%";
+            } else if (slot.domain == "cover") {
+              if (slot.has_position)
+                state_text = std::to_string(slot.position_pct) + "%";
+              else
+                state_text = translated_state(slot.state);
             } else if (slot.domain == "climate" && slot.has_current_temperature) {
+              std::string display_unit;
+              const float display_temperature = temperature_for_display(
+                  slot.current_temperature, slot.unit, display_unit);
               char text[32];
-              snprintf(text, sizeof(text), "%.1f%s", slot.current_temperature, slot.unit.empty() ? "°" : slot.unit.c_str());
+              snprintf(text, sizeof(text), "%.1f%s", display_temperature, display_unit.c_str());
               state_text = text;
             } else if (slot.domain == "weather" && slot.has_current_temperature) {
-              char text[32];
+              std::string display_unit;
+              const float display_temperature = temperature_for_display(
+                  slot.current_temperature, slot.unit, display_unit);
+              char text[48];
               const std::string condition = weather_text(slot.state);
-              snprintf(text, sizeof(text), "%.1f%s · %s", slot.current_temperature,
-                       slot.unit.empty() ? "°" : slot.unit.c_str(), condition.c_str());
+              snprintf(text, sizeof(text), "%.1f%s · %s", display_temperature,
+                       display_unit.c_str(), condition.c_str());
               state_text = text;
             } else if (slot.domain == "sensor") {
               state_text = slot.state + (slot.unit.empty() ? "" : " " + slot.unit);
@@ -816,7 +964,7 @@ interval:
             } else if (slot.domain == "script") {
               state_text = id(wall_panel_language).tr("script");
             } else {
-              state_text = slot.state;
+              state_text = translated_state(slot.state);
             }
             set_label(states[i], state_text);
 
@@ -826,10 +974,11 @@ interval:
               last_icons[i] = image;
             }
 
-            const bool active = slot.state == "on" || slot.state == "open" || slot.state == "opening";
-            lv_obj_set_style_image_recolor(icons[i], lv_color_hex(active ? 0xFFD54F : 0x858B94), LV_PART_MAIN);
+            const bool active_state = slot.state == "on" || slot.state == "open" || slot.state == "opening";
+            lv_obj_set_style_image_recolor(icons[i], lv_color_hex(active_state ? 0xFFD54F : 0x858B94), LV_PART_MAIN);
           }
 
+      # Keep an open detail page synchronized with live HA state changes.
       - if:
           condition:
             lambda: return id(active_home_slot) >= 1 && id(active_home_slot) <= 6;
