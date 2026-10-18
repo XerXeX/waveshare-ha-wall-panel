@@ -15,6 +15,14 @@
 # Values entered into the various "... Name" text entities are user content.
 # They are deliberately NOT translated by the wall-panel language system. If the
 # user calls a card "Sofa lamp", "Roberto" or "Stue", that exact text is kept.
+#
+# UNIT SETTINGS
+# -------------
+# The unit selectors are DEFINED in this file rather than merely extended here.
+# This is intentional. ESPHome resolves !extend while merging packages, and a
+# remote configuration may still use an older package list that does not include
+# a newly-added units.yaml. Defining the selectors here makes the unit feature
+# self-contained and backwards-compatible with existing package lists.
 
 esphome:
   on_boot:
@@ -65,7 +73,7 @@ esphome:
 
 select:
   # ---------------------------------------------------------------------------
-  # Settings
+  # Settings inherited from other packages
   # ---------------------------------------------------------------------------
   - id: !extend wall_panel_language
     device_id: settings_device
@@ -82,19 +90,54 @@ select:
   - id: !extend wall_panel_time_format
     device_id: settings_device
 
-  # Display-unit preferences live in packages/units.yaml. They affect only how
-  # values are rendered on the panel; Home Assistant's own units stay unchanged.
-  - id: !extend wall_panel_temperature_unit
-    device_id: settings_device
+  # ---------------------------------------------------------------------------
+  # Display-unit preferences
+  # ---------------------------------------------------------------------------
+  # These selectors change PRESENTATION ONLY. Home Assistant remains the source
+  # of truth. Raw source values stay unchanged, which is important when the panel
+  # later sends a value back to Home Assistant.
+  #
+  # Auto = show the source unit reported by Home Assistant.
 
-  - id: !extend wall_panel_distance_unit
+  - platform: template
+    id: wall_panel_temperature_unit
+    name: "Temperature Unit"
     device_id: settings_device
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "°C", "°F"]
 
-  - id: !extend wall_panel_speed_unit
+  - platform: template
+    id: wall_panel_distance_unit
+    name: "Distance Unit"
     device_id: settings_device
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "km", "mi"]
 
-  - id: !extend wall_panel_pressure_unit
+  - platform: template
+    id: wall_panel_speed_unit
+    name: "Speed Unit"
     device_id: settings_device
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "m/s", "km/h", "mph"]
+
+  - platform: template
+    id: wall_panel_pressure_unit
+    name: "Pressure Unit"
+    device_id: settings_device
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "hPa", "inHg"]
 
   # ---------------------------------------------------------------------------
   # Lights
