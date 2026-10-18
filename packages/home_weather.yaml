@@ -198,11 +198,18 @@ interval:
           set_label(id(home_weather_pressure_name), danish ? "Lufttryk" : "Pressure");
           set_label(id(home_weather_wind_name), danish ? "Vind" : "Wind");
 
-          if (end != slot.wind_bearing.c_str() && std::isfinite(bearing)) {
-            lv_image_set_rotation(
-              id(home_weather_wind_arrow),
-              static_cast<int32_t>(bearing * 10)
-            );
+          if (slot.available && slot.has_wind_speed) {
+            if (!slot.wind_bearing.empty()) {
+              char *end = nullptr;
+              const float bearing = std::strtof(slot.wind_bearing.c_str(), &end);
+
+              if (end != slot.wind_bearing.c_str() && std::isfinite(bearing)) {
+                lv_image_set_rotation(
+                  id(home_weather_wind_arrow),
+                  static_cast<int32_t>(bearing * 10)
+                );
+              }
+            }
           }
 
           if (slot.available && slot.has_current_temperature) {
