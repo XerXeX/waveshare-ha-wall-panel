@@ -440,10 +440,7 @@ interval:
             return id(icon_palette_outline);
           };
 
-          set_text_if_changed(
-            id(scenes_page_title),
-            id(wall_panel_controller).tr(esphome::wall_panel::TranslationKey::SCENES)
-          );
+          set_text_if_changed(id(scenes_page_title), id(wall_panel_language).tr("scenes"));
 
           const std::string names[4] = {
             id(scene_slot1_name).state, id(scene_slot2_name).state,
@@ -482,7 +479,7 @@ interval:
             if (visible)
               visible_indices[visible_count++] = i;
 
-            const std::string fallback = "Scene " + std::to_string(i + 1);
+            const std::string fallback = std::string(id(wall_panel_language).tr("scene")) + " " + std::to_string(i + 1);
             set_text_if_changed(labels[i], names[i].empty() ? fallback : names[i]);
 
             const std::string inherited_icon = visible ? id(wall_panel_controller).get_scene_icon(i + 1) : "";
