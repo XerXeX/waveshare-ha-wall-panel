@@ -1,0 +1,48 @@
+code: da
+name: Dansk
+
+translations:
+  lights: "Lys"
+  light: "Lys"
+  blinds: "Persienner"
+  audio: "Lyd"
+  scenes: "Scener"
+  scene: "Scene"
+  script: "Script"
+  automation: "Automatisering"
+  button: "Knap"
+  all_off: "Sluk alt"
+  all_lights: "Alle lys"
+  unavailable: "Ikke tilgængelig"
+  on: "Tændt"
+  off: "Slukket"
+  active: "Aktiv"
+  inactive: "Inaktiv"
+  turn_on: "Tænd"
+  turn_off: "Sluk"
+  run: "Kør"
+  activate: "Aktivér"
+  trigger: "Udløs"
+  press: "Tryk"
+  humidity: "Luftfugtighed"
+  pressure: "Lufttryk"
+  wind: "Vind"
+  hour_short: "t"
+  weather_sunny: "Solrigt"
+  weather_clear_night: "Klar nat"
+  weather_cloudy: "Overskyet"
+  weather_partlycloudy: "Delvist skyet"
+  weather_fog: "Tåge"
+  weather_hail: "Hagl"
+  weather_lightning: "Torden"
+  weather_lightning_rainy: "Torden og regn"
+  weather_pouring: "Kraftig regn"
+  weather_rainy: "Regn"
+  weather_snowy: "Sne"
+  weather_snowy_rainy: "Slud"
+  weather_windy: "Blæsende"
+  weather_exceptional: "Usædvanligt vejr"
+  action_permission_message: |-
+    Panelet kan ikke udføre handlinger i Home Assistant.
+
+    Aktivér "Allow device to perform Home Assistant actions" i ESPHome-enhedens indstillinger.
