@@ -55,6 +55,7 @@ image:
   - { platform: file, file: "mdi:check-circle", id: icon_check_circle, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:close", id: icon_close, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:close-circle", id: icon_close_circle, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:coffee", id: icon_coffee, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:cog", id: icon_cog, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:desktop-tower", id: icon_desktop_tower, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:dishwasher", id: icon_dishwasher, resize: 42x42, type: RGB565, transparency: alpha_channel }
