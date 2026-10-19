@@ -73,6 +73,19 @@ struct HomeSlotState {
   std::string wind_speed_unit;
   std::string wind_bearing;
 
+  // WLED integration entities are derived automatically from a light entity.
+  // Example: light.wled -> select.wled_preset, number.wled_speed, ...
+  // If any of these derived entities reports state, the Home slot is treated as
+  // a WLED controller and gets the richer WLED detail UI.
+  std::string wled_preset_entity;
+  std::string wled_palette_entity;
+  std::string wled_playlist_entity;
+  std::string wled_speed_entity;
+  std::string wled_intensity_entity;
+  std::string wled_preset;
+  std::string wled_palette;
+  std::string wled_playlist;
+
   bool configured{false};
   bool available{false};
   bool has_brightness{false};
@@ -82,10 +95,15 @@ struct HomeSlotState {
   bool has_humidity{false};
   bool has_pressure{false};
   bool has_wind_speed{false};
+  bool wled_detected{false};
+  bool has_wled_speed{false};
+  bool has_wled_intensity{false};
 
   int brightness_pct{0};
   int reported_brightness_pct{0};
   int position_pct{0};
+  int wled_speed{0};
+  int wled_intensity{0};
   float current_temperature{0.0f};
   float target_temperature{0.0f};
   float humidity{0.0f};
@@ -171,6 +189,13 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void close_home_cover(uint8_t slot);
   void set_home_cover_position(uint8_t slot, int position_pct);
   void set_home_climate_temperature(uint8_t slot, float temperature);
+
+  // WLED helpers operate on entities derived from the selected Home light.
+  // They are no-ops for normal lights, so the UI can safely call them only when
+  // wled_detected is true.
+  void home_wled_select_relative(uint8_t slot, const std::string &control, bool next);
+  void set_home_wled_number(uint8_t slot, const std::string &control, int value);
+  void set_home_wled_color(uint8_t slot, const std::string &color_name);
 
   void register_icon(const std::string &mdi_name, image::Image *image) {
     if (mdi_name.empty() || image == nullptr)
@@ -264,6 +289,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void save_cover_configuration_();
   void subscribe_cover_slot_(uint8_t slot);
   void subscribe_home_slot_(uint8_t slot);
+  void subscribe_home_wled_(uint8_t slot);
   void refresh_ha_subscriptions_();
   void turn_entity_off_(const std::string &entity_id);
 
@@ -300,6 +326,8 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void on_home_wind_speed_state_(const std::string &entity_id, StringRef value);
   void on_home_wind_speed_unit_state_(const std::string &entity_id, StringRef value);
   void on_home_wind_bearing_state_(const std::string &entity_id, StringRef value);
+  void on_home_wled_select_state_(const std::string &entity_id, StringRef value);
+  void on_home_wled_number_state_(const std::string &entity_id, StringRef value);
 };
 
 // The language selector owns the scalable translation system. The original
