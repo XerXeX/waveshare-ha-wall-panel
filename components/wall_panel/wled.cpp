@@ -1,9 +1,9 @@
 #include "wall_panel.h"
 
-#include "esphome/components/homeassistant/homeassistant.h"
 #include "esphome/core/helpers.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <cstdlib>
 #include <vector>
@@ -30,6 +30,131 @@ bool parse_wled_float(StringRef value, float &result) {
     return false;
   result = parsed;
   return true;
+}
+
+bool emit_wled_utf8(uint32_t code_point, std::string &out) {
+  if (code_point == 0 || code_point > 0x10FFFF)
+    return false;
+  if (code_point < 0x80) {
+    out.push_back(static_cast<char>(code_point));
+  } else if (code_point < 0x800) {
+    out.push_back(static_cast<char>(0xC0 | (code_point >> 6)));
+    out.push_back(static_cast<char>(0x80 | (code_point & 0x3F)));
+  } else if (code_point < 0x10000) {
+    out.push_back(static_cast<char>(0xE0 | (code_point >> 12)));
+    out.push_back(static_cast<char>(0x80 | ((code_point >> 6) & 0x3F)));
+    out.push_back(static_cast<char>(0x80 | (code_point & 0x3F)));
+  } else {
+    out.push_back(static_cast<char>(0xF0 | (code_point >> 18)));
+    out.push_back(static_cast<char>(0x80 | ((code_point >> 12) & 0x3F)));
+    out.push_back(static_cast<char>(0x80 | ((code_point >> 6) & 0x3F)));
+    out.push_back(static_cast<char>(0x80 | (code_point & 0x3F)));
+  }
+  return true;
+}
+
+bool parse_wled_python_list(StringRef src, std::vector<std::string> &items) {
+  items.clear();
+  const char *pos = src.c_str();
+  const char *const end = pos + src.size();
+  auto skip_spaces = [&]() {
+    while (pos < end && *pos == ' ')
+      pos++;
+  };
+
+  skip_spaces();
+  if (pos == end || *pos != '[')
+    return false;
+  pos++;
+  skip_spaces();
+  if (pos < end && *pos == ']') {
+    pos++;
+    skip_spaces();
+    return pos == end;
+  }
+
+  while (true) {
+    skip_spaces();
+    const bool enum_member = pos < end && *pos == '<';
+    if (enum_member) {
+      pos++;
+      while (pos < end && (std::isalnum(static_cast<unsigned char>(*pos)) || *pos == '_' || *pos == '.'))
+        pos++;
+      if (pos == end || *pos != ':')
+        return false;
+      pos++;
+      skip_spaces();
+    }
+
+    if (pos == end || (*pos != '\'' && *pos != '"'))
+      return false;
+    const char quote = *pos++;
+    std::string item;
+    while (true) {
+      if (pos == end)
+        return false;
+      const char c = *pos++;
+      if (c == quote)
+        break;
+      if (c != '\\') {
+        item.push_back(c);
+        continue;
+      }
+      if (pos == end)
+        return false;
+      const char escape = *pos++;
+      switch (escape) {
+        case '\\':
+        case '\'':
+        case '"':
+          item.push_back(escape);
+          break;
+        case 'n':
+          item.push_back('\n');
+          break;
+        case 'r':
+          item.push_back('\r');
+          break;
+        case 't':
+          item.push_back('\t');
+          break;
+        case 'x':
+        case 'u':
+        case 'U': {
+          const size_t digits = escape == 'x' ? 2 : (escape == 'u' ? 4 : 8);
+          if (static_cast<size_t>(end - pos) < digits)
+            return false;
+          auto code_point = parse_hex<uint32_t>(pos, digits);
+          if (!code_point.has_value() || !emit_wled_utf8(*code_point, item))
+            return false;
+          pos += digits;
+          break;
+        }
+        default:
+          return false;
+      }
+    }
+
+    if (enum_member) {
+      skip_spaces();
+      if (pos == end || *pos != '>')
+        return false;
+      pos++;
+    }
+
+    items.push_back(item);
+    skip_spaces();
+    if (pos == end)
+      return false;
+    const char separator = *pos++;
+    if (separator == ']')
+      break;
+    if (separator != ',')
+      return false;
+  }
+
+  skip_spaces();
+  return pos == end;
 }
 
 void split_wled_option_bundle(const std::string &bundle, std::string &preset_options, std::string &palette_options) {
@@ -59,22 +184,19 @@ std::vector<std::string> split_wled_lines(const std::string &text) {
 }
 
 bool parse_wled_options(StringRef value, std::string &joined) {
-  joined.clear();
-  std::string option;
-  bool first = true;
-  const bool valid = homeassistant::parse_python_list(
-      value,
-      [&](char c) { option.push_back(c); },
-      [&]() {
-        if (!first)
-          joined.push_back('\n');
-        joined += option;
-        option.clear();
-        first = false;
-      });
-  if (!valid)
+  std::vector<std::string> options;
+  if (!parse_wled_python_list(value, options)) {
     joined.clear();
-  return valid;
+    return false;
+  }
+
+  joined.clear();
+  for (size_t i = 0; i < options.size(); i++) {
+    if (i != 0)
+      joined.push_back('\n');
+    joined += options[i];
+  }
+  return true;
 }
 
 }  // namespace
@@ -155,9 +277,6 @@ void WallPanel::set_active_wled_brightness(int brightness_pct) {
 void WallPanel::active_wled_select_relative(const std::string &control, bool next) {
   const auto &state = this->active_wled_;
 
-  // The existing method is also used by the LVGL dropdowns. Prefixing an exact
-  // option keeps the public API backwards compatible while avoiding another YAML
-  // facing method solely for direct selection.
   const std::string preset_prefix = "preset_option=";
   const std::string palette_prefix = "palette_option=";
   if (control.rfind(preset_prefix, 0) == 0) {
@@ -266,8 +385,6 @@ void WallPanel::on_active_wled_select_state_(const std::string &entity_id, Strin
   if (text.empty() || text == "unknown" || text == "unavailable")
     return;
 
-  // The same callback handles both the select state and its `options` attribute.
-  // Home Assistant serializes the options attribute as a Python-style list.
   const auto first = text.find_first_not_of(" \t\r\n");
   if (first != std::string::npos && text[first] == '[') {
     std::string joined;
@@ -286,8 +403,6 @@ void WallPanel::on_active_wled_select_state_(const std::string &entity_id, Strin
     else
       return;
 
-    // WledState::playlist is unused by the current UI. Store both complete lists
-    // here as a compact transport to YAML without changing the public state struct.
     this->active_wled_.playlist = preset_options + WLED_OPTIONS_SEPARATOR + palette_options;
     return;
   }
