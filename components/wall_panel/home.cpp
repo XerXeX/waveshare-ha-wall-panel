@@ -27,6 +27,18 @@ bool parse_float(StringRef value, float &result) {
   return true;
 }
 
+void infer_climate_temperature_unit(HomeSlotState &slot, float value) {
+  if (slot.domain != "climate" || !slot.unit.empty())
+    return;
+
+  // Home Assistant climate entities commonly omit a temperature-unit attribute
+  // even though their temperature values are already expressed in HA's native
+  // unit system. Typical climate setpoints make a safe fallback discriminator:
+  // Celsius values are normally well below 45, while Fahrenheit setpoints are
+  // normally above it. A real unit attribute, when supplied later, still wins.
+  slot.unit = value >= 45.0f ? "°F" : "°C";
+}
+
 }  // namespace
 
 bool WallPanel::valid_home_slot_(uint8_t slot) const { return slot >= 1 && slot <= HOME_SLOT_COUNT; }
@@ -285,6 +297,7 @@ void WallPanel::on_home_temperature_state_(const std::string &entity_id, StringR
     if (slot.entity_id != entity_id)
       continue;
     if (slot.domain == "climate") {
+      infer_climate_temperature_unit(slot, parsed);
       slot.has_target_temperature = true;
       slot.target_temperature = parsed;
     } else if (slot.domain == "weather") {
@@ -301,6 +314,7 @@ void WallPanel::on_home_current_temperature_state_(const std::string &entity_id,
 
   for (auto &slot : this->home_slots_) {
     if (slot.entity_id == entity_id) {
+      infer_climate_temperature_unit(slot, parsed);
       slot.has_current_temperature = true;
       slot.current_temperature = parsed;
     }
