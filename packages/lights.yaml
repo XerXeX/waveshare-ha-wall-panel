@@ -165,7 +165,7 @@ select:
     initial_option: "Auto"
     options: ["Auto", "WLED", "All off", "Hidden"]
     set_action:
-      - lambda: id(wall_panel_controller).set_light_function(1, x == "WLED" ? "Auto" : x);
+      - lambda: 'id(wall_panel_controller).set_light_function(1, x == "WLED" ? "Auto" : x);'
   - platform: template
     id: light_slot2_function
     name: "Lights · Slot 2 · 3 Function"
@@ -175,7 +175,7 @@ select:
     initial_option: "Auto"
     options: ["Auto", "WLED", "All off", "Hidden"]
     set_action:
-      - lambda: id(wall_panel_controller).set_light_function(2, x == "WLED" ? "Auto" : x);
+      - lambda: 'id(wall_panel_controller).set_light_function(2, x == "WLED" ? "Auto" : x);'
   - platform: template
     id: light_slot3_function
     name: "Lights · Slot 3 · 3 Function"
@@ -185,7 +185,7 @@ select:
     initial_option: "Auto"
     options: ["Auto", "WLED", "All off", "Hidden"]
     set_action:
-      - lambda: id(wall_panel_controller).set_light_function(3, x == "WLED" ? "Auto" : x);
+      - lambda: 'id(wall_panel_controller).set_light_function(3, x == "WLED" ? "Auto" : x);'
   - platform: template
     id: light_slot4_function
     name: "Lights · Slot 4 · 3 Function"
@@ -195,7 +195,7 @@ select:
     initial_option: "All off"
     options: ["Auto", "WLED", "All off", "Hidden"]
     set_action:
-      - lambda: id(wall_panel_controller).set_light_function(4, x == "WLED" ? "Auto" : x);
+      - lambda: 'id(wall_panel_controller).set_light_function(4, x == "WLED" ? "Auto" : x);'
 
 switch:
   - platform: template
