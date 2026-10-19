@@ -476,11 +476,16 @@ void WallPanel::call_homeassistant_service_checked_(const std::string &service_n
       });
 
   api::global_api_server->send_homeassistant_action(request);
-  this->set_timeout(ACTION_PERMISSION_TIMEOUT, 2500, [this, call_id]() {
+  this->set_timeout(ACTION_PERMISSION_TIMEOUT, 2500, [this, call_id, service_name]() {
     if (!this->action_permission_probe_pending_ || this->action_permission_probe_call_id_ != call_id)
       return;
     this->action_permission_probe_pending_ = false;
-    this->action_permission_warning_ = true;
+    // A missing action response is ambiguous: Home Assistant may have accepted
+    // the call but not returned a response before our probe timeout. Do not turn
+    // that into a user-facing permission error; only an explicit failed response
+    // above is authoritative enough to show the overlay.
+    ESP_LOGW(TAG, "No Home Assistant action response for %s; leaving permission state unchanged",
+             service_name.c_str());
   });
 }
 
