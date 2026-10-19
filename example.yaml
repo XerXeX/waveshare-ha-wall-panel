@@ -51,6 +51,7 @@ packages:
       - packages/units.yaml
       - packages/home.yaml
       - packages/home_weather.yaml
+      - packages/home_wled.yaml
       - packages/lights.yaml
       - packages/blinds.yaml
       - packages/scenes.yaml
