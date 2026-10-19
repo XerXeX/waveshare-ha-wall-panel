@@ -17,6 +17,13 @@ std::string entity_domain(const std::string &entity_id) {
   return entity_id.substr(0, separator);
 }
 
+std::string entity_object_id(const std::string &entity_id) {
+  const auto separator = entity_id.find('.');
+  if (separator == std::string::npos || separator + 1 >= entity_id.size())
+    return {};
+  return entity_id.substr(separator + 1);
+}
+
 bool parse_float(StringRef value, float &result) {
   const std::string text = value.str();
   char *end = nullptr;
@@ -75,6 +82,35 @@ void WallPanel::set_home_entity(uint8_t slot, const std::string &entity_id) {
     this->subscribe_home_slot_(slot);
 }
 
+void WallPanel::subscribe_home_wled_(uint8_t slot) {
+  if (!this->valid_home_slot_(slot))
+    return;
+
+  auto &state = this->home_slots_[slot - 1];
+  if (state.domain != "light")
+    return;
+
+  const std::string object_id = entity_object_id(state.entity_id);
+  if (object_id.empty())
+    return;
+
+  // WLED's HA integration uses a consistent object-id family for companion
+  // entities. We can therefore probe for them without any extra user settings.
+  // Normal lights simply never report states for these derived IDs, so they keep
+  // the generic light detail page.
+  state.wled_preset_entity = "select." + object_id + "_preset";
+  state.wled_palette_entity = "select." + object_id + "_color_palette";
+  state.wled_playlist_entity = "select." + object_id + "_playlist";
+  state.wled_speed_entity = "number." + object_id + "_speed";
+  state.wled_intensity_entity = "number." + object_id + "_intensity";
+
+  this->subscribe_homeassistant_state(&WallPanel::on_home_wled_select_state_, state.wled_preset_entity);
+  this->subscribe_homeassistant_state(&WallPanel::on_home_wled_select_state_, state.wled_palette_entity);
+  this->subscribe_homeassistant_state(&WallPanel::on_home_wled_select_state_, state.wled_playlist_entity);
+  this->subscribe_homeassistant_state(&WallPanel::on_home_wled_number_state_, state.wled_speed_entity);
+  this->subscribe_homeassistant_state(&WallPanel::on_home_wled_number_state_, state.wled_intensity_entity);
+}
+
 void WallPanel::subscribe_home_slot_(uint8_t slot) {
   if (!this->valid_home_slot_(slot))
     return;
@@ -101,6 +137,7 @@ void WallPanel::subscribe_home_slot_(uint8_t slot) {
   this->subscribe_homeassistant_state(&WallPanel::on_home_wind_speed_state_, entity_id, "wind_speed");
   this->subscribe_homeassistant_state(&WallPanel::on_home_wind_speed_unit_state_, entity_id, "wind_speed_unit");
   this->subscribe_homeassistant_state(&WallPanel::on_home_wind_bearing_state_, entity_id, "wind_bearing");
+  this->subscribe_home_wled_(slot);
   this->refresh_ha_subscriptions_();
 }
 
@@ -153,6 +190,62 @@ void WallPanel::set_home_light_brightness(uint8_t slot, int brightness_pct) {
   this->call_homeassistant_service_checked_(
       "light.turn_on",
       {{"entity_id", state.entity_id}, {"brightness_pct", std::to_string(brightness_pct)}, {"transition", "1"}});
+}
+
+void WallPanel::home_wled_select_relative(uint8_t slot, const std::string &control, bool next) {
+  if (!this->valid_home_slot_(slot))
+    return;
+  const auto &state = this->home_slots_[slot - 1];
+  if (!state.wled_detected)
+    return;
+
+  std::string entity_id;
+  if (control == "preset")
+    entity_id = state.wled_preset_entity;
+  else if (control == "palette")
+    entity_id = state.wled_palette_entity;
+  else if (control == "playlist")
+    entity_id = state.wled_playlist_entity;
+  else
+    return;
+
+  if (entity_id.empty())
+    return;
+
+  this->call_homeassistant_service_checked_(next ? "select.select_next" : "select.select_previous",
+                                             {{"entity_id", entity_id}, {"cycle", "true"}});
+}
+
+void WallPanel::set_home_wled_number(uint8_t slot, const std::string &control, int value) {
+  if (!this->valid_home_slot_(slot))
+    return;
+  const auto &state = this->home_slots_[slot - 1];
+  if (!state.wled_detected)
+    return;
+
+  value = std::max(0, std::min(255, value));
+  std::string entity_id;
+  if (control == "speed")
+    entity_id = state.wled_speed_entity;
+  else if (control == "intensity")
+    entity_id = state.wled_intensity_entity;
+  else
+    return;
+
+  if (!entity_id.empty())
+    this->call_homeassistant_service_checked_("number.set_value",
+                                               {{"entity_id", entity_id}, {"value", std::to_string(value)}});
+}
+
+void WallPanel::set_home_wled_color(uint8_t slot, const std::string &color_name) {
+  if (!this->valid_home_slot_(slot) || color_name.empty())
+    return;
+  const auto &state = this->home_slots_[slot - 1];
+  if (!state.wled_detected || state.entity_id.empty())
+    return;
+
+  this->call_homeassistant_service_checked_("light.turn_on",
+                                             {{"entity_id", state.entity_id}, {"color_name", color_name}});
 }
 
 void WallPanel::open_home_cover(uint8_t slot) {
@@ -389,6 +482,50 @@ void WallPanel::on_home_wind_bearing_state_(const std::string &entity_id, String
   for (auto &slot : this->home_slots_) {
     if (slot.entity_id == entity_id)
       slot.wind_bearing = bearing;
+  }
+}
+
+void WallPanel::on_home_wled_select_state_(const std::string &entity_id, StringRef value) {
+  const std::string state_value = value.str();
+  if (state_value.empty() || state_value == "unknown" || state_value == "unavailable")
+    return;
+
+  for (auto &slot : this->home_slots_) {
+    bool matched = false;
+    if (slot.wled_preset_entity == entity_id) {
+      slot.wled_preset = state_value;
+      matched = true;
+    } else if (slot.wled_palette_entity == entity_id) {
+      slot.wled_palette = state_value;
+      matched = true;
+    } else if (slot.wled_playlist_entity == entity_id) {
+      slot.wled_playlist = state_value;
+      matched = true;
+    }
+    if (matched)
+      slot.wled_detected = true;
+  }
+}
+
+void WallPanel::on_home_wled_number_state_(const std::string &entity_id, StringRef value) {
+  float parsed = 0.0f;
+  if (!parse_float(value, parsed))
+    return;
+  const int number = std::max(0, std::min(255, static_cast<int>(std::lround(parsed))));
+
+  for (auto &slot : this->home_slots_) {
+    bool matched = false;
+    if (slot.wled_speed_entity == entity_id) {
+      slot.has_wled_speed = true;
+      slot.wled_speed = number;
+      matched = true;
+    } else if (slot.wled_intensity_entity == entity_id) {
+      slot.has_wled_intensity = true;
+      slot.wled_intensity = number;
+      matched = true;
+    }
+    if (matched)
+      slot.wled_detected = true;
   }
 }
 
