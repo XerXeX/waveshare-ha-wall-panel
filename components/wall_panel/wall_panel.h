@@ -73,10 +73,8 @@ struct HomeSlotState {
   std::string wind_speed_unit;
   std::string wind_bearing;
 
-  // WLED integration entities are derived automatically from a light entity.
-  // Example: light.wled -> select.wled_preset, number.wled_speed, ...
-  // If any of these derived entities reports state, the Home slot is treated as
-  // a WLED controller and gets the richer WLED detail UI.
+  // Legacy WLED auto-detection state. Kept for backwards compatibility with
+  // older package revisions; the shared WLED detail page now uses WledState.
   std::string wled_preset_entity;
   std::string wled_palette_entity;
   std::string wled_playlist_entity;
@@ -109,6 +107,33 @@ struct HomeSlotState {
   float humidity{0.0f};
   float pressure{0.0f};
   float wind_speed{0.0f};
+};
+
+// Shared WLED detail state. Home and Lights both point this at the light entity
+// that was long-pressed, so there is only one WLED UI and one subscription model.
+struct WledState {
+  std::string entity_id;
+  std::string name;
+  std::string state;
+  std::string preset_entity;
+  std::string palette_entity;
+  std::string playlist_entity;
+  std::string speed_entity;
+  std::string intensity_entity;
+  std::string preset;
+  std::string palette;
+  std::string playlist;
+
+  bool configured{false};
+  bool available{false};
+  bool has_brightness{false};
+  bool has_speed{false};
+  bool has_intensity{false};
+
+  int brightness_pct{0};
+  int reported_brightness_pct{0};
+  int speed{0};
+  int intensity{0};
 };
 
 // Legacy v1 storage. Kept only so existing entity selections can be migrated.
@@ -190,12 +215,21 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void set_home_cover_position(uint8_t slot, int position_pct);
   void set_home_climate_temperature(uint8_t slot, float temperature);
 
-  // WLED helpers operate on entities derived from the selected Home light.
-  // They are no-ops for normal lights, so the UI can safely call them only when
-  // wled_detected is true.
+  // Legacy Home-only WLED helpers, retained so older YAML revisions still build.
   void home_wled_select_relative(uint8_t slot, const std::string &control, bool next);
   void set_home_wled_number(uint8_t slot, const std::string &control, int value);
   void set_home_wled_color(uint8_t slot, const std::string &color_name);
+
+  // Shared WLED detail controller. Any configured light can become the active
+  // WLED source, regardless of whether it was opened from Home or Lights.
+  void set_active_wled(const std::string &entity_id, const std::string &name);
+  void clear_active_wled();
+  const WledState &get_active_wled() const { return this->active_wled_; }
+  void toggle_active_wled();
+  void set_active_wled_brightness(int brightness_pct);
+  void active_wled_select_relative(const std::string &control, bool next);
+  void set_active_wled_number(const std::string &control, int value);
+  void set_active_wled_color(const std::string &color_name);
 
   void register_icon(const std::string &mdi_name, image::Image *image) {
     if (mdi_name.empty() || image == nullptr)
@@ -254,6 +288,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   bool cover_slot_pref_ready_{false};
 
   std::array<HomeSlotState, HOME_SLOT_COUNT> home_slots_{};
+  WledState active_wled_{};
 
   std::map<std::string, image::Image *> icon_registry_{};
   std::array<std::string, SCENE_SLOT_COUNT> scene_icon_entities_{};
@@ -290,6 +325,7 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void subscribe_cover_slot_(uint8_t slot);
   void subscribe_home_slot_(uint8_t slot);
   void subscribe_home_wled_(uint8_t slot);
+  void subscribe_active_wled_();
   void refresh_ha_subscriptions_();
   void turn_entity_off_(const std::string &entity_id);
 
@@ -328,6 +364,11 @@ class WallPanel : public Component, public api::CustomAPIDevice {
   void on_home_wind_bearing_state_(const std::string &entity_id, StringRef value);
   void on_home_wled_select_state_(const std::string &entity_id, StringRef value);
   void on_home_wled_number_state_(const std::string &entity_id, StringRef value);
+
+  void on_active_wled_state_(const std::string &entity_id, StringRef value);
+  void on_active_wled_brightness_(const std::string &entity_id, StringRef value);
+  void on_active_wled_select_state_(const std::string &entity_id, StringRef value);
+  void on_active_wled_number_state_(const std::string &entity_id, StringRef value);
 };
 
 // The language selector owns the scalable translation system. The original
