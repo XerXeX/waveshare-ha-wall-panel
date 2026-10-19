@@ -43,6 +43,10 @@ image:
   - { platform: file, file: "mdi:camera", id: icon_camera, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:car", id: icon_car, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:car-electric", id: icon_car_electric, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:cash", id: icon_cash, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:cash-100", id: icon_cash_100, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:cash-clock", id: icon_cash_clock, resize: 42x42, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: "mdi:cash-multiple", id: icon_cash_multiple, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:cat", id: icon_cat, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:cctv", id: icon_cctv, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:chat-sleep", id: icon_chat_sleep, resize: 42x42, type: RGB565, transparency: alpha_channel }
@@ -51,7 +55,6 @@ image:
   - { platform: file, file: "mdi:check-circle", id: icon_check_circle, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:close", id: icon_close, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:close-circle", id: icon_close_circle, resize: 42x42, type: RGB565, transparency: alpha_channel }
-  - { platform: file, file: "mdi:coffee", id: icon_coffee, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:cog", id: icon_cog, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:desktop-tower", id: icon_desktop_tower, resize: 42x42, type: RGB565, transparency: alpha_channel }
   - { platform: file, file: "mdi:dishwasher", id: icon_dishwasher, resize: 42x42, type: RGB565, transparency: alpha_channel }
