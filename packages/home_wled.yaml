@@ -1,12 +1,10 @@
 # Shared WLED detail page
 #
-# WLED is now an explicit special function instead of being auto-detected from
-# companion entities. This makes navigation deterministic and lets Home and the
-# Lights sub-device share the exact same WLED page.
-#
-# Home slots expose: Auto / WLED under "Special Function".
-# Lights keeps its existing Function selector; packages/lights.yaml adds WLED to
-# that selector and maps it to normal light behaviour for short presses.
+# WLED is an explicit special function. Home and Lights share this page.
+# Short press remains a normal toggle; long press opens this detail page.
+# Preset/palette options are loaded from the Home Assistant select entities and
+# shown as real dropdown lists. The arrow buttons use the same local lists and
+# send select.select_option, avoiding select_next/select_previous.
 
 globals:
   # 1 = return to Home, 2 = return to Lights.
@@ -66,8 +64,6 @@ select:
     options: ["Auto", "WLED"]
 
 script:
-  # Home: lights and switches use short press for the quick action. Everything
-  # else still opens its normal detail page on a short press.
   - id: home_slot_short_action
     mode: restart
     parameters:
@@ -88,8 +84,6 @@ script:
             - script.execute: home_refresh_detail
             - lvgl.page.show: home_detail_page
 
-  # Home long press always opens details for switch/light. Explicit WLED lights
-  # go straight to the shared WLED page; ordinary lights keep the generic detail.
   - id: home_slot_long_action
     mode: restart
     parameters:
@@ -126,8 +120,6 @@ script:
             - script.execute: home_refresh_detail
             - lvgl.page.show: home_detail_page
 
-  # Lights: Function=WLED keeps the familiar short-toggle/long-detail behaviour.
-  # Auto lights still use the existing brightness detail page on long press.
   - id: light_slot_long_action
     mode: restart
     parameters:
@@ -354,15 +346,37 @@ lvgl:
                   widgets:
                     - image: { src: icon_arrow_left, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
               - label:
-                  id: home_wled_preset_label
-                  x: 60
-                  y: 5
-                  width: 312
+                  id: home_wled_preset_caption
+                  x: 58
+                  y: 14
+                  width: 78
                   text: "Preset"
-                  text_align: CENTER
+                  text_font: ui_font_18
+                  text_color: 0xB8BDC5
+              - dropdown:
+                  id: home_wled_preset_dropdown
+                  x: 136
+                  y: 4
+                  width: 236
+                  height: 40
+                  options: ["--"]
+                  selected_index: 0
+                  bg_color: 0x24282F
+                  radius: 10
+                  border_width: 0
                   text_font: ui_font_18
                   text_color: 0xFFFFFF
-                  long_mode: dot
+                  dropdown_list:
+                    max_height: 220
+                    text_font: ui_font_18
+                  on_change:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        char selected[128];
+                        lv_dropdown_get_selected_str(id(home_wled_preset_dropdown), selected, sizeof(selected));
+                        if (std::strcmp(selected, "--") != 0)
+                          id(wall_panel_controller).active_wled_select_relative(
+                            std::string("preset_option=") + selected, true);
               - button:
                   x: 380
                   y: 0
@@ -399,15 +413,37 @@ lvgl:
                   widgets:
                     - image: { src: icon_arrow_left, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
               - label:
-                  id: home_wled_palette_label
-                  x: 60
-                  y: 5
-                  width: 312
+                  id: home_wled_palette_caption
+                  x: 58
+                  y: 14
+                  width: 78
                   text: "Palette"
-                  text_align: CENTER
+                  text_font: ui_font_18
+                  text_color: 0xB8BDC5
+              - dropdown:
+                  id: home_wled_palette_dropdown
+                  x: 136
+                  y: 4
+                  width: 236
+                  height: 40
+                  options: ["--"]
+                  selected_index: 0
+                  bg_color: 0x24282F
+                  radius: 10
+                  border_width: 0
                   text_font: ui_font_18
                   text_color: 0xFFFFFF
-                  long_mode: dot
+                  dropdown_list:
+                    max_height: 220
+                    text_font: ui_font_18
+                  on_change:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        char selected[128];
+                        lv_dropdown_get_selected_str(id(home_wled_palette_dropdown), selected, sizeof(selected));
+                        if (std::strcmp(selected, "--") != 0)
+                          id(wall_panel_controller).active_wled_select_relative(
+                            std::string("palette_option=") + selected, true);
               - button:
                   x: 380
                   y: 0
@@ -479,8 +515,37 @@ interval:
               lv_label_set_text(label, text.c_str());
           };
 
+          auto find_option_index = [](const std::string &options, const std::string &selected) -> uint32_t {
+            uint32_t index = 0;
+            size_t start = 0;
+            while (start <= options.size()) {
+              const auto end = options.find('\n', start);
+              const std::string option = options.substr(
+                start, end == std::string::npos ? std::string::npos : end - start);
+              if (option == selected)
+                return index;
+              if (end == std::string::npos)
+                break;
+              start = end + 1;
+              index++;
+            }
+            return 0;
+          };
+
+          auto sync_dropdown = [&](lv_obj_t *dropdown, const std::string &raw_options, const std::string &selected) {
+            const std::string options = raw_options.empty() ? std::string("--") : raw_options;
+            const char *current_options = lv_dropdown_get_options(dropdown);
+            if (current_options == nullptr || options != current_options)
+              lv_dropdown_set_options(dropdown, options.c_str());
+            const uint32_t index = find_option_index(options, selected);
+            if (lv_dropdown_get_selected(dropdown) != index)
+              lv_dropdown_set_selected(dropdown, index);
+          };
+
           set_label(id(home_wled_title), state.name.empty() ? std::string("WLED") : state.name);
           set_label(id(home_wled_power_label), id(wall_panel_language).tr(state.state == "on" ? "turn_off" : "turn_on"));
+          set_label(id(home_wled_preset_caption), id(wall_panel_language).tr("preset"));
+          set_label(id(home_wled_palette_caption), id(wall_panel_language).tr("palette"));
           lv_obj_set_style_bg_color(
             id(home_wled_power_button),
             lv_color_hex(state.state == "on" ? 0xE6A700 : 0x343A44),
@@ -493,10 +558,18 @@ interval:
               lv_slider_get_value(id(home_wled_brightness_slider)) != state.brightness_pct)
             lv_slider_set_value(id(home_wled_brightness_slider), state.brightness_pct, LV_ANIM_OFF);
 
-          const std::string preset = state.preset.empty() ? "--" : state.preset;
-          const std::string palette = state.palette.empty() ? "--" : state.palette;
-          set_label(id(home_wled_preset_label), std::string(id(wall_panel_language).tr("preset")) + " · " + preset);
-          set_label(id(home_wled_palette_label), std::string(id(wall_panel_language).tr("palette")) + " · " + palette);
+          std::string preset_options;
+          std::string palette_options;
+          const std::string separator = "\n---WLED-PALETTES---\n";
+          const auto separator_pos = state.playlist.find(separator);
+          if (separator_pos == std::string::npos) {
+            preset_options = state.playlist;
+          } else {
+            preset_options = state.playlist.substr(0, separator_pos);
+            palette_options = state.playlist.substr(separator_pos + separator.size());
+          }
+          sync_dropdown(id(home_wled_preset_dropdown), preset_options, state.preset);
+          sync_dropdown(id(home_wled_palette_dropdown), palette_options, state.palette);
 
           snprintf(text, sizeof(text), "%s · %d", id(wall_panel_language).tr("speed"), state.speed);
           set_label(id(home_wled_speed_label), text);
