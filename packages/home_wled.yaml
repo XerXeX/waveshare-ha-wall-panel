@@ -373,7 +373,7 @@ lvgl:
                     - script.execute: ui_click
                     - lambda: |-
                         char selected[128];
-                        lv_dropdown_get_selected_str(id(home_wled_preset_dropdown), selected, sizeof(selected));
+                        lv_dropdown_get_selected_str(id(home_wled_preset_dropdown)->obj, selected, sizeof(selected));
                         if (std::strcmp(selected, "--") != 0)
                           id(wall_panel_controller).active_wled_select_relative(
                             std::string("preset_option=") + selected, true);
@@ -440,7 +440,7 @@ lvgl:
                     - script.execute: ui_click
                     - lambda: |-
                         char selected[128];
-                        lv_dropdown_get_selected_str(id(home_wled_palette_dropdown), selected, sizeof(selected));
+                        lv_dropdown_get_selected_str(id(home_wled_palette_dropdown)->obj, selected, sizeof(selected));
                         if (std::strcmp(selected, "--") != 0)
                           id(wall_panel_controller).active_wled_select_relative(
                             std::string("palette_option=") + selected, true);
@@ -568,8 +568,8 @@ interval:
             preset_options = state.playlist.substr(0, separator_pos);
             palette_options = state.playlist.substr(separator_pos + separator.size());
           }
-          sync_dropdown(id(home_wled_preset_dropdown), preset_options, state.preset);
-          sync_dropdown(id(home_wled_palette_dropdown), palette_options, state.palette);
+          sync_dropdown(id(home_wled_preset_dropdown)->obj, preset_options, state.preset);
+          sync_dropdown(id(home_wled_palette_dropdown)->obj, palette_options, state.palette);
 
           snprintf(text, sizeof(text), "%s · %d", id(wall_panel_language).tr("speed"), state.speed);
           set_label(id(home_wled_speed_label), text);
