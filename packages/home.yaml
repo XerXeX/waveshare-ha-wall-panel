@@ -18,7 +18,7 @@
 # UNITS
 # -----
 # Climate/weather temperatures respect wall_panel_temperature_unit from
-# packages/units.yaml. "Auto" keeps the source unit supplied by Home Assistant.
+# Settings. "Auto" keeps the source unit supplied by Home Assistant.
 # Conversion is display-only; climate service calls still use the original source
 # values stored in HomeSlotState.
 
@@ -209,8 +209,8 @@ text:
 
 script:
   # Rebuild the generic detail page for the currently selected Home slot.
-  # Weather adds its own overlay in packages/home_weather.yaml, but still shares
-  # the active_home_slot selection and the generic navigation structure.
+  # Weather adds its own overlay in packages/home_weather.yaml. Climate uses an
+  # opaque thermostat overlay below, while keeping the same detail page/back nav.
   - id: home_refresh_detail
     mode: restart
     then:
@@ -307,10 +307,11 @@ script:
             return key == nullptr ? condition : std::string(id(wall_panel_language).tr(key));
           };
 
-          // Name and entity ID come from user configuration and must never be
-          // translated or normalized.
-          set_label(id(home_detail_name), slot.name.empty() ? slot.entity_id : slot.name);
-          set_label(id(home_detail_entity), slot.entity_id);
+          // Climate gets a deliberately minimal header: the thermostat itself
+          // carries all useful information, so only the back button remains.
+          const bool is_climate = slot.domain == "climate";
+          set_label(id(home_detail_name), is_climate ? "" : (slot.name.empty() ? slot.entity_id : slot.name));
+          set_label(id(home_detail_entity), is_climate ? "" : slot.entity_id);
           esphome::lvgl::lv_image_set_src(id(home_detail_icon), default_icon(slot));
 
           // Hide every domain-specific control first; the matching domain block
@@ -359,28 +360,58 @@ script:
                 lv_slider_set_value(id(home_detail_cover_slider), slot.position_pct, LV_ANIM_OFF);
             }
           } else if (slot.domain == "climate") {
+            set_visible(id(home_detail_climate_controls), true);
+
+            // Status sits inside the thermostat ring. Prefer the active HVAC
+            // action (Heating/Cooling) over the configured mode (Heat/Cool).
+            const std::string climate_status =
+                (!slot.hvac_action.empty() && slot.hvac_action != "idle") ? slot.hvac_action : slot.state;
+            set_label(id(home_climate_status), translated_state(climate_status));
+
+            // The arc uses integers but climate targets commonly use 0.5° steps.
+            // Store source temperature * 2 in the arc, then convert only the text
+            // shown to the user. Service calls therefore remain in HA's source unit.
+            const bool source_f = slot.unit == "°F" || slot.unit == "F";
+            lv_arc_set_range(id(home_climate_arc), source_f ? 80 : 10, source_f ? 190 : 70);
+
+            if (slot.has_target_temperature) {
+              const int arc_target = static_cast<int>(std::lround(slot.target_temperature * 2.0f));
+              if (!lv_obj_has_state(id(home_climate_arc), LV_STATE_PRESSED)) {
+                if (lv_arc_get_value(id(home_climate_arc)) != arc_target)
+                  lv_arc_set_value(id(home_climate_arc), arc_target);
+
+                std::string display_unit;
+                const float display_target = temperature_for_display(
+                    slot.target_temperature, slot.unit, display_unit);
+                char target[24];
+                snprintf(target, sizeof(target), "%.1f%s", display_target, display_unit.c_str());
+                set_label(id(home_climate_target), target);
+              }
+            } else {
+              set_label(id(home_climate_target), "--");
+            }
+
+            // Current temperature is intentionally just the number: no caption
+            // and no unit, keeping the centre of the thermostat visually quiet.
             if (slot.has_current_temperature) {
               std::string display_unit;
-              const float display_temperature = temperature_for_display(
+              const float display_current = temperature_for_display(
                   slot.current_temperature, slot.unit, display_unit);
-              char text[24];
-              snprintf(text, sizeof(text), "%.1f%s", display_temperature, display_unit.c_str());
-              value = text;
-            }
-            secondary = translated_state(slot.state);
-            if (!slot.hvac_action.empty() && slot.hvac_action != "idle")
-              secondary += " · " + translated_state(slot.hvac_action);
-            set_visible(id(home_detail_climate_controls), true);
-            if (slot.has_target_temperature) {
-              std::string display_unit;
-              const float display_target = temperature_for_display(
-                  slot.target_temperature, slot.unit, display_unit);
-              char target[24];
-              snprintf(target, sizeof(target), "%.1f%s", display_target, display_unit.c_str());
-              set_label(id(home_detail_climate_target), target);
+              char current[20];
+              snprintf(current, sizeof(current), "%.1f", display_current);
+              set_label(id(home_climate_current), current);
             } else {
-              set_label(id(home_detail_climate_target), "--");
+              set_label(id(home_climate_current), "--");
             }
+
+            // HA-like color cue: orange for heat, blue for cool, neutral otherwise.
+            uint32_t accent = 0x858B94;
+            if (slot.state == "heat" || slot.hvac_action == "heating")
+              accent = 0xE35F21;
+            else if (slot.state == "cool" || slot.hvac_action == "cooling")
+              accent = 0x42A5F5;
+            lv_obj_set_style_arc_color(id(home_climate_arc), lv_color_hex(accent), LV_PART_INDICATOR);
+            lv_obj_set_style_border_color(id(home_climate_arc), lv_color_hex(accent), LV_PART_KNOB);
           } else if (slot.domain == "scene" || slot.domain == "script" || slot.domain == "button" ||
                      slot.domain == "input_button" || slot.domain == "automation") {
             value = id(wall_panel_language).tr(slot.domain == "scene" ? "scene"
@@ -731,59 +762,144 @@ lvgl:
                   id(wall_panel_controller).set_home_cover_position(
                     id(active_home_slot), lv_slider_get_value(id(home_detail_cover_slider)));
 
+        # Climate is intentionally a full-width opaque overlay. It hides the
+        # generic entity/icon/value content and leaves only the shared back button.
         - obj:
             id: home_detail_climate_controls
-            x: 20
-            y: 220
-            width: 440
-            height: 100
-            bg_opa: TRANSP
+            x: 0
+            y: 74
+            width: 480
+            height: 316
+            bg_color: 0x101216
+            bg_opa: 100%
             border_width: 0
+            radius: 0
             pad_all: 0
+            scrollable: false
             hidden: true
             widgets:
-              # +/- operate on the SOURCE unit stored by Home Assistant. Only the
-              # displayed number is converted by the unit preference.
-              - button:
-                  x: 0
+              # 270° HA-style thermostat ring. Values are source temperature * 2,
+              # which gives native 0.5° steps while keeping LVGL's arc integer.
+              - arc:
+                  id: home_climate_arc
+                  x: 90
                   y: 0
-                  width: 90
-                  height: 70
-                  bg_color: 0x343A44
-                  radius: 16
-                  border_width: 0
-                  on_click:
+                  width: 300
+                  height: 300
+                  min_value: 10
+                  max_value: 70
+                  value: 40
+                  start_angle: 135
+                  end_angle: 45
+                  adjustable: true
+                  adv_hittest: true
+                  ext_click_area: 12
+                  arc_color: 0x2B2D30
+                  arc_width: 20
+                  arc_rounded: true
+                  indicator:
+                    arc_color: 0xE35F21
+                    arc_width: 20
+                    arc_rounded: true
+                  knob:
+                    bg_color: 0xFFFFFF
+                    bg_opa: 100%
+                    border_color: 0xE35F21
+                    border_width: 4
+                    pad_all: 5
+                  on_value:
+                    - lambda: |-
+                        // Update the centre value immediately while dragging, but
+                        // do not call Home Assistant until the finger is released.
+                        const auto &slot = id(wall_panel_controller).get_home_slot(id(active_home_slot));
+                        const float source_value = x / 2.0f;
+                        const std::string target_unit = id(wall_panel_temperature_unit).current_option();
+                        const bool source_f = slot.unit == "°F" || slot.unit == "F";
+                        const bool source_c = slot.unit == "°C" || slot.unit == "C";
+                        float display_value = source_value;
+                        std::string display_unit = target_unit == "Auto" ? (slot.unit.empty() ? "°" : slot.unit) : target_unit;
+                        if (target_unit == "°F" && source_c)
+                          display_value = source_value * 9.0f / 5.0f + 32.0f;
+                        else if (target_unit == "°C" && source_f)
+                          display_value = (source_value - 32.0f) * 5.0f / 9.0f;
+                        char text[24];
+                        snprintf(text, sizeof(text), "%.1f%s", display_value, display_unit.c_str());
+                        lv_label_set_text(id(home_climate_target), text);
+                  on_release:
                     - script.execute: ui_click
                     - lambda: |-
-                        const auto &slot = id(wall_panel_controller).get_home_slot(id(active_home_slot));
-                        float target = slot.has_target_temperature ? slot.target_temperature
-                                     : slot.has_current_temperature ? slot.current_temperature : 20.0f;
-                        id(wall_panel_controller).set_home_climate_temperature(id(active_home_slot), target - 0.5f);
-                  widgets:
-                    - image: { src: icon_minus, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
+                        id(wall_panel_controller).set_home_climate_temperature(
+                          id(active_home_slot), x / 2.0f);
+
               - label:
-                  id: home_detail_climate_target
-                  x: 105
-                  y: 18
-                  width: 230
+                  id: home_climate_status
+                  x: 90
+                  y: 76
+                  width: 300
+                  text: ""
+                  text_align: CENTER
+                  text_font: ui_font_18
+                  text_color: 0xB8BDC5
+
+              - label:
+                  id: home_climate_target
+                  x: 90
+                  y: 108
+                  width: 300
                   text: "--"
                   text_align: CENTER
                   text_font: ui_font_34
                   text_color: 0xFFFFFF
+
+              - label:
+                  id: home_climate_current
+                  x: 90
+                  y: 158
+                  width: 300
+                  text: "--"
+                  text_align: CENTER
+                  text_font: ui_font_22
+                  text_color: 0x858B94
+
+              # Keep +/- at the bottom as a precise alternative to dragging the ring.
               - button:
-                  x: 350
-                  y: 0
-                  width: 90
-                  height: 70
-                  bg_color: 0x343A44
-                  radius: 16
-                  border_width: 0
+                  x: 154
+                  y: 247
+                  width: 60
+                  height: 60
+                  bg_color: 0x181B20
+                  radius: 30
+                  border_color: 0x72757A
+                  border_width: 1
                   on_click:
                     - script.execute: ui_click
                     - lambda: |-
                         const auto &slot = id(wall_panel_controller).get_home_slot(id(active_home_slot));
-                        float target = slot.has_target_temperature ? slot.target_temperature
-                                     : slot.has_current_temperature ? slot.current_temperature : 20.0f;
+                        const bool source_f = slot.unit == "°F" || slot.unit == "F";
+                        const float fallback = source_f ? 68.0f : 20.0f;
+                        const float target = slot.has_target_temperature ? slot.target_temperature
+                                           : slot.has_current_temperature ? slot.current_temperature : fallback;
+                        id(wall_panel_controller).set_home_climate_temperature(id(active_home_slot), target - 0.5f);
+                  widgets:
+                    - image: { src: icon_minus, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
+
+              - button:
+                  x: 266
+                  y: 247
+                  width: 60
+                  height: 60
+                  bg_color: 0x181B20
+                  radius: 30
+                  border_color: 0x72757A
+                  border_width: 1
+                  on_click:
+                    - script.execute: ui_click
+                    - lambda: |-
+                        const auto &slot = id(wall_panel_controller).get_home_slot(id(active_home_slot));
+                        const bool source_f = slot.unit == "°F" || slot.unit == "F";
+                        const float fallback = source_f ? 68.0f : 20.0f;
+                        const float target = slot.has_target_temperature ? slot.target_temperature
+                                           : slot.has_current_temperature ? slot.current_temperature : fallback;
                         id(wall_panel_controller).set_home_climate_temperature(id(active_home_slot), target + 0.5f);
                   widgets:
                     - image: { src: icon_plus, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
