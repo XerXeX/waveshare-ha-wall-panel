@@ -1,5 +1,6 @@
 #include "wall_panel.h"
 
+#include "esphome/components/homeassistant/homeassistant.h"
 #include "esphome/core/helpers.h"
 
 #include <algorithm>
@@ -61,7 +62,7 @@ bool parse_wled_options(StringRef value, std::string &joined) {
   joined.clear();
   std::string option;
   bool first = true;
-  const bool valid = parse_python_list(
+  const bool valid = homeassistant::parse_python_list(
       value,
       [&](char c) { option.push_back(c); },
       [&]() {
