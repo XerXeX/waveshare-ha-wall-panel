@@ -1,31 +1,186 @@
-# WLED detail page for Home
+# Shared WLED detail page
 #
-# HOW DISCOVERY WORKS
-# -------------------
-# No separate WLED entity list is required. When a Home slot contains a light,
-# the wall_panel component probes the standard WLED companion entity names that
-# share the same object id:
+# WLED is now an explicit special function instead of being auto-detected from
+# companion entities. This makes navigation deterministic and lets Home and the
+# Lights sub-device share the exact same WLED page.
 #
-#   light.wled
-#     -> select.wled_preset
-#     -> select.wled_color_palette
-#     -> select.wled_playlist
-#     -> number.wled_speed
-#     -> number.wled_intensity
-#
-# If one of those companion entities reports a state, HomeSlotState.wled_detected
-# becomes true and this package redirects the normal Home detail page to the WLED
-# page automatically. Ordinary lights keep the normal light detail page.
-#
-# First version intentionally focuses on the controls that are useful every day:
-# power, brightness, quick colors, preset, palette, speed and intensity.
+# Home slots expose: Auto / WLED under "Special Function".
+# Lights keeps its existing Function selector; packages/lights.yaml adds WLED to
+# that selector and maps it to normal light behaviour for short presses.
 
 globals:
-  # Prevent the 250 ms redirect watcher from reloading the page continuously.
-  - id: home_wled_page_redirected
-    type: bool
+  # 1 = return to Home, 2 = return to Lights.
+  - id: wled_return_page
+    type: int
     restore_value: false
-    initial_value: 'false'
+    initial_value: '1'
+
+select:
+  - platform: template
+    id: home_slot1_special_function
+    name: "Home · Slot 1 · 3 Special Function"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "WLED"]
+  - platform: template
+    id: home_slot2_special_function
+    name: "Home · Slot 2 · 3 Special Function"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "WLED"]
+  - platform: template
+    id: home_slot3_special_function
+    name: "Home · Slot 3 · 3 Special Function"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "WLED"]
+  - platform: template
+    id: home_slot4_special_function
+    name: "Home · Slot 4 · 3 Special Function"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "WLED"]
+  - platform: template
+    id: home_slot5_special_function
+    name: "Home · Slot 5 · 3 Special Function"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "WLED"]
+  - platform: template
+    id: home_slot6_special_function
+    name: "Home · Slot 6 · 3 Special Function"
+    entity_category: config
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: ["Auto", "WLED"]
+
+script:
+  # Home: lights and switches use short press for the quick action. Everything
+  # else still opens its normal detail page on a short press.
+  - id: home_slot_short_action
+    mode: restart
+    parameters:
+      slot: int
+    then:
+      - if:
+          condition:
+            lambda: |-
+              if (slot < 1 || slot > 6) return false;
+              const auto &item = id(wall_panel_controller).get_home_slot(slot);
+              return item.domain == "light" || item.domain == "switch" || item.domain == "input_boolean";
+          then:
+            - script.execute: ui_click
+            - lambda: id(wall_panel_controller).toggle_home_entity(slot);
+          else:
+            - script.execute: ui_click
+            - lambda: id(active_home_slot) = slot;
+            - script.execute: home_refresh_detail
+            - lvgl.page.show: home_detail_page
+
+  # Home long press always opens details for switch/light. Explicit WLED lights
+  # go straight to the shared WLED page; ordinary lights keep the generic detail.
+  - id: home_slot_long_action
+    mode: restart
+    parameters:
+      slot: int
+    then:
+      - if:
+          condition:
+            lambda: |-
+              if (slot < 1 || slot > 6) return false;
+              const auto &item = id(wall_panel_controller).get_home_slot(slot);
+              if (item.domain != "light") return false;
+              std::string special = "Auto";
+              switch (slot) {
+                case 1: special = id(home_slot1_special_function).current_option(); break;
+                case 2: special = id(home_slot2_special_function).current_option(); break;
+                case 3: special = id(home_slot3_special_function).current_option(); break;
+                case 4: special = id(home_slot4_special_function).current_option(); break;
+                case 5: special = id(home_slot5_special_function).current_option(); break;
+                case 6: special = id(home_slot6_special_function).current_option(); break;
+              }
+              return special == "WLED";
+          then:
+            - script.execute: ui_click
+            - lambda: |-
+                const auto &item = id(wall_panel_controller).get_home_slot(slot);
+                id(wled_return_page) = 1;
+                id(active_home_slot) = 0;
+                id(wall_panel_controller).set_active_wled(
+                  item.entity_id, item.name.empty() ? item.entity_id : item.name);
+            - lvgl.page.show: home_wled_page
+          else:
+            - script.execute: ui_click
+            - lambda: id(active_home_slot) = slot;
+            - script.execute: home_refresh_detail
+            - lvgl.page.show: home_detail_page
+
+  # Lights: Function=WLED keeps the familiar short-toggle/long-detail behaviour.
+  # Auto lights still use the existing brightness detail page on long press.
+  - id: light_slot_long_action
+    mode: restart
+    parameters:
+      slot: int
+    then:
+      - if:
+          condition:
+            lambda: |-
+              if (slot < 1 || slot > 4) return false;
+              switch (slot) {
+                case 1: return id(light_slot1_function).current_option() == "WLED";
+                case 2: return id(light_slot2_function).current_option() == "WLED";
+                case 3: return id(light_slot3_function).current_option() == "WLED";
+                case 4: return id(light_slot4_function).current_option() == "WLED";
+              }
+              return false;
+          then:
+            - script.execute: ui_click
+            - lambda: |-
+                const auto &item = id(wall_panel_controller).get_light_slot(slot);
+                if (!item.configured) return;
+                id(wled_return_page) = 2;
+                id(active_light_slot) = 0;
+                id(light_brightness_dirty) = false;
+                id(wall_panel_controller).set_active_wled(
+                  item.entity_id, item.name.empty() ? item.entity_id : item.name);
+            - lvgl.page.show: home_wled_page
+          else:
+            - if:
+                condition:
+                  lambda: |-
+                    if (slot < 1 || slot > 4) return false;
+                    const auto &item = id(wall_panel_controller).get_light_slot(slot);
+                    return item.function == "Auto" && item.configured && item.available && item.has_brightness;
+                then:
+                  - script.execute: ui_click
+                  - lambda: |-
+                      const auto &item = id(wall_panel_controller).get_light_slot(slot);
+                      id(active_light_slot) = slot;
+                      id(light_brightness_dirty) = false;
+                      const char *name = item.name.empty() ? id(wall_panel_language).tr("light") : item.name.c_str();
+                      if (std::strcmp(lv_label_get_text(id(light_detail_name)), name) != 0)
+                        lv_label_set_text(id(light_detail_name), name);
+                      char text[16];
+                      snprintf(text, sizeof(text), "%d%%", item.brightness_pct);
+                      if (std::strcmp(lv_label_get_text(id(light_detail_percent)), text) != 0)
+                        lv_label_set_text(id(light_detail_percent), text);
+                      if (lv_slider_get_value(id(light_detail_slider)) != item.brightness_pct) {
+                        id(light_slider_syncing) = true;
+                        lv_slider_set_value(id(light_detail_slider), item.brightness_pct, LV_ANIM_OFF);
+                        id(light_slider_syncing) = false;
+                      }
+                  - lvgl.page.show: light_detail_page
 
 lvgl:
   id: wall_panel_lvgl
@@ -43,10 +198,14 @@ lvgl:
             border_width: 0
             on_click:
               - script.execute: ui_click
-              - lambda: |-
-                  id(active_home_slot) = 0;
-                  id(home_wled_page_redirected) = false;
-              - lvgl.page.show: home_page
+              - lambda: id(wall_panel_controller).clear_active_wled();
+              - if:
+                  condition:
+                    lambda: return id(wled_return_page) == 2;
+                  then:
+                    - lvgl.page.show: lights_page
+                  else:
+                    - lvgl.page.show: home_page
             widgets:
               - image:
                   src: icon_arrow_left
@@ -64,7 +223,6 @@ lvgl:
             text_color: 0xFFFFFF
             long_mode: dot
 
-        # Power is intentionally a large touch target. Its color follows state.
         - button:
             id: home_wled_power_button
             x: 20
@@ -76,7 +234,7 @@ lvgl:
             border_width: 0
             on_click:
               - script.execute: ui_click
-              - lambda: id(wall_panel_controller).toggle_home_entity(id(active_home_slot));
+              - lambda: id(wall_panel_controller).toggle_active_wled();
             widgets:
               - label:
                   id: home_wled_power_label
@@ -105,11 +263,9 @@ lvgl:
             on_release:
               - script.execute: ui_click
               - lambda: |-
-                  id(wall_panel_controller).set_home_light_brightness(
-                    id(active_home_slot), lv_slider_get_value(id(home_wled_brightness_slider)));
+                  id(wall_panel_controller).set_active_wled_brightness(
+                    lv_slider_get_value(id(home_wled_brightness_slider)));
 
-        # Quick colors use Home Assistant's color_name field, so they do not need
-        # any WLED-specific API knowledge.
         - button:
             x: 20
             y: 158
@@ -118,9 +274,7 @@ lvgl:
             bg_color: 0xF44336
             radius: 21
             border_width: 0
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(wall_panel_controller).set_home_wled_color(id(active_home_slot), "red");
+            on_click: [{ script.execute: ui_click }, { lambda: 'id(wall_panel_controller).set_active_wled_color("red");' }]
         - button:
             x: 84
             y: 158
@@ -129,9 +283,7 @@ lvgl:
             bg_color: 0xFF9800
             radius: 21
             border_width: 0
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(wall_panel_controller).set_home_wled_color(id(active_home_slot), "orange");
+            on_click: [{ script.execute: ui_click }, { lambda: 'id(wall_panel_controller).set_active_wled_color("orange");' }]
         - button:
             x: 148
             y: 158
@@ -140,9 +292,7 @@ lvgl:
             bg_color: 0xFFEB3B
             radius: 21
             border_width: 0
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(wall_panel_controller).set_home_wled_color(id(active_home_slot), "yellow");
+            on_click: [{ script.execute: ui_click }, { lambda: 'id(wall_panel_controller).set_active_wled_color("yellow");' }]
         - button:
             x: 212
             y: 158
@@ -151,9 +301,7 @@ lvgl:
             bg_color: 0x4CAF50
             radius: 21
             border_width: 0
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(wall_panel_controller).set_home_wled_color(id(active_home_slot), "green");
+            on_click: [{ script.execute: ui_click }, { lambda: 'id(wall_panel_controller).set_active_wled_color("green");' }]
         - button:
             x: 276
             y: 158
@@ -162,9 +310,7 @@ lvgl:
             bg_color: 0x2196F3
             radius: 21
             border_width: 0
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(wall_panel_controller).set_home_wled_color(id(active_home_slot), "blue");
+            on_click: [{ script.execute: ui_click }, { lambda: 'id(wall_panel_controller).set_active_wled_color("blue");' }]
         - button:
             x: 340
             y: 158
@@ -173,9 +319,7 @@ lvgl:
             bg_color: 0x9C27B0
             radius: 21
             border_width: 0
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(wall_panel_controller).set_home_wled_color(id(active_home_slot), "purple");
+            on_click: [{ script.execute: ui_click }, { lambda: 'id(wall_panel_controller).set_active_wled_color("purple");' }]
         - button:
             x: 404
             y: 158
@@ -185,13 +329,8 @@ lvgl:
             radius: 21
             border_color: 0x858B94
             border_width: 1
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(wall_panel_controller).set_home_wled_color(id(active_home_slot), "white");
+            on_click: [{ script.execute: ui_click }, { lambda: 'id(wall_panel_controller).set_active_wled_color("white");' }]
 
-        # WLED select entities can contain many entries. Cycling them with large
-        # previous/next buttons stays usable on a wall display and avoids copying
-        # the entire HA options list into the ESP32.
         - obj:
             x: 20
             y: 214
@@ -211,7 +350,7 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).home_wled_select_relative(id(active_home_slot), "preset", false);
+                    - lambda: id(wall_panel_controller).active_wled_select_relative("preset", false);
                   widgets:
                     - image: { src: icon_arrow_left, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
               - label:
@@ -233,7 +372,7 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).home_wled_select_relative(id(active_home_slot), "preset", true);
+                    - lambda: id(wall_panel_controller).active_wled_select_relative("preset", true);
                   widgets:
                     - image: { src: icon_arrow_right, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
 
@@ -256,7 +395,7 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).home_wled_select_relative(id(active_home_slot), "palette", false);
+                    - lambda: id(wall_panel_controller).active_wled_select_relative("palette", false);
                   widgets:
                     - image: { src: icon_arrow_left, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
               - label:
@@ -278,7 +417,7 @@ lvgl:
                   border_width: 0
                   on_click:
                     - script.execute: ui_click
-                    - lambda: id(wall_panel_controller).home_wled_select_relative(id(active_home_slot), "palette", true);
+                    - lambda: id(wall_panel_controller).active_wled_select_relative("palette", true);
                   widgets:
                     - image: { src: icon_arrow_right, align: CENTER, image_recolor: 0xFFFFFF, image_recolor_opa: 100% }
 
@@ -301,8 +440,8 @@ lvgl:
             on_release:
               - script.execute: ui_click
               - lambda: |-
-                  id(wall_panel_controller).set_home_wled_number(
-                    id(active_home_slot), "speed", lv_slider_get_value(id(home_wled_speed_slider)));
+                  id(wall_panel_controller).set_active_wled_number(
+                    "speed", lv_slider_get_value(id(home_wled_speed_slider)));
 
         - label:
             id: home_wled_intensity_label
@@ -323,38 +462,15 @@ lvgl:
             on_release:
               - script.execute: ui_click
               - lambda: |-
-                  id(wall_panel_controller).set_home_wled_number(
-                    id(active_home_slot), "intensity", lv_slider_get_value(id(home_wled_intensity_slider)));
+                  id(wall_panel_controller).set_active_wled_number(
+                    "intensity", lv_slider_get_value(id(home_wled_intensity_slider)));
 
 interval:
-  # Redirect a Home light to this page once one of the standard WLED companion
-  # entities has answered. The guard makes the redirect happen only once.
   - interval: 250ms
     then:
-      - if:
-          condition:
-            lambda: |-
-              const int active = id(active_home_slot);
-              if (active < 1 || active > 6) {
-                id(home_wled_page_redirected) = false;
-                return false;
-              }
-              const auto &slot = id(wall_panel_controller).get_home_slot(active);
-              if (!slot.wled_detected) {
-                id(home_wled_page_redirected) = false;
-                return false;
-              }
-              return !id(home_wled_page_redirected);
-          then:
-            - lambda: id(home_wled_page_redirected) = true;
-            - lvgl.page.show: home_wled_page
-
       - lambda: |-
-          const int active = id(active_home_slot);
-          if (active < 1 || active > 6)
-            return;
-          const auto &slot = id(wall_panel_controller).get_home_slot(active);
-          if (!slot.wled_detected)
+          const auto &state = id(wall_panel_controller).get_active_wled();
+          if (!state.configured)
             return;
 
           auto set_label = [](lv_obj_t *label, const std::string &text) {
@@ -363,33 +479,33 @@ interval:
               lv_label_set_text(label, text.c_str());
           };
 
-          set_label(id(home_wled_title), slot.name.empty() ? std::string("WLED") : slot.name);
-          set_label(id(home_wled_power_label), id(wall_panel_language).tr(slot.state == "on" ? "turn_off" : "turn_on"));
+          set_label(id(home_wled_title), state.name.empty() ? std::string("WLED") : state.name);
+          set_label(id(home_wled_power_label), id(wall_panel_language).tr(state.state == "on" ? "turn_off" : "turn_on"));
           lv_obj_set_style_bg_color(
             id(home_wled_power_button),
-            lv_color_hex(slot.state == "on" ? 0xE6A700 : 0x343A44),
+            lv_color_hex(state.state == "on" ? 0xE6A700 : 0x343A44),
             LV_PART_MAIN);
 
           char text[96];
-          snprintf(text, sizeof(text), "%s · %d%%", id(wall_panel_language).tr("brightness"), slot.brightness_pct);
+          snprintf(text, sizeof(text), "%s · %d%%", id(wall_panel_language).tr("brightness"), state.brightness_pct);
           set_label(id(home_wled_brightness_label), text);
-          if (slot.has_brightness && !lv_obj_has_state(id(home_wled_brightness_slider), LV_STATE_PRESSED) &&
-              lv_slider_get_value(id(home_wled_brightness_slider)) != slot.brightness_pct)
-            lv_slider_set_value(id(home_wled_brightness_slider), slot.brightness_pct, LV_ANIM_OFF);
+          if (state.has_brightness && !lv_obj_has_state(id(home_wled_brightness_slider), LV_STATE_PRESSED) &&
+              lv_slider_get_value(id(home_wled_brightness_slider)) != state.brightness_pct)
+            lv_slider_set_value(id(home_wled_brightness_slider), state.brightness_pct, LV_ANIM_OFF);
 
-          const std::string preset = slot.wled_preset.empty() ? "--" : slot.wled_preset;
-          const std::string palette = slot.wled_palette.empty() ? "--" : slot.wled_palette;
+          const std::string preset = state.preset.empty() ? "--" : state.preset;
+          const std::string palette = state.palette.empty() ? "--" : state.palette;
           set_label(id(home_wled_preset_label), std::string(id(wall_panel_language).tr("preset")) + " · " + preset);
           set_label(id(home_wled_palette_label), std::string(id(wall_panel_language).tr("palette")) + " · " + palette);
 
-          snprintf(text, sizeof(text), "%s · %d", id(wall_panel_language).tr("speed"), slot.wled_speed);
+          snprintf(text, sizeof(text), "%s · %d", id(wall_panel_language).tr("speed"), state.speed);
           set_label(id(home_wled_speed_label), text);
-          if (slot.has_wled_speed && !lv_obj_has_state(id(home_wled_speed_slider), LV_STATE_PRESSED) &&
-              lv_slider_get_value(id(home_wled_speed_slider)) != slot.wled_speed)
-            lv_slider_set_value(id(home_wled_speed_slider), slot.wled_speed, LV_ANIM_OFF);
+          if (state.has_speed && !lv_obj_has_state(id(home_wled_speed_slider), LV_STATE_PRESSED) &&
+              lv_slider_get_value(id(home_wled_speed_slider)) != state.speed)
+            lv_slider_set_value(id(home_wled_speed_slider), state.speed, LV_ANIM_OFF);
 
-          snprintf(text, sizeof(text), "%s · %d", id(wall_panel_language).tr("intensity"), slot.wled_intensity);
+          snprintf(text, sizeof(text), "%s · %d", id(wall_panel_language).tr("intensity"), state.intensity);
           set_label(id(home_wled_intensity_label), text);
-          if (slot.has_wled_intensity && !lv_obj_has_state(id(home_wled_intensity_slider), LV_STATE_PRESSED) &&
-              lv_slider_get_value(id(home_wled_intensity_slider)) != slot.wled_intensity)
-            lv_slider_set_value(id(home_wled_intensity_slider), slot.wled_intensity, LV_ANIM_OFF);
+          if (state.has_intensity && !lv_obj_has_state(id(home_wled_intensity_slider), LV_STATE_PRESSED) &&
+              lv_slider_get_value(id(home_wled_intensity_slider)) != state.intensity)
+            lv_slider_set_value(id(home_wled_intensity_slider), state.intensity, LV_ANIM_OFF);
