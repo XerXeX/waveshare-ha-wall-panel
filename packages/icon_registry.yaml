@@ -1,32 +1,11 @@
-# Runtime icon application for Scene cards.
+# Shared icon registry compatibility package
 #
-# Shared icons are registered automatically by the wall_panel component from
-# compiled image IDs following the icon_* naming convention. This package only
-# applies the resulting runtime registry to the Scene/Script card images.
-
-interval:
-  - interval: 250ms
-    then:
-      - lambda: |-
-          lv_obj_t *scene_icons[4] = {
-            id(scene_slot1_icon), id(scene_slot2_icon),
-            id(scene_slot3_icon), id(scene_slot4_icon)
-          };
-
-          static std::string last_registered_icons[4];
-
-          for (int i = 0; i < 4; i++) {
-            const std::string mdi_name = id(wall_panel_controller).get_scene_icon(i + 1);
-            auto *image = id(wall_panel_controller).get_registered_icon(mdi_name);
-
-            if (image == nullptr) {
-              last_registered_icons[i].clear();
-              continue;
-            }
-
-            if (last_registered_icons[i] == mdi_name)
-              continue;
-
-            last_registered_icons[i] = mdi_name;
-            esphome::lvgl::lv_image_set_src(scene_icons[i], image);
-          }
+# The runtime MDI -> image registry now lives entirely in the wall_panel
+# component and is populated automatically from packages/icons.yaml.
+#
+# Home and Scene/Script pages query that registry directly and provide their own
+# domain/page fallback icons when an inherited Home Assistant icon is missing.
+#
+# This package is intentionally kept as a no-op so existing remote package
+# configurations that still include packages/icon_registry.yaml continue to work
+# without needing a configuration change.
