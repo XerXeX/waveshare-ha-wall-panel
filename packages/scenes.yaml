@@ -3,6 +3,13 @@
 # Each slot exposes Name, Entity and Function settings in Home Assistant.
 # scene.* and script.* entities are supported. Entity mode mirrors the Home
 # Assistant entity icon when it is available in packages/icons.yaml.
+#
+# ICONS
+# -----
+# Scene/Script cards do not maintain their own hardcoded MDI lookup table.
+# The wall_panel component owns the shared MDI -> image registry, populated from
+# packages/icons.yaml. This page only asks the registry for the inherited icon
+# and falls back to icon_palette_outline when no matching shared icon exists.
 
 text:
   - platform: template
@@ -315,128 +322,11 @@ interval:
               lv_obj_set_width(obj, width);
           };
 
-          auto icon_image = [](const std::string &icon) -> esphome::image::Image * {
-            if (icon == "mdi:account") return id(icon_account);
-            if (icon == "mdi:account-group") return id(icon_account_group);
-            if (icon == "mdi:air-conditioner") return id(icon_air_conditioner);
-            if (icon == "mdi:alert") return id(icon_alert);
-            if (icon == "mdi:alert-circle") return id(icon_alert_circle);
-            if (icon == "mdi:arrow-down") return id(icon_arrow_down);
-            if (icon == "mdi:arrow-left") return id(icon_arrow_left);
-            if (icon == "mdi:arrow-right") return id(icon_arrow_right);
-            if (icon == "mdi:arrow-up") return id(icon_arrow_up);
-            if (icon == "mdi:battery") return id(icon_battery);
-            if (icon == "mdi:battery-charging") return id(icon_battery_charging);
-            if (icon == "mdi:bed") return id(icon_bed);
-            if (icon == "mdi:bell") return id(icon_bell);
-            if (icon == "mdi:bell-outline") return id(icon_bell_outline);
-            if (icon == "mdi:blinds") return id(icon_blinds);
-            if (icon == "mdi:bluetooth") return id(icon_bluetooth);
-            if (icon == "mdi:book-open-page-variant") return id(icon_book_open_page_variant);
-            if (icon == "mdi:camera") return id(icon_camera);
-            if (icon == "mdi:car") return id(icon_car);
-            if (icon == "mdi:car-electric") return id(icon_car_electric);
-            if (icon == "mdi:cat") return id(icon_cat);
-            if (icon == "mdi:cctv") return id(icon_cctv);
-            if (icon == "mdi:check") return id(icon_check);
-            if (icon == "mdi:check-circle") return id(icon_check_circle);
-            if (icon == "mdi:close") return id(icon_close);
-            if (icon == "mdi:close-circle") return id(icon_close_circle);
-            if (icon == "mdi:coffee") return id(icon_coffee);
-            if (icon == "mdi:cog") return id(icon_cog);
-            if (icon == "mdi:desktop-tower") return id(icon_desktop_tower);
-            if (icon == "mdi:dishwasher") return id(icon_dishwasher);
-            if (icon == "mdi:door-closed") return id(icon_door_closed);
-            if (icon == "mdi:door-open") return id(icon_door_open);
-            if (icon == "mdi:fan") return id(icon_fan);
-            if (icon == "mdi:fire") return id(icon_fire);
-            if (icon == "mdi:fireplace") return id(icon_fireplace);
-            if (icon == "mdi:flash") return id(icon_flash);
-            if (icon == "mdi:flower") return id(icon_flower);
-            if (icon == "mdi:gamepad-variant") return id(icon_gamepad_variant);
-            if (icon == "mdi:garage") return id(icon_garage);
-            if (icon == "mdi:garage-open") return id(icon_garage_open);
-            if (icon == "mdi:heart") return id(icon_heart);
-            if (icon == "mdi:heart-outline") return id(icon_heart_outline);
-            if (icon == "mdi:home") return id(icon_home);
-            if (icon == "mdi:home-outline") return id(icon_home_outline);
-            if (icon == "mdi:information") return id(icon_information);
-            if (icon == "mdi:kettle") return id(icon_kettle);
-            if (icon == "mdi:lamp") return id(icon_lamp);
-            if (icon == "mdi:laptop") return id(icon_laptop);
-            if (icon == "mdi:leaf") return id(icon_leaf);
-            if (icon == "mdi:lightbulb") return id(icon_lightbulb);
-            if (icon == "mdi:lightbulb-group") return id(icon_lightbulb_group);
-            if (icon == "mdi:lightbulb-outline") return id(icon_lightbulb_outline);
-            if (icon == "mdi:lock") return id(icon_lock);
-            if (icon == "mdi:lock-open") return id(icon_lock_open);
-            if (icon == "mdi:map-marker") return id(icon_map_marker);
-            if (icon == "mdi:menu") return id(icon_menu);
-            if (icon == "mdi:microphone") return id(icon_microphone);
-            if (icon == "mdi:microphone-off") return id(icon_microphone_off);
-            if (icon == "mdi:microwave") return id(icon_microwave);
-            if (icon == "mdi:minus") return id(icon_minus);
-            if (icon == "mdi:moon-waning-crescent") return id(icon_moon_waning_crescent);
-            if (icon == "mdi:moon-waxing-crescent") return id(icon_moon_waxing_crescent);
-            if (icon == "mdi:motion-sensor") return id(icon_motion_sensor);
-            if (icon == "mdi:movie") return id(icon_movie);
-            if (icon == "mdi:movie-open") return id(icon_movie_open);
-            if (icon == "mdi:music") return id(icon_music);
-            if (icon == "mdi:music-note") return id(icon_music_note);
-            if (icon == "mdi:palette") return id(icon_palette);
-            if (icon == "mdi:palette-outline") return id(icon_palette_outline);
-            if (icon == "mdi:party-popper") return id(icon_party_popper);
-            if (icon == "mdi:pause") return id(icon_pause);
-            if (icon == "mdi:paw") return id(icon_paw);
-            if (icon == "mdi:play") return id(icon_play);
-            if (icon == "mdi:plus") return id(icon_plus);
-            if (icon == "mdi:power") return id(icon_power);
-            if (icon == "mdi:radiator") return id(icon_radiator);
-            if (icon == "mdi:fridge") return id(icon_fridge);
-            if (icon == "mdi:robot-vacuum") return id(icon_robot_vacuum);
-            if (icon == "mdi:security") return id(icon_security);
-            if (icon == "mdi:shield-check") return id(icon_shield_check);
-            if (icon == "mdi:shield-home") return id(icon_shield_home);
-            if (icon == "mdi:shower") return id(icon_shower);
-            if (icon == "mdi:silverware-fork-knife") return id(icon_silverware_fork_knife);
-            if (icon == "mdi:skip-next") return id(icon_skip_next);
-            if (icon == "mdi:skip-previous") return id(icon_skip_previous);
-            if (icon == "mdi:snowflake") return id(icon_snowflake);
-            if (icon == "mdi:sofa") return id(icon_sofa);
-            if (icon == "mdi:speaker") return id(icon_speaker);
-            if (icon == "mdi:speaker-wireless") return id(icon_speaker_wireless);
-            if (icon == "mdi:star") return id(icon_star);
-            if (icon == "mdi:star-outline") return id(icon_star_outline);
-            if (icon == "mdi:stop") return id(icon_stop);
-            if (icon == "mdi:stove") return id(icon_stove);
-            if (icon == "mdi:tablet") return id(icon_tablet);
-            if (icon == "mdi:television") return id(icon_television);
-            if (icon == "mdi:thermometer") return id(icon_thermometer);
-            if (icon == "mdi:thermostat") return id(icon_thermostat);
-            if (icon == "mdi:toilet") return id(icon_toilet);
-            if (icon == "mdi:tree") return id(icon_tree);
-            if (icon == "mdi:vacuum") return id(icon_vacuum);
-            if (icon == "mdi:volume-high") return id(icon_volume_high);
-            if (icon == "mdi:volume-low") return id(icon_volume_low);
-            if (icon == "mdi:volume-medium") return id(icon_volume_medium);
-            if (icon == "mdi:volume-off") return id(icon_volume_off);
-            if (icon == "mdi:wall-sconce-flat") return id(icon_wall_sconce_flat);
-            if (icon == "mdi:washing-machine") return id(icon_washing_machine);
-            if (icon == "mdi:water") return id(icon_water);
-            if (icon == "mdi:water-boiler") return id(icon_water_boiler);
-            if (icon == "mdi:weather-cloudy") return id(icon_weather_cloudy);
-            if (icon == "mdi:weather-lightning") return id(icon_weather_lightning);
-            if (icon == "mdi:weather-night") return id(icon_weather_night);
-            if (icon == "mdi:weather-pouring") return id(icon_weather_pouring);
-            if (icon == "mdi:weather-rainy") return id(icon_weather_rainy);
-            if (icon == "mdi:weather-snowy") return id(icon_weather_snowy);
-            if (icon == "mdi:weather-sunny") return id(icon_weather_sunny);
-            if (icon == "mdi:wifi") return id(icon_wifi);
-            if (icon == "mdi:wifi-off") return id(icon_wifi_off);
-            if (icon == "mdi:window-closed") return id(icon_window_closed);
-            if (icon == "mdi:window-open") return id(icon_window_open);
-            if (icon == "mdi:window-shutter") return id(icon_window_shutter);
-            if (icon == "mdi:wrench") return id(icon_wrench);
+          // One shared runtime registry is the single source of truth for MDI
+          // assets. No duplicated list of icon IDs lives in this page anymore.
+          auto icon_image = [&](const std::string &icon) -> esphome::image::Image * {
+            if (auto *image = id(wall_panel_controller).get_registered_icon(icon); image != nullptr)
+              return image;
             return id(icon_palette_outline);
           };
 
