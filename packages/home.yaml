@@ -15,6 +15,12 @@
 # text. Only panel-owned UI words and well-known Home Assistant state strings are
 # passed through wall_panel_language.tr(...).
 #
+# INTERACTION
+# -----------
+# Light/switch/input_boolean cards use short press for toggle and long press for
+# detail. packages/home_wled.yaml owns those gesture scripts so an explicit WLED
+# special function can open the shared WLED detail page on long press.
+#
 # UNITS
 # -----
 # Climate/weather temperatures respect wall_panel_temperature_unit from
@@ -27,8 +33,6 @@ esphome:
     - priority: -100
       then:
         - lambda: |-
-            // Push restored YAML text-entity configuration into the C++ slot
-            // model. After this, the component subscribes to the chosen HA IDs.
             id(wall_panel_controller).set_home_name(1, id(home_slot1_name).state);
             id(wall_panel_controller).set_home_entity(1, id(home_slot1_entity).state);
             id(wall_panel_controller).set_home_name(2, id(home_slot2_name).state);
@@ -43,20 +47,12 @@ esphome:
             id(wall_panel_controller).set_home_entity(6, id(home_slot6_entity).state);
 
 globals:
-  # 0 = no detail page selected. 1..6 = active Home slot.
   - id: active_home_slot
     type: int
     restore_value: false
     initial_value: '0'
 
 text:
-  # ---------------------------------------------------------------------------
-  # Slot configuration exposed to Home Assistant.
-  #
-  # The entity names below deliberately stay English. They are configuration
-  # entity identifiers in Home Assistant, not on-screen UI copy. The VALUE of a
-  # Name entity is user content and must never go through the translator.
-  # ---------------------------------------------------------------------------
   - platform: template
     id: home_slot1_name
     name: "Home · Slot 1 · 1 Name"
@@ -208,9 +204,6 @@ text:
       - lambda: id(wall_panel_controller).set_home_entity(6, x);
 
 script:
-  # Rebuild the generic detail page for the currently selected Home slot.
-  # Weather adds its own overlay in packages/home_weather.yaml. Climate uses an
-  # opaque thermostat overlay below, while keeping the same detail page/back nav.
   - id: home_refresh_detail
     mode: restart
     then:
@@ -221,7 +214,6 @@ script:
 
           const auto &slot = id(wall_panel_controller).get_home_slot(active);
 
-          // Update only when text changed to reduce LVGL redraw work.
           auto set_label = [](lv_obj_t *label, const std::string &text) {
             const char *current = lv_label_get_text(label);
             if (current == nullptr || text != current)
@@ -234,9 +226,6 @@ script:
               lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
           };
 
-          // Convert known HA state strings to translation keys. Unknown states
-          // intentionally fall back to the original string so custom integrations
-          // remain useful instead of displaying a blank value.
           auto translated_state = [&](const std::string &state) -> std::string {
             const char *key = nullptr;
             if (state == "on") key = "on";
@@ -307,15 +296,11 @@ script:
             return key == nullptr ? condition : std::string(id(wall_panel_language).tr(key));
           };
 
-          // Climate gets a deliberately minimal header: the thermostat itself
-          // carries all useful information, so only the back button remains.
           const bool is_climate = slot.domain == "climate";
           set_label(id(home_detail_name), is_climate ? "" : (slot.name.empty() ? slot.entity_id : slot.name));
           set_label(id(home_detail_entity), is_climate ? "" : slot.entity_id);
           esphome::lvgl::lv_image_set_src(id(home_detail_icon), default_icon(slot));
 
-          // Hide every domain-specific control first; the matching domain block
-          // below enables only the controls that make sense for this entity.
           set_visible(id(home_detail_toggle_button), false);
           set_visible(id(home_detail_light_slider), false);
           set_visible(id(home_detail_cover_controls), false);
@@ -362,15 +347,10 @@ script:
           } else if (slot.domain == "climate") {
             set_visible(id(home_detail_climate_controls), true);
 
-            // Status sits inside the thermostat ring. Prefer the active HVAC
-            // action (Heating/Cooling) over the configured mode (Heat/Cool).
             const std::string climate_status =
                 (!slot.hvac_action.empty() && slot.hvac_action != "idle") ? slot.hvac_action : slot.state;
             set_label(id(home_climate_status), translated_state(climate_status));
 
-            // The arc uses integers but climate targets commonly use 0.5° steps.
-            // Store source temperature * 2 in the arc, then convert only the text
-            // shown to the user. Service calls therefore remain in HA's source unit.
             const bool source_f = slot.unit == "°F" || slot.unit == "F";
             lv_arc_set_range(id(home_climate_arc), source_f ? 80 : 10, source_f ? 190 : 70);
 
@@ -391,8 +371,6 @@ script:
               set_label(id(home_climate_target), "--");
             }
 
-            // Current temperature is intentionally just the number: no caption
-            // and no unit, keeping the centre of the thermostat visually quiet.
             if (slot.has_current_temperature) {
               std::string display_unit;
               const float display_current = temperature_for_display(
@@ -404,7 +382,6 @@ script:
               set_label(id(home_climate_current), "--");
             }
 
-            // HA-like color cue: orange for heat, blue for cool, neutral otherwise.
             uint32_t accent = 0x858B94;
             if (slot.state == "heat" || slot.hvac_action == "heating")
               accent = 0xE35F21;
@@ -437,8 +414,6 @@ script:
               secondary += humidity;
             }
           } else if (slot.domain == "sensor") {
-            // Generic sensor state is source data. Do not translate arbitrary
-            // values because integrations may use meaningful custom strings.
             value = slot.state + (slot.unit.empty() ? "" : " " + slot.unit);
           } else if (slot.domain == "binary_sensor") {
             value = id(wall_panel_language).tr(slot.state == "on" ? "active" : "inactive");
@@ -452,9 +427,6 @@ script:
 lvgl:
   id: wall_panel_lvgl
   pages:
-    # -------------------------------------------------------------------------
-    # Main Home grid
-    # -------------------------------------------------------------------------
     - id: home_page
       bg_color: 0x101216
       widgets:
@@ -466,9 +438,6 @@ lvgl:
             text_font: ui_font_34
             text_color: 0xFFFFFF
 
-        # The six card definitions are intentionally repetitive. The interval
-        # below packs only configured cards into a 2-column grid and updates their
-        # labels/icons from HomeSlotState.
         - button:
             id: home_slot1_card
             width: 210
@@ -476,11 +445,14 @@ lvgl:
             bg_color: 0x181B20
             radius: 18
             border_width: 0
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(active_home_slot) = 1;
-              - script.execute: home_refresh_detail
-              - lvgl.page.show: home_detail_page
+            on_short_click:
+              - script.execute:
+                  id: home_slot_short_action
+                  slot: 1
+            on_long_press:
+              - script.execute:
+                  id: home_slot_long_action
+                  slot: 1
             widgets:
               - image:
                   id: home_slot1_icon
@@ -513,11 +485,10 @@ lvgl:
             bg_color: 0x181B20
             radius: 18
             border_width: 0
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(active_home_slot) = 2;
-              - script.execute: home_refresh_detail
-              - lvgl.page.show: home_detail_page
+            on_short_click:
+              - script.execute: { id: home_slot_short_action, slot: 2 }
+            on_long_press:
+              - script.execute: { id: home_slot_long_action, slot: 2 }
             widgets:
               - image: { id: home_slot2_icon, src: icon_home, x: 14, y: 24, image_recolor: 0x858B94, image_recolor_opa: 100% }
               - label: { id: home_slot2_name_label, x: 68, y: 15, width: 126, text: "Home 2", text_font: ui_font_22, text_color: 0xFFFFFF }
@@ -530,11 +501,10 @@ lvgl:
             bg_color: 0x181B20
             radius: 18
             border_width: 0
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(active_home_slot) = 3;
-              - script.execute: home_refresh_detail
-              - lvgl.page.show: home_detail_page
+            on_short_click:
+              - script.execute: { id: home_slot_short_action, slot: 3 }
+            on_long_press:
+              - script.execute: { id: home_slot_long_action, slot: 3 }
             widgets:
               - image: { id: home_slot3_icon, src: icon_home, x: 14, y: 24, image_recolor: 0x858B94, image_recolor_opa: 100% }
               - label: { id: home_slot3_name_label, x: 68, y: 15, width: 126, text: "Home 3", text_font: ui_font_22, text_color: 0xFFFFFF }
@@ -547,11 +517,10 @@ lvgl:
             bg_color: 0x181B20
             radius: 18
             border_width: 0
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(active_home_slot) = 4;
-              - script.execute: home_refresh_detail
-              - lvgl.page.show: home_detail_page
+            on_short_click:
+              - script.execute: { id: home_slot_short_action, slot: 4 }
+            on_long_press:
+              - script.execute: { id: home_slot_long_action, slot: 4 }
             widgets:
               - image: { id: home_slot4_icon, src: icon_home, x: 14, y: 24, image_recolor: 0x858B94, image_recolor_opa: 100% }
               - label: { id: home_slot4_name_label, x: 68, y: 15, width: 126, text: "Home 4", text_font: ui_font_22, text_color: 0xFFFFFF }
@@ -564,11 +533,10 @@ lvgl:
             bg_color: 0x181B20
             radius: 18
             border_width: 0
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(active_home_slot) = 5;
-              - script.execute: home_refresh_detail
-              - lvgl.page.show: home_detail_page
+            on_short_click:
+              - script.execute: { id: home_slot_short_action, slot: 5 }
+            on_long_press:
+              - script.execute: { id: home_slot_long_action, slot: 5 }
             widgets:
               - image: { id: home_slot5_icon, src: icon_home, x: 14, y: 24, image_recolor: 0x858B94, image_recolor_opa: 100% }
               - label: { id: home_slot5_name_label, x: 68, y: 15, width: 126, text: "Home 5", text_font: ui_font_22, text_color: 0xFFFFFF }
@@ -581,19 +549,15 @@ lvgl:
             bg_color: 0x181B20
             radius: 18
             border_width: 0
-            on_click:
-              - script.execute: ui_click
-              - lambda: id(active_home_slot) = 6;
-              - script.execute: home_refresh_detail
-              - lvgl.page.show: home_detail_page
+            on_short_click:
+              - script.execute: { id: home_slot_short_action, slot: 6 }
+            on_long_press:
+              - script.execute: { id: home_slot_long_action, slot: 6 }
             widgets:
               - image: { id: home_slot6_icon, src: icon_home, x: 14, y: 24, image_recolor: 0x858B94, image_recolor_opa: 100% }
               - label: { id: home_slot6_name_label, x: 68, y: 15, width: 126, text: "Home 6", text_font: ui_font_22, text_color: 0xFFFFFF }
               - label: { id: home_slot6_state_label, x: 68, y: 50, width: 126, text: "--", text_font: ui_font_18, text_color: 0x858B94 }
 
-    # -------------------------------------------------------------------------
-    # Generic detail page
-    # -------------------------------------------------------------------------
     - id: home_detail_page
       bg_color: 0x101216
       widgets:
@@ -762,8 +726,6 @@ lvgl:
                   id(wall_panel_controller).set_home_cover_position(
                     id(active_home_slot), lv_slider_get_value(id(home_detail_cover_slider)));
 
-        # Climate is intentionally a full-width opaque overlay. It hides the
-        # generic entity/icon/value content and leaves only the shared back button.
         - obj:
             id: home_detail_climate_controls
             x: 0
@@ -778,8 +740,6 @@ lvgl:
             scrollable: false
             hidden: true
             widgets:
-              # 270° HA-style thermostat ring. Values are source temperature * 2,
-              # which gives native 0.5° steps while keeping LVGL's arc integer.
               - arc:
                   id: home_climate_arc
                   x: 90
@@ -809,8 +769,6 @@ lvgl:
                     pad_all: 5
                   on_value:
                     - lambda: |-
-                        // Update the centre value immediately while dragging, but
-                        // do not call Home Assistant until the finger is released.
                         const auto &slot = id(wall_panel_controller).get_home_slot(id(active_home_slot));
                         const float source_value = x / 2.0f;
                         const std::string target_unit = id(wall_panel_temperature_unit).current_option();
@@ -861,7 +819,6 @@ lvgl:
                   text_font: ui_font_22
                   text_color: 0x858B94
 
-              # Keep +/- at the bottom as a precise alternative to dragging the ring.
               - button:
                   x: 154
                   y: 247
@@ -926,8 +883,6 @@ lvgl:
                   text_color: 0xFFFFFF
 
 interval:
-  # Refresh compact cards. 250 ms keeps state feedback feeling immediate while
-  # the changed-value checks avoid rewriting labels/images unnecessarily.
   - interval: 250ms
     then:
       - lambda: |-
@@ -1040,7 +995,6 @@ interval:
             lv_obj_set_pos(cards[i], 20 + column * 230, 72 + row * 98);
             visible++;
 
-            // Custom Name is user data; do not translate it.
             set_label(names[i], slot.name.empty() ? slot.entity_id : slot.name);
 
             std::string state_text;
@@ -1094,7 +1048,6 @@ interval:
             lv_obj_set_style_image_recolor(icons[i], lv_color_hex(active_state ? 0xFFD54F : 0x858B94), LV_PART_MAIN);
           }
 
-      # Keep an open detail page synchronized with live HA state changes.
       - if:
           condition:
             lambda: return id(active_home_slot) >= 1 && id(active_home_slot) <= 6;
