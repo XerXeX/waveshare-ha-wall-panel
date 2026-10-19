@@ -148,6 +148,22 @@ select:
     options: ["Auto", "hPa", "inHg"]
 
   # ---------------------------------------------------------------------------
+  # Home
+  # ---------------------------------------------------------------------------
+  - id: !extend home_slot1_special_function
+    device_id: home_device
+  - id: !extend home_slot2_special_function
+    device_id: home_device
+  - id: !extend home_slot3_special_function
+    device_id: home_device
+  - id: !extend home_slot4_special_function
+    device_id: home_device
+  - id: !extend home_slot5_special_function
+    device_id: home_device
+  - id: !extend home_slot6_special_function
+    device_id: home_device
+
+  # ---------------------------------------------------------------------------
   # Lights
   # ---------------------------------------------------------------------------
   - id: !extend light_slot1_function
